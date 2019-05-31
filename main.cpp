@@ -85,7 +85,6 @@ int main()
         // 從第一個開始到最後一個 每個都跟他後面的做找交點
         // 找完的交點存在 vector<point*> intersection裡面
         oper.find_intersect();
-
         oper.insert_intersect();
 #ifdef DEBUG
         cout << "----------intersect----------" << endl;
@@ -100,22 +99,64 @@ int main()
             }
         }
 #endif
-        // Merge
-        vector<point *> out_list;
+// Merge per operation
+#ifdef DEBUG
+        cout << "----------operation----------" << endl;
+        cout << "There are " << oper.out_list.size() << " out intersects" << endl;
+        set<point *>::iterator iter;
+        for (iter = oper.out_list.begin(); iter != oper.out_list.end(); ++iter)
+            cout << **iter << endl;
+#endif
+        vector<point *> new_list;
+        int cnt = 0;
+        while (oper.out_list.size() > 0)
+        {
+            cout << "----------" << endl;
+            point *new_poly;
+            set<point *>::iterator iter;
+            iter = oper.out_list.begin();
+            new_poly = *iter;
+            point *p = (*iter)->next;
+            oper.out_list.erase(*iter);
+            cout << "WALK " << *new_poly << endl;
+            while (p != new_poly)
+            {
+                ++cnt;
+                cout << "WALK " << *p << endl;
+                if (!p->ispoint())
+                {
+                    if (!static_cast<intersect_point *>(p)->in)
+                    {
+                        oper.out_list.erase(p);
+                    }
+                    p = static_cast<intersect_point *>(p)->cross_point;
+                    cout << "WALK " << *p << endl;
+                    if (p == new_poly)
+                    {
+                        break;
+                    }
+                    if (!static_cast<intersect_point *>(p)->in)
+                    {
+                        oper.out_list.erase(p);
+                    }
+                }
+                p = p->next;
+            }
+        }
     }
 }
 // find cross point in two vector of POLYGON
 // 找兩個 root list 的所有焦點
-void find_intersect(vector<point *> total_root, vector<point *> root)
-{
-    for (int i = 0; i < total_root.size(); i++)
-    {
-        for (int j = 0; j < root.size(); j++)
-        {
-            find_intersect(total_root[i], root[j]);
-        }
-    }
-}
+// void find_intersect(vector<point *> total_root, vector<point *> root)
+// {
+//     for (int i = 0; i < total_root.size(); i++)
+//     {
+//         for (int j = 0; j < root.size(); j++)
+//         {
+//             find_intersect(total_root[i], root[j]);
+//         }
+//     }
+// }
 
 inline bool read_operation(fstream &fin, point **root)
 {

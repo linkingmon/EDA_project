@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # filename = 'sample_in.txt'
-filename = 'OpenCase_1.txt'
+filename = 'sample_in.txt'
 with open(filename, 'r') as f:
     L = f.read().splitlines()[2:]
     plt.figure()
@@ -21,5 +21,5 @@ with open(filename, 'r') as f:
             color = 'b' if operation == 'MERGE' else 'r'
             for j in range(arr.shape[1]-1):
                 plt.plot(arr[:, j], arr[:, j+1], color)
-    plt.show()
-    # plt.savefig('sample.png')
+    # plt.show()
+    plt.savefig('sample.png')

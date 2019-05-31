@@ -10,9 +10,9 @@ class point
 private:
 protected:
 public:
-    point();
+    point(){};
     point(long long xt, long long yt);
-    ~point();
+    ~point(){};
     float area(point *p) { return x / DIV * (p->y) / DIV - y / DIV * (p->x) / DIV; }
     // virtual void print() { cout << x << " " << y << endl; }
     void swap_dir() { swap(next, prev); };
@@ -20,7 +20,7 @@ public:
     void sort_intersection();
     friend ostream &operator<<(ostream &os, const point &p);
     virtual void print() { cout << *this << endl; };
-
+    virtual bool ispoint() { return true; };
     vector<point *> intersection;
     long long x, y;
     point *next;
@@ -37,17 +37,7 @@ ostream &operator<<(ostream &os, const point &p) { os << '(' << setw(4) << p.x <
 
 point::point(long long xt, long long yt) : x(xt), y(yt)
 {
-    // cout << "point construct" << endl;
-    // cout << "x & y:" << x << " " << y << endl;
     verti = false;
-}
-
-point::point()
-{
-}
-
-point::~point()
-{
 }
 
 // bool operator < (point* a,point* b)
@@ -147,10 +137,12 @@ class intersect_point : public point
 private:
 public:
     intersect_point(/* args */);
-    intersect_point(long long, long long);
+    intersect_point(long long, long long, int);
     ~intersect_point();
-    intersect_point *cross_point;
+    bool ispoint() { return false; };
     void print();
+    intersect_point *cross_point;
+    int color;
     bool in;
 };
 
@@ -159,10 +151,8 @@ intersect_point::intersect_point(/* args */)
     cout << "point construct" << endl;
 }
 
-intersect_point::intersect_point(long long xt, long long yt) : point(xt, yt)
+intersect_point::intersect_point(long long xt, long long yt, int colort) : point(xt, yt), color(colort)
 {
-    // cout << "point construct" << endl;
-    // cout << "x & y:" << x << " " << y << endl;
 }
 
 intersect_point::~intersect_point()

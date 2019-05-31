@@ -1,16 +1,8 @@
 #include "point.h"
+#include <set>
 using namespace std;
 
-void find_intersect(point *a, point *b);
-void find_cross(point *, point *);
-void add_intersect(point *a, point *b);
-bool inside_edge(long long x1, long long x2, long long y);
-void two_way_intersect(intersect_point *, intersect_point *);
-void new_intersect(point *a, point *b, long long x, long long y);
-bool inside_region(point *a, point *b, long long x, long long y);
-void in_out_cross(point *, point *);
-bool outside_poly(point *, point *);
-
+static int glob_color = 0;
 class operation
 {
 private:
@@ -20,16 +12,25 @@ public:
     ~operation(){};
     void find_intersect();
     void insert_intersect();
+    void find_intersect(point *a, point *b);
+    void find_cross(point *, point *);
+    void add_intersect(point *a, point *b);
+    bool inside_edge(long long x1, long long x2, long long y);
+    void two_way_intersect(intersect_point *, intersect_point *);
+    void new_intersect(point *a, point *b, long long x, long long y);
+    bool inside_region(point *a, point *b, long long x, long long y);
+    void in_out_cross(point *, point *);
+    bool outside_poly(point *, point *);
     string name;
     vector<point *> root_list; // 存該 operation 下的所有多邊形
-    vector<point *> out_list;
+    set<point *> out_list;
 };
 
 void operation::find_intersect()
 {
     for (int i = 0; i < root_list.size(); ++i)
         for (int j = i + 1; j < root_list.size(); ++j)
-            ::find_intersect(root_list[i], root_list[j]);
+            find_intersect(root_list[i], root_list[j]);
 }
 //insert intersect in one POLYGON
 void operation::insert_intersect()
@@ -51,11 +52,12 @@ void operation::insert_intersect()
 
 // find cross point in two POLYGON
 // 找兩個 多邊形 的交點
-void find_intersect(point *a, point *b)
+void operation::find_intersect(point *a, point *b)
 {
     point *p_k = a;
     point *p_l = b;
     // 每兩個頂點都做 找交點
+    ++glob_color;
     for (int k = 0; k < a->len; k++)
     {
         for (int l = 0; l < b->len; l++)
@@ -65,6 +67,9 @@ void find_intersect(point *a, point *b)
         }
         p_k = p_k->next;
     }
+    static int num = 0;
+    num += 1;
+    cout << "X" << num << endl;
     in_out_cross(a, b);
     in_out_cross(b, a);
 }
@@ -72,7 +77,7 @@ void find_intersect(point *a, point *b)
 // cross 來 merge root
 // 先判斷 root 是不是在 cross 外面
 // root 如果在 cross 的邊上就算是在裡面
-void in_out_cross(point *root, point *cross)
+void operation::in_out_cross(point *root, point *cross)
 {
     bool outward = outside_poly(root, cross);
 #ifdef DEBUG
@@ -92,15 +97,25 @@ void in_out_cross(point *root, point *cross)
             p->sort_intersection();
             for (unsigned int i = 0; i < p->intersection.size(); ++i)
             {
-                static_cast<intersect_point *>(p->intersection[i])->in = outward;
-                outward = !outward;
+                intersect_point *p_t = static_cast<intersect_point *>(p->intersection[i]);
+                if (p_t->color == glob_color)
+                {
+
+                    p_t->in = outward;
+                    outward = !outward;
+                    if (outward)
+                    {
+                        out_list.insert(p->intersection[i]);
+                        // cout << *(p->intersection[i]) << " is outward intersect of poly " << *cross << endl;
+                    }
+                }
             }
         }
         p = p->next;
     }
 }
 
-bool outside_poly(point *root, point *cross)
+bool operation::outside_poly(point *root, point *cross)
 {
     // minx-1 一定在外面, 設定一個在外面的點P(minx-1,XX) 這個點在該點左上角
     // 找 root 和 P 的連線和 cross多邊形 有幾個交點
@@ -157,7 +172,7 @@ bool outside_poly(point *root, point *cross)
 }
 
 // given two point a, b ; find cross point between a, a->next ,b ,b->bext
-void find_cross(point *a, point *b)
+void operation::find_cross(point *a, point *b)
 {
     long long x, y;
     bool verti_a = a->verti;
@@ -190,13 +205,13 @@ void find_cross(point *a, point *b)
 }
 
 // add intersect b after point a
-void add_intersect(point *a, point *b)
+void operation::add_intersect(point *a, point *b)
 {
     a->intersection.push_back(b);
 }
 
 // check whether x is inside x1 and x2 or not
-bool inside_edge(long long x1, long long x2, long long x)
+bool operation::inside_edge(long long x1, long long x2, long long x)
 {
     if (x >= x1 && x <= x2)
     {
@@ -212,7 +227,7 @@ bool inside_edge(long long x1, long long x2, long long x)
 
 // to check (x,y) is inside the region a , a->next , b , b->next
 // if (x,y) is on the (a->next and b->next) return false
-bool inside_region(point *a, point *b, long long x, long long y)
+bool operation::inside_region(point *a, point *b, long long x, long long y)
 {
     if (a->verti)
     {
@@ -233,16 +248,16 @@ bool inside_region(point *a, point *b, long long x, long long y)
 }
 
 // two the same coordinate intersect point connect other
-void two_way_intersect(intersect_point *a, intersect_point *b)
+void operation::two_way_intersect(intersect_point *a, intersect_point *b)
 {
     a->cross_point = b;
     b->cross_point = a;
 }
 // the new intersect (x,y) is right after point a and point b
-void new_intersect(point *a, point *b, long long x, long long y)
+void operation::new_intersect(point *a, point *b, long long x, long long y)
 {
-    intersect_point *insert_a = new intersect_point(x, y);
-    intersect_point *insert_b = new intersect_point(x, y);
+    intersect_point *insert_a = new intersect_point(x, y, glob_color);
+    intersect_point *insert_b = new intersect_point(x, y, glob_color);
     add_intersect(a, insert_a);
     add_intersect(b, insert_b);
     two_way_intersect(insert_a, insert_b);
