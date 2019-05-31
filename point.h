@@ -4,6 +4,7 @@
 #include <iomanip>
 using namespace std;
 #define DIV 922337203685477580.0
+
 class point
 {
 private:
