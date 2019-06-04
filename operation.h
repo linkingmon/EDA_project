@@ -192,15 +192,8 @@ void operation::find_cross(point *a, point *b)
         y = verti_b ? a->y : b->y;
         if (inside_region(a, b, x, y))
         {
-            // cout << "before intersect" << endl;
-            // a->print();
-            // b->print();
             new_intersect(a, b, x, y);
-            // cout << "after intersect" << endl;
-            // a->print();
-            // b->print();
         }
-        // new_intersect(a, b, x, y);
     }
 }
 
@@ -251,7 +244,9 @@ bool operation::inside_region(point *a, point *b, long long x, long long y)
 void operation::two_way_intersect(intersect_point *a, intersect_point *b)
 {
     a->cross_point = b;
+    a->tran = true;
     b->cross_point = a;
+    b->tran = false;
 }
 // the new intersect (x,y) is right after point a and point b
 void operation::new_intersect(point *a, point *b, long long x, long long y)
@@ -260,5 +255,23 @@ void operation::new_intersect(point *a, point *b, long long x, long long y)
     intersect_point *insert_b = new intersect_point(x, y, glob_color);
     add_intersect(a, insert_a);
     add_intersect(b, insert_b);
-    two_way_intersect(insert_a, insert_b);
+    bool order = true;
+    point *temp_a = a;
+    point *temp_b = b;
+    if(b->verti){
+        temp_a = b;
+        temp_b = a;
+        swap(insert_a, insert_b);
+    }
+    if (temp_a->dir){
+        if (!temp_b->dir){
+            order = false;
+        }
+        else if(temp_b->dir)
+            order = false;
+    }
+    if(order)
+        two_way_intersect(insert_a, insert_b);
+    else
+        two_way_intersect(insert_b, insert_a);
 }

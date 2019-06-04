@@ -129,8 +129,11 @@ int main()
                     {
                         oper.out_list.erase(p);
                     }
+                    if(!static_cast<intersect_point *>(p)->tran){
+                        break;
+                    }
                     p = static_cast<intersect_point *>(p)->cross_point;
-                    cout << "WALK " << *p << endl;
+                    cout << "cross " << *p << endl;
                     if (p == new_poly)
                     {
                         break;
@@ -140,6 +143,7 @@ int main()
                         oper.out_list.erase(p);
                     }
                 }
+                cout << "WALK " << *p << endl;
                 p = p->next;
             }
         }
@@ -236,12 +240,20 @@ void list_construct(point *root)
         else
             temp->angle = 2;
         point *s_next = temp->next;
-        if (temp->verti)
+        if (temp->verti){
             while (s_next->next->x == temp->x)
                 s_next = s_next->next;
-        else
+            if(s_next->y > temp->y ){
+                temp->dir = true;
+            }
+        }
+        else{
             while (s_next->next->y == temp->y)
                 s_next = s_next->next;
+            if(s_next->x > temp->x ){
+                temp->dir = true;
+            }
+        }
         temp->s_next = s_next;
         temp = temp->next;
     }

@@ -32,6 +32,7 @@ public:
     // point* straright_next;
     short angle;
     bool verti;
+    bool dir;
     // point &bool operator<(point &b);
 };
 
@@ -43,6 +44,7 @@ ostream &operator<<(ostream &os, const point &p) { os << '(' << setw(4) << p.x <
 point::point(long long xt, long long yt) : x(xt), y(yt)
 {
     verti = false;
+    dir = false;
 }
 
 // bool operator < (point* a,point* b)
@@ -161,7 +163,6 @@ void point::sort_dsc(){
 void point::sort_intersection()
 {
     bool reverse = false;
-    int i;
     if (verti)
     {
         if (y > next->y)
@@ -188,6 +189,7 @@ public:
     intersect_point *cross_point;
     int color;
     bool in;
+    bool tran;
 };
 
 intersect_point::intersect_point(/* args */)
