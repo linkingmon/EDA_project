@@ -18,6 +18,8 @@ public:
     void swap_dir() { swap(next, prev); };
     void connect();
     void sort_intersection();
+    void sort_asc();
+    void sort_dsc();
     friend ostream &operator<<(ostream &os, const point &p);
     virtual void print() { cout << *this << endl; };
     virtual bool ispoint() { return true; };
@@ -33,7 +35,10 @@ public:
     // point &bool operator<(point &b);
 };
 
-ostream &operator<<(ostream &os, const point &p) { os << '(' << setw(4) << p.x << ',' << setw(4) << p.y << ')'; };
+ostream &operator<<(ostream &os, const point &p) { os << '(' << setw(4) << p.x << ',' << setw(4) << p.y << ')';
+    return os;
+
+};
 
 point::point(long long xt, long long yt) : x(xt), y(yt)
 {
@@ -49,6 +54,112 @@ void point::connect()
     if (intersection.size() == 0)
         return;
     sort_intersection();
+    int i;
+    for (i = 0; i < intersection.size(); ++i)
+        {
+            intersection[i]->prev = temp;
+            temp->next = intersection[i];
+            temp = intersection[i];
+        }
+    n->prev = intersection[--i];
+    intersection[i]->next = n;
+    // bool reverse = false;
+    // int i;
+    // if (verti)
+    // {
+    //     if (y > next->y)
+    //         reverse = true;
+    // }
+    // else if (x > next->x)
+    //     reverse = true;
+    // if (reverse)
+    // {
+    //     for (i = intersection.size() - 1; i >= 0; --i)
+    //     {
+    //         intersection[i]->prev = temp;
+    //         temp->next = intersection[i];
+    //         temp = intersection[i];
+    //     }
+    //     n->prev = intersection[0];
+    //     intersection[0]->next = n;
+    // }
+    // else
+    // {
+    //     for (i = 0; i < intersection.size(); ++i)
+    //     {
+    //         intersection[i]->prev = temp;
+    //         temp->next = intersection[i];
+    //         temp = intersection[i];
+    //     }
+
+    //     n->prev = intersection[--i];
+    //     intersection[i]->next = n;
+    // }
+}
+
+void point::sort_asc(){
+    if (verti){
+        for (int i = 1; i < intersection.size(); ++i)
+        {
+            point *key = intersection[i];
+            int j = i - 1;
+            while (j >= 0 && key->y < intersection[j]->y )
+            {
+                intersection[j + 1] = intersection[j];
+                --j;
+            }
+            intersection[j + 1] = key;
+        }
+    }
+    else
+    {
+        for (int i = 1; i < intersection.size(); ++i)
+        {
+            point *key = intersection[i];
+            int j = i - 1;
+            while (j >= 0 && key->x < intersection[j]->x )
+            {
+                intersection[j + 1] = intersection[j];
+                --j;
+            }
+            intersection[j + 1] = key;
+        }
+    }
+}
+
+void point::sort_dsc(){
+    if (verti){
+        for (int i = 1; i < intersection.size(); ++i)
+        {
+            point *key = intersection[i];
+            int j = i - 1;
+            while (j >= 0 && key->y > intersection[j]->y )
+            {
+                intersection[j + 1] = intersection[j];
+                --j;
+            }
+            intersection[j + 1] = key;
+        }
+    }
+    else
+    {
+        for (int i = 1; i > intersection.size(); ++i)
+        {
+            point *key = intersection[i];
+            int j = i - 1;
+            while (j >= 0 && key->x > intersection[j]->x )
+            {
+                intersection[j + 1] = intersection[j];
+                --j;
+            }
+            intersection[j + 1] = key;
+        }
+    }
+}
+
+
+void point::sort_intersection()
+{
     bool reverse = false;
     int i;
     if (verti)
@@ -58,78 +169,11 @@ void point::connect()
     }
     else if (x > next->x)
         reverse = true;
-    if (reverse)
-    {
-        for (i = intersection.size() - 1; i >= 0; --i)
-        {
-            intersection[i]->prev = temp;
-            temp->next = intersection[i];
-            temp = intersection[i];
-        }
-        n->prev = intersection[0];
-        intersection[0]->next = n;
+    if(reverse){
+        sort_dsc();
     }
-    else
-    {
-        for (i = 0; i < intersection.size(); ++i)
-        {
-            intersection[i]->prev = temp;
-            temp->next = intersection[i];
-            temp = intersection[i];
-        }
-
-        n->prev = intersection[--i];
-        intersection[i]->next = n;
-    }
-    // set<point *>::iterator iter = intersection.begin();
-    // for (; iter != intersection.end(); ++iter)
-    // {
-    //     (*iter)->prev = temp;
-    //     temp->next = (*iter);
-    //     temp = (*iter);
-    // }
-    // n->prev = *(--iter);
-    // (*iter)->next = n;
-    // intersection.clear();
-}
-// void point::print(){
-//     cout << x << " " << y << endl;
-//     // cout << "intersection number is " << intersection.size() << endl;
-//     // for (int i = 0; i < intersection.size();++i){
-//     //     cout << "intersection is : " << endl;
-//     //     cout << intersection[i]->x << " " << intersection[i]->y<<endl;
-//     // }
-// }
-
-void point::sort_intersection()
-{
-    if (verti)
-    {
-        for (int i = 1; i < intersection.size(); ++i)
-        {
-            point *key = intersection[i];
-            int j = i - 1;
-            while (key->y < intersection[j]->y && j > 0)
-            {
-                intersection[j + 1] = intersection[j];
-                --j;
-            }
-            intersection[j + 1] = key;
-        }
-    }
-    else
-    {
-        for (int i = 1; i < intersection.size(); ++i)
-        {
-            point *key = intersection[i];
-            int j = i - 1;
-            while (key->x < intersection[j]->x && j > 0)
-            {
-                intersection[j + 1] = intersection[j];
-                --j;
-            }
-            intersection[j + 1] = key;
-        }
+    else {
+        sort_asc();
     }
 }
 class intersect_point : public point
