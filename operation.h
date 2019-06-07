@@ -99,6 +99,7 @@ int operation::find_intersect(point *a, point *b)
     {
         cout << "Delete Polygon: " << *a << endl;
         a->delete_poly();
+        delete a;
         return_num = 1;
     }
     has_out = in_out_cross(b, a);
@@ -106,6 +107,7 @@ int operation::find_intersect(point *a, point *b)
     {
         cout << "Delete Polygon: " << *b << endl;
         b->delete_poly();
+        delete b;
         return_num = 2;
     }
     return return_num;
@@ -312,7 +314,7 @@ void operation::new_intersect(point *a, point *b, long long x, long long y)
     }
     else if (temp_b->dir)
         order = false;
-    
+
     if (order)
         two_way_intersect(insert_a, insert_b);
     else

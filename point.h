@@ -4,15 +4,17 @@
 #include <iomanip>
 using namespace std;
 #define DIV 922337203685477580.0
+static int point_cnt = 0;
+static int intersect_cnt = 0;
 
 class point
 {
 private:
 protected:
 public:
-    point(){};
     point(long long xt, long long yt);
-    ~point();
+    point(const point &); // copy constructor
+    virtual ~point();
     float area(point *p) { return x / DIV * (p->y) / DIV - y / DIV * (p->x) / DIV; }
     // virtual void print() { cout << x << " " << y << endl; }
     void swap_dir() { swap(next, prev); };
@@ -24,6 +26,7 @@ public:
     friend ostream &operator<<(ostream &os, const point &p);
     virtual void print() { cout << *this << endl; };
     virtual bool ispoint() { return true; };
+
     vector<point *> intersection;
     long long x, y;
     point *next;
@@ -46,19 +49,33 @@ ostream &operator<<(ostream &os, const point &p)
 point::point(long long xt, long long yt) : x(xt), y(yt)
 {
     // cout << "construct vertex" << *this << endl;
+    point_cnt += 1;
     verti = false;
     dir = false;
+}
+// 複製新的多邊形
+point::point(const point &p2)
+{
+    // cout << "construct vertex" << *this << endl;
+    point_cnt += 1;
+    x = p2.x;
+    y = p2.y;
 }
 
 // 把頂點裡面存的交點清掉
 point::~point()
 {
+    // cout << "destruct vertex" << *this << endl;
+    point_cnt -= 1;
+    // 宥璁沒有把他從 intesection 清掉
+    // 所以不用清了
+
     // cout << "delete vertex" << *this << endl;
-    for (unsigned int j = 0; j < intersection.size(); ++j)
-    {
-        delete intersection[j];
-    }
-    intersection.clear();
+    // for (unsigned int j = 0; j < intersection.size(); ++j)
+    // {
+    //     delete intersection[j];
+    // }
+    // intersection.clear();
 }
 // bool operator < (point* a,point* b)
 
@@ -205,20 +222,20 @@ void point::sort_intersection()
 // 把整個多邊形刪掉，需要刪掉全部的 頂點 和 交點
 void point::delete_poly()
 {
-    point *p = this;
+    point *p = this->next;
+    // cout << "POLY" << *p << "LEN" << len << endl;
     for (unsigned int i = 0; i < len - 1; ++i)
     {
         p = p->next;
+        // cout << "DELoo " << *(p->prev) << endl;
         delete p->prev;
     }
-    delete p;
 }
 
 class intersect_point : public point
 {
 private:
 public:
-    intersect_point(/* args */);
     intersect_point(long long, long long, int);
     ~intersect_point();
     bool ispoint() { return false; };
@@ -229,18 +246,17 @@ public:
     bool tran;
 };
 
-intersect_point::intersect_point(/* args */)
-{
-    // cout << "point construct" << endl;
-}
-
 intersect_point::intersect_point(long long xt, long long yt, int colort) : point(xt, yt), color(colort), in(true)
 {
+    point_cnt -= 1;
+    intersect_cnt += 1;
     // cout << "construct intersect" << *this << endl;
 }
 
 intersect_point::~intersect_point()
 {
+    point_cnt += 1;
+    intersect_cnt -= 1;
     // cout << "delete intersect" << *this << endl;
 }
 

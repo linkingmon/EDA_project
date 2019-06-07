@@ -14,6 +14,7 @@ using namespace std;
 inline bool read_operation(fstream &, point **);
 void find_intersect(vector<point *> total_root, vector<point *> root);
 void list_construct(point *);
+point *construct_new_poly(vector<point *>);
 
 int main()
 {
@@ -74,7 +75,7 @@ int main()
 #ifdef DEBUG
             point *p = root;
             cout << "POLYGON" << oper.root_list.size() - 1 << endl;
-            for (int i = 0; i < root->len; ++i)
+            for (int k = 0; k < root->len; ++k)
             {
                 cout << *p << " DIR" << (p->verti ? '|' : '-') << " Angle" << ang[p->angle] << " Snext" << *(p->s_next) << endl;
                 p = p->next;
@@ -107,22 +108,35 @@ int main()
         for (iter = oper.out_list.begin(); iter != oper.out_list.end(); ++iter)
             cout << **iter << endl;
 #endif
+#ifdef DEBUG
+        cout << "----memory leak checking-----" << endl;
+        cout << "Total points: " << point_cnt << " & intersects: " << intersect_cnt << endl;
+#endif
         vector<point *> new_list;
         int cnt = 0;
+#ifdef DEBUG
+        cout << "-----------merging-----------" << endl;
+#endif
         while (oper.out_list.size() > 0)
         {
-            cout << "----------" << endl;
+            vector<point *> poly;
             point *new_poly;
             set<point *>::iterator iter;
             iter = oper.out_list.begin();
             new_poly = *iter;
             point *p = (*iter)->next;
             oper.out_list.erase(*iter);
+#ifdef DEBUG
             cout << "WALK " << *new_poly << endl;
+#endif
+            poly.push_back(new_poly);
             while (p != new_poly)
             {
                 ++cnt;
+#ifdef DEBUG
                 cout << "WALK " << *p << endl;
+#endif
+                poly.push_back(p);
                 if (!p->ispoint())
                 {
                     if (!static_cast<intersect_point *>(p)->in)
@@ -131,10 +145,14 @@ int main()
                     }
                     if (!static_cast<intersect_point *>(p)->tran)
                     {
+                        // cout << "No tran in intersect" << *p << endl;
                         goto back;
                     }
                     p = static_cast<intersect_point *>(p)->cross_point;
+#ifdef DEBUG
                     cout << "cross " << *p << endl;
+#endif
+                    poly.push_back(p);
                     if (p == new_poly)
                     {
                         break;
@@ -145,10 +163,25 @@ int main()
                     }
                 }
             back:
+#ifdef DEBUG
                 cout << "WALK " << *p << endl;
+#endif
+                poly.push_back(p);
                 p = p->next;
             }
+            // 用新走出的形狀做出多邊形
+            // 需要初始化更種參數：包刮：x, y next, prev, s_next, len, angle, verti, dir
+            new_list.push_back(construct_new_poly(poly));
         }
+        for (unsigned int k = 0; k < oper.root_list.size(); ++k)
+        {
+            oper.root_list[k]->delete_poly();
+            delete oper.root_list[k];
+        }
+#ifdef DEBUG
+        cout << "----memory leak checking-----" << endl;
+        cout << "Total points: " << point_cnt << " & intersects: " << intersect_cnt << endl;
+#endif
     }
 }
 // find cross point in two vector of POLYGON
@@ -175,12 +208,12 @@ inline bool read_operation(fstream &fin, point **root)
         return false;
 
     // read first 2 dummy int
+    // 文喬老大說有可能最後不會出現
     fin >> s >> s;
 
     // read root
     fin >> s >> s2;
     point *p;
-    p = new point();
     point *prev = new point((long long)(atoi(s.c_str())), (long long)(atoi(s2.c_str())));
     *root = prev;
     int cnt = 1;
@@ -263,4 +296,10 @@ void list_construct(point *root)
         temp->s_next = s_next;
         temp = temp->next;
     }
+}
+
+// 需要初始化更種參數：包刮：x, y next, prev, s_next, len, angle, verti, dir
+point *construct_new_poly(vector<point *> point_stream)
+{
+    cout << "CONS" << endl;
 }
