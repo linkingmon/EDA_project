@@ -329,5 +329,6 @@ point *construct_new_poly(vector<point *> point_stream)
     p_prev->next = root;
     root->prev = p_prev;
     // 壓縮一下直接走到s_next
+    list_construct(root);
     return root;
 }
