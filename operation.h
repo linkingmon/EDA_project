@@ -309,9 +309,10 @@ void operation::new_intersect(point *a, point *b, long long x, long long y)
         {
             order = false;
         }
-        else if (temp_b->dir)
-            order = false;
     }
+    else if (temp_b->dir)
+        order = false;
+    
     if (order)
         two_way_intersect(insert_a, insert_b);
     else
