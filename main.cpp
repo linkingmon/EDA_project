@@ -14,7 +14,7 @@ using namespace std;
 inline bool read_operation(fstream &, point **);
 void find_intersect(vector<point *> total_root, vector<point *> root);
 void list_construct(point *);
-point *construct_new_poly(vector<point *>);
+point *construct_new_poly(vector<point *> &);
 
 int main()
 {
@@ -114,6 +114,7 @@ int main()
 #endif
         vector<point *> new_list;
         int cnt = 0;
+        ++glob_color;
 #ifdef DEBUG
         cout << "-----------merging-----------" << endl;
 #endif
@@ -129,6 +130,7 @@ int main()
 #ifdef DEBUG
             cout << "WALK " << *new_poly << endl;
 #endif
+            new_poly->pcolor = glob_color;
             poly.push_back(new_poly);
             while (p != new_poly)
             {
@@ -136,6 +138,7 @@ int main()
 #ifdef DEBUG
                 cout << "WALK " << *p << endl;
 #endif
+                p->pcolor = glob_color;
                 poly.push_back(p);
                 if (!p->ispoint())
                 {
@@ -152,6 +155,7 @@ int main()
 #ifdef DEBUG
                     cout << "cross " << *p << endl;
 #endif
+                    p->pcolor = glob_color;
                     poly.push_back(p);
                     if (p == new_poly)
                     {
@@ -166,12 +170,26 @@ int main()
 #ifdef DEBUG
                 cout << "WALK " << *p << endl;
 #endif
+                p->pcolor = glob_color;
                 poly.push_back(p);
                 p = p->next;
             }
             // 用新走出的形狀做出多邊形
             // 需要初始化更種參數：包刮：x, y next, prev, s_next, len, angle, verti, dir
             new_list.push_back(construct_new_poly(poly));
+        }
+        // 判斷有些多邊形跟其他是分開的，根本不用何在一起，要直接加進去；感覺有點慢?
+        for (unsigned int k = 0; k < oper.root_list.size(); ++k)
+        {
+            point *p = oper.root_list[k];
+            bool isout = true;
+            for (unsigned int z = 0; z < p->len; ++z)
+            {
+                if (p->pcolor == glob_color)
+                    break;
+                p = p->next;
+            }
+            new_list.push_back(p);
         }
         for (unsigned int k = 0; k < oper.root_list.size(); ++k)
         {
@@ -301,7 +319,7 @@ void list_construct(point *root)
 }
 
 // 需要初始化更種參數：包刮：x, y next, prev, s_next, len, angle, verti, dir
-point *construct_new_poly(vector<point *> point_stream)
+point *construct_new_poly(vector<point *> &point_stream)
 {
     //     point *root = new point(point_stream[0]);
     // #ifdef DEBUG

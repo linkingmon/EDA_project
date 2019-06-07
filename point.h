@@ -33,6 +33,7 @@ public:
     point *prev;
     point *s_next;
     int len;
+    int pcolor;
     // point* straright_next;
     short angle;
     bool verti;
