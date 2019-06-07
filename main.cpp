@@ -23,7 +23,8 @@ int main()
     //clock_t t = clock();
     // can choose file: sample_in.txt / OpenCase_1.txt / OpenCase_2.txt
     // string filename = "sample_in.txt";
-    string filename = "test_merge.txt";
+    // string filename = "test_merge.txt";
+    string filename = "OpenCase_1.txt";
     fstream fin(filename.c_str(), fstream::in);
 
     // read operation

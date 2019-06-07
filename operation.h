@@ -25,6 +25,7 @@ public:
     string name;
     vector<point *> root_list; // 存該 operation 下的所有多邊形
     set<point *> out_list;
+    vector<point *> out_list_buf; //先存好out焦點 如果沒有要被刪掉才推到out list之中
 };
 
 void operation::find_intersect()
@@ -97,20 +98,69 @@ int operation::find_intersect(point *a, point *b)
     has_out = in_out_cross(a, b);
     if (!has_out)
     {
-        cout << "Delete Polygon: " << *a << endl;
-        a->delete_poly();
-        delete a;
-        return_num = 1;
+        return_num += 1;
+        out_list_buf.clear();
     }
     has_out = in_out_cross(b, a);
     if (!has_out)
     {
+        return_num += 2;
+        out_list_buf.clear();
+    }
+    point *p;
+    intersect_point *p_t;
+    switch (return_num)
+    {
+    case 1:
+#ifdef DEBUG
+        cout << "Delete Polygon: " << *a << endl;
+#endif
+        a->delete_poly();
+        delete a;
+        p = b;
+        for (unsigned int i = 0; i < b->len; ++i)
+        {
+            for (unsigned int j = 0; j < p->intersection.size(); ++j)
+            {
+                p_t = static_cast<intersect_point *>(p->intersection[j]);
+                if (p_t->color == glob_color)
+                {
+                    p->intersection.erase(p->intersection.begin() + j);
+                    --j;
+                }
+            }
+            p = p->next;
+        }
+        return 1;
+        break;
+    case 2:
+    case 3:
+#ifdef DEBUG
         cout << "Delete Polygon: " << *b << endl;
+#endif
         b->delete_poly();
         delete b;
-        return_num = 2;
+        p = a;
+        for (unsigned int i = 0; i < a->len; ++i)
+        {
+            for (unsigned int j = 0; j < p->intersection.size(); ++j)
+            {
+                p_t = static_cast<intersect_point *>(p->intersection[j]);
+                if (p_t->color == glob_color)
+                {
+                    p->intersection.erase(p->intersection.begin() + j);
+                    --j;
+                }
+            }
+            p = p->next;
+        }
+        return 2;
+        break;
+    default:
+        for (unsigned int kk = 0; kk < out_list_buf.size(); ++kk)
+            out_list.insert(out_list_buf[kk]);
+        return 0;
     }
-    return return_num;
 }
 
 // cross 來 merge root
@@ -144,7 +194,7 @@ bool operation::in_out_cross(point *root, point *cross)
                     if (p_t->color == glob_color)
                     {
                         p_t->in = false;
-                        out_list.insert(p_t);
+                        out_list_buf.push_back(p_t);
                         break;
                     }
                 }
