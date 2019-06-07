@@ -15,13 +15,15 @@ inline bool read_operation(fstream &, point **);
 void find_intersect(vector<point *> total_root, vector<point *> root);
 void list_construct(point *);
 point *construct_new_poly(vector<point *> &);
+void output_result(const vector<point *> &, string);
 
 int main()
 {
     string ang = "\\/X";
     //clock_t t = clock();
     // can choose file: sample_in.txt / OpenCase_1.txt / OpenCase_2.txt
-    string filename = "sample_in.txt";
+    // string filename = "sample_in.txt";
+    string filename = "test_merge.txt";
     fstream fin(filename.c_str(), fstream::in);
 
     // read operation
@@ -183,24 +185,33 @@ int main()
         {
             point *p = oper.root_list[k];
             bool isout = true;
-            for (unsigned int z = 0; z < p->len; ++z)
+            // cout << p->len << " " << *p << endl;
+            for (unsigned int z = 0; z < oper.root_list[k]->len; ++z)
             {
                 if (p->pcolor == glob_color)
+                {
+                    isout = false;
                     break;
+                }
+                // cout << p->pcolor << *p << endl;
                 p = p->next;
             }
-            new_list.push_back(p);
-        }
-        for (unsigned int k = 0; k < oper.root_list.size(); ++k)
-        {
-            oper.root_list[k]->delete_poly();
-            delete oper.root_list[k];
+            // cout << isout << endl;
+            if (isout)
+                new_list.push_back(oper.root_list[k]);
+            else
+            {
+                oper.root_list[k]->delete_poly();
+                delete oper.root_list[k];
+            }
         }
         oper.root_list = new_list;
 #ifdef DEBUG
         cout << "----memory leak checking-----" << endl;
         cout << "Total points: " << point_cnt << " & intersects: " << intersect_cnt << endl;
         cout << "Total polygons after merging in operation: " << oper.root_list.size() << endl;
+        char c = i + 49;
+        output_result(oper.root_list, string("result/Merge") + c + ".txt");
 #endif
     }
 }
@@ -346,7 +357,28 @@ point *construct_new_poly(vector<point *> &point_stream)
     }
     p_prev->next = root;
     root->prev = p_prev;
+    root->len = point_stream.size();
     // 壓縮一下直接走到s_next
     list_construct(root);
     return root;
+}
+
+// 輸出txt黨 給python吃 看對不對
+void output_result(const vector<point *> &root_list, string filename)
+{
+    fstream fout(filename.c_str(), fstream::out);
+    fout << "OPERATION M1 ;\n\n";
+    fout << "DATA MERGE M1 ;" << endl;
+    for (unsigned int i = 0; i < root_list.size(); ++i)
+    {
+        point *p = root_list[i];
+        fout << "POLYGON ";
+        for (unsigned int j = 0; j < root_list[i]->len; ++j)
+        {
+            fout << p->x << " " << p->y << " ";
+            p = p->next;
+        }
+        fout << root_list[i]->x << " " << root_list[i]->y << " ;" << endl;
+    }
+    fout << "END DATA" << endl;
 }
