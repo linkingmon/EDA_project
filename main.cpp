@@ -87,7 +87,7 @@ int main()
         oper.find_intersect();
         oper.insert_intersect();
 #ifdef DEBUG
-        cout << "----------intersect----------" << endl;
+        cout << "------------result-----------" << endl;
         for (int j = 0; j < oper.root_list.size(); ++j)
         {
             point *p = oper.root_list[j];
@@ -129,8 +129,9 @@ int main()
                     {
                         oper.out_list.erase(p);
                     }
-                    if(!static_cast<intersect_point *>(p)->tran){
-                        break;
+                    if (!static_cast<intersect_point *>(p)->tran)
+                    {
+                        goto back;
                     }
                     p = static_cast<intersect_point *>(p)->cross_point;
                     cout << "cross " << *p << endl;
@@ -143,6 +144,7 @@ int main()
                         oper.out_list.erase(p);
                     }
                 }
+            back:
                 cout << "WALK " << *p << endl;
                 p = p->next;
             }
@@ -240,17 +242,21 @@ void list_construct(point *root)
         else
             temp->angle = 2;
         point *s_next = temp->next;
-        if (temp->verti){
+        if (temp->verti)
+        {
             while (s_next->next->x == temp->x)
                 s_next = s_next->next;
-            if(s_next->y > temp->y ){
+            if (s_next->y > temp->y)
+            {
                 temp->dir = true;
             }
         }
-        else{
+        else
+        {
             while (s_next->next->y == temp->y)
                 s_next = s_next->next;
-            if(s_next->x > temp->x ){
+            if (s_next->x > temp->x)
+            {
                 temp->dir = true;
             }
         }

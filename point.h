@@ -12,7 +12,7 @@ protected:
 public:
     point(){};
     point(long long xt, long long yt);
-    ~point(){};
+    ~point();
     float area(point *p) { return x / DIV * (p->y) / DIV - y / DIV * (p->x) / DIV; }
     // virtual void print() { cout << x << " " << y << endl; }
     void swap_dir() { swap(next, prev); };
@@ -20,6 +20,7 @@ public:
     void sort_intersection();
     void sort_asc();
     void sort_dsc();
+    void delete_poly();
     friend ostream &operator<<(ostream &os, const point &p);
     virtual void print() { cout << *this << endl; };
     virtual bool ispoint() { return true; };
@@ -36,17 +37,29 @@ public:
     // point &bool operator<(point &b);
 };
 
-ostream &operator<<(ostream &os, const point &p) { os << '(' << setw(4) << p.x << ',' << setw(4) << p.y << ')';
+ostream &operator<<(ostream &os, const point &p)
+{
+    os << '(' << setw(4) << p.x << ',' << setw(4) << p.y << ')';
     return os;
-
 };
 
 point::point(long long xt, long long yt) : x(xt), y(yt)
 {
+    // cout << "construct vertex" << *this << endl;
     verti = false;
     dir = false;
 }
 
+// 把頂點裡面存的交點清掉
+point::~point()
+{
+    // cout << "delete vertex" << *this << endl;
+    for (unsigned int j = 0; j < intersection.size(); ++j)
+    {
+        delete intersection[j];
+    }
+    intersection.clear();
+}
 // bool operator < (point* a,point* b)
 
 void point::connect()
@@ -58,11 +71,11 @@ void point::connect()
     sort_intersection();
     int i;
     for (i = 0; i < intersection.size(); ++i)
-        {
-            intersection[i]->prev = temp;
-            temp->next = intersection[i];
-            temp = intersection[i];
-        }
+    {
+        intersection[i]->prev = temp;
+        temp->next = intersection[i];
+        temp = intersection[i];
+    }
     n->prev = intersection[--i];
     intersection[i]->next = n;
     // bool reverse = false;
@@ -99,13 +112,15 @@ void point::connect()
     // }
 }
 
-void point::sort_asc(){
-    if (verti){
+void point::sort_asc()
+{
+    if (verti)
+    {
         for (int i = 1; i < intersection.size(); ++i)
         {
             point *key = intersection[i];
             int j = i - 1;
-            while (j >= 0 && key->y < intersection[j]->y )
+            while (j >= 0 && key->y < intersection[j]->y)
             {
                 intersection[j + 1] = intersection[j];
                 --j;
@@ -119,7 +134,7 @@ void point::sort_asc(){
         {
             point *key = intersection[i];
             int j = i - 1;
-            while (j >= 0 && key->x < intersection[j]->x )
+            while (j >= 0 && key->x < intersection[j]->x)
             {
                 intersection[j + 1] = intersection[j];
                 --j;
@@ -129,13 +144,15 @@ void point::sort_asc(){
     }
 }
 
-void point::sort_dsc(){
-    if (verti){
+void point::sort_dsc()
+{
+    if (verti)
+    {
         for (int i = 1; i < intersection.size(); ++i)
         {
             point *key = intersection[i];
             int j = i - 1;
-            while (j >= 0 && key->y > intersection[j]->y )
+            while (j >= 0 && key->y > intersection[j]->y)
             {
                 intersection[j + 1] = intersection[j];
                 --j;
@@ -145,11 +162,11 @@ void point::sort_dsc(){
     }
     else
     {
-        for (int i = 1; i > intersection.size(); ++i)
+        for (int i = 1; i < intersection.size(); ++i)
         {
             point *key = intersection[i];
             int j = i - 1;
-            while (j >= 0 && key->x > intersection[j]->x )
+            while (j >= 0 && key->x > intersection[j]->x)
             {
                 intersection[j + 1] = intersection[j];
                 --j;
@@ -158,7 +175,6 @@ void point::sort_dsc(){
         }
     }
 }
-
 
 void point::sort_intersection()
 {
@@ -170,13 +186,34 @@ void point::sort_intersection()
     }
     else if (x > next->x)
         reverse = true;
-    if(reverse){
+    if (reverse)
+    {
         sort_dsc();
     }
-    else {
+    else
+    {
         sort_asc();
     }
+
+    // cout << "***************************************" << endl;
+    // cout << *this << *(this->next) << endl;
+    // for (signed int i = 0; i < intersection.size(); ++i)
+    //     cout << *(intersection[i]) << " ";
+    // cout << endl;
+    // cout << "***************************************" << endl;
 }
+// 把整個多邊形刪掉，需要刪掉全部的 頂點 和 交點
+void point::delete_poly()
+{
+    point *p = this;
+    for (unsigned int i = 0; i < len - 1; ++i)
+    {
+        p = p->next;
+        delete p->prev;
+    }
+    delete p;
+}
+
 class intersect_point : public point
 {
 private:
@@ -194,15 +231,17 @@ public:
 
 intersect_point::intersect_point(/* args */)
 {
-    cout << "point construct" << endl;
+    // cout << "point construct" << endl;
 }
 
-intersect_point::intersect_point(long long xt, long long yt, int colort) : point(xt, yt), color(colort)
+intersect_point::intersect_point(long long xt, long long yt, int colort) : point(xt, yt), color(colort), in(true)
 {
+    // cout << "construct intersect" << *this << endl;
 }
 
 intersect_point::~intersect_point()
 {
+    // cout << "delete intersect" << *this << endl;
 }
 
 void intersect_point::print()

@@ -1,5 +1,6 @@
 #include "point.h"
 #include <set>
+#define DEBUG
 using namespace std;
 
 static int glob_color = 0;
@@ -12,14 +13,14 @@ public:
     ~operation(){};
     void find_intersect();
     void insert_intersect();
-    void find_intersect(point *a, point *b);
+    int find_intersect(point *a, point *b);
     void find_cross(point *, point *);
     void add_intersect(point *a, point *b);
     bool inside_edge(long long x1, long long x2, long long y);
     void two_way_intersect(intersect_point *, intersect_point *);
     void new_intersect(point *a, point *b, long long x, long long y);
     bool inside_region(point *a, point *b, long long x, long long y);
-    void in_out_cross(point *, point *);
+    bool in_out_cross(point *, point *);
     bool outside_poly(point *, point *);
     string name;
     vector<point *> root_list; // 存該 operation 下的所有多邊形
@@ -28,9 +29,33 @@ public:
 
 void operation::find_intersect()
 {
+#ifdef DEBUG
+    cout << "----------intersect----------" << endl;
+#endif
     for (int i = 0; i < root_list.size(); ++i)
         for (int j = i + 1; j < root_list.size(); ++j)
-            find_intersect(root_list[i], root_list[j]);
+        {
+#ifdef DEBUG
+            // 0是有焦點 1是要刪掉前面的 2是要刪掉後面的
+            cout << "Find intersect: " << *root_list[i] << " " << *root_list[j] << endl;
+#endif
+            int state = find_intersect(root_list[i], root_list[j]);
+            switch (state)
+            {
+            case 1:
+                root_list.erase(root_list.begin() + i);
+                --i;
+                continue;
+                break;
+            case 2:
+                root_list.erase(root_list.begin() + j);
+                --j;
+                continue;
+                break;
+            default:
+                break;
+            }
+        }
 }
 //insert intersect in one POLYGON
 void operation::insert_intersect()
@@ -52,7 +77,7 @@ void operation::insert_intersect()
 
 // find cross point in two POLYGON
 // 找兩個 多邊形 的交點
-void operation::find_intersect(point *a, point *b)
+int operation::find_intersect(point *a, point *b)
 {
     point *p_k = a;
     point *p_l = b;
@@ -67,52 +92,66 @@ void operation::find_intersect(point *a, point *b)
         }
         p_k = p_k->next;
     }
-    static int num = 0;
-    num += 1;
-    cout << "X" << num << endl;
-    in_out_cross(a, b);
-    in_out_cross(b, a);
+    int return_num = 0;
+    bool has_out;
+    has_out = in_out_cross(a, b);
+    if (!has_out)
+    {
+        cout << "Delete Polygon: " << *a << endl;
+        a->delete_poly();
+        return_num = 1;
+    }
+    has_out = in_out_cross(b, a);
+    if (!has_out)
+    {
+        cout << "Delete Polygon: " << *b << endl;
+        b->delete_poly();
+        return_num = 2;
+    }
+    return return_num;
 }
 
 // cross 來 merge root
 // 先判斷 root 是不是在 cross 外面
 // root 如果在 cross 的邊上就算是在裡面
-void operation::in_out_cross(point *root, point *cross)
+// 2019/6/6
+// root 如果在外面才開始"順時針"遶(by 宥璁)
+bool operation::in_out_cross(point *root, point *cross)
 {
-    bool outward = outside_poly(root, cross);
-#ifdef DEBUG
-    static bool pr = true;
-    if (pr)
-    {
-        cout << "--------detect in out--------" << endl;
-        pr = false;
-    }
-    cout << "detect that " << *root << " is " << (outward ? "outside" : " inside") << " of POLY" << *cross << endl;
-#endif
+    // 要一直判斷點是不是在外面，有點多餘
     point *p = root;
+    bool has_out = false;
     for (int i = 0; i < root->len; i++)
     {
-        if (p->intersection.size() > 0)
+        bool outside = outside_poly(p, cross);
+        // cout << "POINT" << *p << " " << outside << endl;
+        // 如果是 outside 順著走的交點是 outward
+        if (outside)
         {
-            p->sort_intersection();
-            for (unsigned int i = 0; i < p->intersection.size(); ++i)
+            has_out = true;
+            // cout << "SIZE" << p->prev->intersection.size() << endl;
+            if (p->prev->intersection.size() > 0)
             {
-                intersect_point *p_t = static_cast<intersect_point *>(p->intersection[i]);
-                if (p_t->color == glob_color)
+                p->prev->sort_intersection();
+                // cout << "SIZE after sort" << p->prev->intersection.size() << endl;
+                // cout << "SORT Done" << endl;
+                for (int j = p->prev->intersection.size() - 1; j >= 0; --j)
                 {
-
-                    p_t->in = outward;
-                    outward = !outward;
-                    if (outward)
+                    // cout << "J: " << j << endl;
+                    intersect_point *p_t = static_cast<intersect_point *>(p->prev->intersection[j]);
+                    if (p_t->color == glob_color)
                     {
-                        out_list.insert(p->intersection[i]);
-                        // cout << *(p->intersection[i]) << " is outward intersect of poly " << *cross << endl;
+                        p_t->in = false;
+                        out_list.insert(p_t);
+                        break;
                     }
                 }
             }
         }
         p = p->next;
     }
+    return has_out;
+    // cout << "Should delete Poly: " << *p << endl;
 }
 
 bool operation::outside_poly(point *root, point *cross)
@@ -258,19 +297,22 @@ void operation::new_intersect(point *a, point *b, long long x, long long y)
     bool order = true;
     point *temp_a = a;
     point *temp_b = b;
-    if(b->verti){
+    if (b->verti)
+    {
         temp_a = b;
         temp_b = a;
         swap(insert_a, insert_b);
     }
-    if (temp_a->dir){
-        if (!temp_b->dir){
+    if (temp_a->dir)
+    {
+        if (!temp_b->dir)
+        {
             order = false;
         }
-        else if(temp_b->dir)
+        else if (temp_b->dir)
             order = false;
     }
-    if(order)
+    if (order)
         two_way_intersect(insert_a, insert_b);
     else
         two_way_intersect(insert_b, insert_a);
