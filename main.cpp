@@ -178,9 +178,11 @@ int main()
             oper.root_list[k]->delete_poly();
             delete oper.root_list[k];
         }
+        oper.root_list = new_list;
 #ifdef DEBUG
         cout << "----memory leak checking-----" << endl;
         cout << "Total points: " << point_cnt << " & intersects: " << intersect_cnt << endl;
+        cout << "Total polygons after merging in operation: " << oper.root_list.size() << endl;
 #endif
     }
 }
@@ -301,5 +303,31 @@ void list_construct(point *root)
 // 需要初始化更種參數：包刮：x, y next, prev, s_next, len, angle, verti, dir
 point *construct_new_poly(vector<point *> point_stream)
 {
-    cout << "CONS" << endl;
+    //     point *root = new point(point_stream[0]);
+    // #ifdef DEBUG
+    //     if (point_stream.size() < 4)
+    //     {
+    //         cout << "POLY has only " << point_stream.size() << " vertices" << endl;
+    //         assert(0);
+    //     }
+    // #endif
+    //     point *p = point_stream[0];
+    //     point *p_next = point_stream[1];
+    //     for (unsigned int i = 2; i < point_stream.size(); ++i)
+    //     {
+    //         p_next = point_stream[i];
+    //     }
+    point *root = new point(*(point_stream[0]));
+    point *p_prev = root;
+    for (unsigned int i = 1; i < point_stream.size(); ++i)
+    {
+        point *p = new point(*(point_stream[i]));
+        p_prev->next = p;
+        p->prev = p_prev;
+        p_prev = p;
+    }
+    p_prev->next = root;
+    root->prev = p_prev;
+    // 壓縮一下直接走到s_next
+    return root;
 }
