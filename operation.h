@@ -12,8 +12,9 @@ public:
     operation(string s) : name(s){};
     ~operation(){};
     void find_intersect();
+    void find_intersect(operation &);
     void insert_intersect();
-    int find_intersect(point *a, point *b);
+    int find_intersect(point *a, point *b,operation &);
     void find_cross(point *, point *);
     void add_intersect(point *a, point *b);
     bool inside_edge(long long x1, long long x2, long long y);
@@ -33,6 +34,7 @@ void operation::find_intersect()
 #ifdef DEBUG
     cout << "----------intersect----------" << endl;
 #endif
+
     for (int i = 0; i < root_list.size(); ++i)
         for (int j = i + 1; j < root_list.size(); ++j)
         {
@@ -40,7 +42,7 @@ void operation::find_intersect()
             // 0是有焦點 1是要刪掉前面的 2是要刪掉後面的
             cout << "Find intersect: " << *root_list[i] << " " << *root_list[j] << endl;
 #endif
-            int state = find_intersect(root_list[i], root_list[j]);
+            int state = find_intersect(root_list[i], root_list[j],*this);
             switch (state)
             {
             case 1:
@@ -76,9 +78,42 @@ void operation::insert_intersect()
     }
 }
 
+void operation::find_intersect(operation & total){
+    #ifdef DEBUG
+    cout << "----------intersect total root list----------" << endl;
+#endif
+    cout << root_list.size() << endl;
+    cout << total.root_list.size() << endl;
+    for (int i = 0; i < root_list.size(); ++i)
+        for (int j = 0; j < total.root_list.size(); ++j)
+        {
+#ifdef DEBUG
+            // 0是有焦點 1是要刪掉前面的 2是要刪掉後面的
+            cout << "Find intersect: " << *root_list[i] << " " << *(total.root_list[j]) << endl;
+#endif
+            int state = find_intersect(root_list[i], total.root_list[j],total);
+            cout << state << endl;
+            switch (state)
+            {
+            case 1:
+                root_list.erase(root_list.begin() + i);
+                --i;
+                continue;
+                break;
+            case 2:
+                total.root_list.erase(total.root_list.begin() + j);
+                --j;
+                continue;
+                break;
+            default:
+                break;
+            }
+        }
+}
 // find cross point in two POLYGON
 // 找兩個 多邊形 的交點
-int operation::find_intersect(point *a, point *b)
+// o_b point*b 屬於的operation
+int operation::find_intersect(point *a, point *b , operation& o_b)
 {
     point *p_k = a;
     point *p_l = b;
@@ -157,10 +192,14 @@ int operation::find_intersect(point *a, point *b)
         return 2;
         break;
     default:
-        for (unsigned int kk = 0; kk < out_list_buf.size(); ++kk)
+        for (unsigned int kk = 0; kk < out_list_buf.size(); ++kk){
             out_list.insert(out_list_buf[kk]);
-        return 0;
+            o_b.out_list.insert(out_list_buf[kk]);
+        
+        }
     }
+
+        return 0;
 }
 
 // cross 來 merge root

@@ -12,8 +12,10 @@
 using namespace std;
 
 inline bool read_operation(fstream &, point **);
-void find_intersect(vector<point *> total_root, vector<point *> root);
+void find_intersect(operation, operation);
 void list_construct(point *);
+vector<point*> little_merge(set<point*>&);
+void check_list(operation &,vector<point*> &);
 point *construct_new_poly(vector<point *> &);
 void output_result(const vector<point *> &, string);
 
@@ -23,14 +25,16 @@ int main()
     //clock_t t = clock();
     // can choose file: sample_in.txt / OpenCase_1.txt / OpenCase_2.txt
     // string filename = "sample_in.txt";
-    // string filename = "test_merge.txt";
-    string filename = "OpenCase_1.txt";
+    string filename = "test_merge.txt";
+    // string filename = "sample_in.txt";
     fstream fin(filename.c_str(), fstream::in);
-
+    vector<point *> total_root_list ; // store current overall polygon list
+    operation total("TOTAL");
+    total.root_list = total_root_list;
     // read operation
     vector<string> operations;       // store opertaion strings
     map<string, operation> mapping;  // map string to its operation
-    vector<point *> total_root_list; // store current overall polygon list
+    // cout << "total_list's size is " << total_root_list.size()<<endl;
     string s;
     fin >> s;
     while (1)
@@ -116,97 +120,119 @@ int main()
         cout << "Total points: " << point_cnt << " & intersects: " << intersect_cnt << endl;
 #endif
         vector<point *> new_list;
-        int cnt = 0;
-        ++glob_color;
-#ifdef DEBUG
-        cout << "-----------merging-----------" << endl;
-#endif
-        while (oper.out_list.size() > 0)
-        {
-            vector<point *> poly;
-            point *new_poly;
-            set<point *>::iterator iter;
-            iter = oper.out_list.begin();
-            new_poly = *iter;
-            point *p = (*iter)->next;
-            oper.out_list.erase(*iter);
-#ifdef DEBUG
-            cout << "WALK " << *new_poly << endl;
-#endif
-            new_poly->pcolor = glob_color;
-            poly.push_back(new_poly);
-            while (p != new_poly)
-            {
-                ++cnt;
-#ifdef DEBUG
-                cout << "WALK " << *p << endl;
-#endif
-                p->pcolor = glob_color;
-                poly.push_back(p);
-                if (!p->ispoint())
-                {
-                    if (!static_cast<intersect_point *>(p)->in)
-                    {
-                        oper.out_list.erase(p);
-                    }
-                    if (!static_cast<intersect_point *>(p)->tran)
-                    {
-                        // cout << "No tran in intersect" << *p << endl;
-                        goto back;
-                    }
-                    p = static_cast<intersect_point *>(p)->cross_point;
-#ifdef DEBUG
-                    cout << "cross " << *p << endl;
-#endif
-                    p->pcolor = glob_color;
-                    poly.push_back(p);
-                    if (p == new_poly)
-                    {
-                        break;
-                    }
-                    if (!static_cast<intersect_point *>(p)->in)
-                    {
-                        oper.out_list.erase(p);
-                    }
-                }
-            back:
-#ifdef DEBUG
-                cout << "WALK " << *p << endl;
-#endif
-                p->pcolor = glob_color;
-                poly.push_back(p);
-                p = p->next;
-            }
-            // 用新走出的形狀做出多邊形
-            // 需要初始化更種參數：包刮：x, y next, prev, s_next, len, angle, verti, dir
-            new_list.push_back(construct_new_poly(poly));
-        }
-        // 判斷有些多邊形跟其他是分開的，根本不用何在一起，要直接加進去；感覺有點慢?
-        for (unsigned int k = 0; k < oper.root_list.size(); ++k)
-        {
-            point *p = oper.root_list[k];
-            bool isout = true;
-            // cout << p->len << " " << *p << endl;
-            for (unsigned int z = 0; z < oper.root_list[k]->len; ++z)
-            {
-                if (p->pcolor == glob_color)
-                {
-                    isout = false;
-                    break;
-                }
-                // cout << p->pcolor << *p << endl;
-                p = p->next;
-            }
-            // cout << isout << endl;
-            if (isout)
-                new_list.push_back(oper.root_list[k]);
-            else
-            {
-                oper.root_list[k]->delete_poly();
-                delete oper.root_list[k];
+        new_list = little_merge(oper.out_list);
+        check_list(oper, new_list);
+        cout << "size is "<<total.root_list.size() << endl;
+        if( (total.root_list.size()) != 0){
+            // cout << oper.name<< endl;
+            switch(oper.name[0])
+            case 'M':{
+                cout << "M" << endl;
+                oper.find_intersect(total);
+                total.insert_intersect();
+                oper.insert_intersect();
+                new_list = little_merge(oper.out_list);
+                check_list(oper, new_list);
+                check_list(total, new_list);
             }
         }
-        oper.root_list = new_list;
+        else{
+            cout << oper.name << endl;
+            total.root_list = oper.root_list;
+        }
+        cout << "size is "<<total.root_list.size() << endl;
+        // vector<point *> new_list;
+        // int cnt = 0;
+        // ++glob_color;
+// #ifdef DEBUG
+//         cout << "-----------merging-----------" << endl;
+// #endif
+//         while (oper.out_list.size() > 0)
+//         {
+//             vector<point *> poly;
+//             point *new_poly;
+//             set<point *>::iterator iter;
+//             iter = oper.out_list.begin();
+//             new_poly = *iter;
+//             point *p = (*iter)->next;
+//             oper.out_list.erase(*iter);
+// #ifdef DEBUG
+//             cout << "WALK " << *new_poly << endl;
+// #endif
+//             new_poly->pcolor = glob_color;
+//             poly.push_back(new_poly);
+//             while (p != new_poly)
+//             {
+//                 ++cnt;
+// #ifdef DEBUG
+//                 cout << "WALK " << *p << endl;
+// #endif
+//                 p->pcolor = glob_color;
+//                 poly.push_back(p);
+//                 if (!p->ispoint())
+//                 {
+//                     if (!static_cast<intersect_point *>(p)->in)
+//                     {
+//                         oper.out_list.erase(p);
+//                     }
+//                     if (!static_cast<intersect_point *>(p)->tran)
+//                     {
+//                         // cout << "No tran in intersect" << *p << endl;
+//                         goto back;
+//                     }
+//                     p = static_cast<intersect_point *>(p)->cross_point;
+// #ifdef DEBUG
+//                     cout << "cross " << *p << endl;
+// #endif
+//                     p->pcolor = glob_color;
+//                     poly.push_back(p);
+//                     if (p == new_poly)
+//                     {
+//                         break;
+//                     }
+//                     if (!static_cast<intersect_point *>(p)->in)
+//                     {
+//                         oper.out_list.erase(p);
+//                     }
+//                 }
+//             back:
+// #ifdef DEBUG
+//                 cout << "WALK " << *p << endl;
+// #endif
+//                 p->pcolor = glob_color;
+//                 poly.push_back(p);
+//                 p = p->next;
+//             }
+//             // 用新走出的形狀做出多邊形
+//             // 需要初始化更種參數：包刮：x, y next, prev, s_next, len, angle, verti, dir
+//             new_list.push_back(construct_new_poly(poly));
+//         }
+//         // 判斷有些多邊形跟其他是分開的，根本不用何在一起，要直接加進去；感覺有點慢?
+//         for (unsigned int k = 0; k < oper.root_list.size(); ++k)
+//         {
+//             point *p = oper.root_list[k];
+//             bool isout = true;
+//             // cout << p->len << " " << *p << endl;
+//             for (unsigned int z = 0; z < oper.root_list[k]->len; ++z)
+//             {
+//                 if (p->pcolor == glob_color)
+//                 {
+//                     isout = false;
+//                     break;
+//                 }
+//                 // cout << p->pcolor << *p << endl;
+//                 p = p->next;
+//             }
+//             // cout << isout << endl;
+//             if (isout)
+//                 new_list.push_back(oper.root_list[k]);
+//             else
+//             {
+//                 oper.root_list[k]->delete_poly();
+//                 delete oper.root_list[k];
+//             }
+//         }
+//         oper.root_list = new_list;
 #ifdef DEBUG
         cout << "----memory leak checking-----" << endl;
         cout << "Total points: " << point_cnt << " & intersects: " << intersect_cnt << endl;
@@ -218,15 +244,35 @@ int main()
 }
 // find cross point in two vector of POLYGON
 // 找兩個 root list 的所有焦點
-// void find_intersect(vector<point *> total_root, vector<point *> root)
+// void find_intersect(operation a, operation b)
 // {
-//     for (int i = 0; i < total_root.size(); i++)
-//     {
-//         for (int j = 0; j < root.size(); j++)
+//     #ifdef DEBUG
+//     cout << "----------intersect----------" << endl;
+//     #endif
+//     for (int i = 0; i < a.root_list.size(); ++i)
+//         for (int j = i + 1; j < b.root_list.size(); ++j)
 //         {
-//             find_intersect(total_root[i], root[j]);
+// #ifdef DEBUG
+//             // 0是有焦點 1是要刪掉前面的 2是要刪掉後面的
+//             cout << "Find intersect: " << *(a.root_list[i]) << " " << *(b.root_list[j]) << endl;
+// #endif
+//             int state = find_intersect(a.root_list[i], b.root_list[j]);
+//             switch (state)
+//             {
+//             case 1:
+//                 a.root_list.erase(a.root_list.begin() + i);
+//                 --i;
+//                 continue;
+//                 break;
+//             case 2:
+//                 b.root_list.erase(b.root_list.begin() + j);
+//                 --j;
+//                 continue;
+//                 break;
+//             default:
+//                 break;
+//             }
 //         }
-//     }
 // }
 
 inline bool read_operation(fstream &fin, point **root)
@@ -382,4 +428,107 @@ void output_result(const vector<point *> &root_list, string filename)
         fout << root_list[i]->x << " " << root_list[i]->y << " ;" << endl;
     }
     fout << "END DATA" << endl;
+}
+
+//merge ;從out list 裡面的交點出發 繞過所有交點
+vector<point*> little_merge(set<point*> &out_list)
+{
+    vector<point *> new_list;
+    int cnt = 0;
+    ++glob_color;
+#ifdef DEBUG
+        cout << "-----------merging-----------" << endl;
+#endif
+    while (out_list.size() > 0)
+        {
+            vector<point *> poly;
+            point *new_poly;
+            set<point *>::iterator iter;
+            iter = out_list.begin();
+            new_poly = *iter;
+            point *p = (*iter)->next;
+            out_list.erase(*iter);
+#ifdef DEBUG
+            cout << "WALK " << *new_poly << endl;
+#endif
+            new_poly->pcolor = glob_color;
+            poly.push_back(new_poly);
+            while (p != new_poly)
+            {
+                ++cnt;
+#ifdef DEBUG
+                cout << "WALK " << *p << endl;
+#endif
+                p->pcolor = glob_color;
+                poly.push_back(p);
+                if (!p->ispoint())
+                {
+                    if (!static_cast<intersect_point *>(p)->in)
+                    {
+                        out_list.erase(p);
+                    }
+                    if (!static_cast<intersect_point *>(p)->tran)
+                    {
+                        // cout << "No tran in intersect" << *p << endl;
+                        goto back;
+                    }
+                    p = static_cast<intersect_point *>(p)->cross_point;
+#ifdef DEBUG
+                    cout << "cross " << *p << endl;
+#endif
+                    p->pcolor = glob_color;
+                    poly.push_back(p);
+                    if (p == new_poly)
+                    {
+                        break;
+                    }
+                    if (!static_cast<intersect_point *>(p)->in)
+                    {
+                        out_list.erase(p);
+                    }
+                }
+            back:
+#ifdef DEBUG
+                cout << "WALK " << *p << endl;
+#endif
+                p->pcolor = glob_color;
+                poly.push_back(p);
+                p = p->next;
+            }
+            // 用新走出的形狀做出多邊形
+            // 需要初始化更種參數：包刮：x, y next, prev, s_next, len, angle, verti, dir
+            new_list.push_back(construct_new_poly(poly));
+        }
+    return new_list;
+}       
+
+void check_list(operation &oper,vector <point*> &new_list){
+     // cout << "new list size is " << new_list.size() << endl;
+        // 判斷有些多邊形跟其他是分開的，根本不用何在一起，要直接加進去；感覺有點慢?
+    for (unsigned int k = 0; k < oper.root_list.size(); ++k)
+    {
+        point *p = oper.root_list[k];
+        bool isout = true;
+        // cout << p->len << " " << *p << endl;
+        for (unsigned int z = 0; z < oper.root_list[k]->len; ++z)
+        {
+            if (p->pcolor == glob_color)
+            {
+                isout = false;
+                break;
+            }
+            // cout << p->pcolor << *p << endl;
+            p = p->next;
+            }
+            // cout << isout << endl;
+            if (isout){
+                new_list.push_back(oper.root_list[k]);
+            }
+            else
+            {
+                oper.root_list[k]->delete_poly();
+                delete oper.root_list[k];
+            }
+        }
+        oper.root_list = new_list;
 }
