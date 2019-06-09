@@ -1,21 +1,23 @@
-#include "point.h"
+// #include "point.h"
+#include "glob_func.h"
 #include <set>
 #define DEBUG
 using namespace std;
 
-static int glob_color = 0;
 class operation
 {
 private:
 protected:
 public:
-    operation(string s) : name(s){};
+    operation(){};
+    // operation(string s) : name(s){};
     ~operation(){};
     void find_intersect();
     void find_intersect(operation &);
     void insert_intersect();
-    int find_intersect(point *a, point *b,operation &);
-    void find_cross(point *, point *);
+    void check_list(vector<point *> &);
+    int find_intersect(point *a, point *b, operation &);
+    bool find_cross(point *, point *);
     void add_intersect(point *a, point *b);
     bool inside_edge(long long x1, long long x2, long long y);
     void two_way_intersect(intersect_point *, intersect_point *);
@@ -23,7 +25,9 @@ public:
     bool inside_region(point *a, point *b, long long x, long long y);
     bool in_out_cross(point *, point *);
     bool outside_poly(point *, point *);
-    string name;
+    operation &operator+=(operation &); // Merge
+    operation &operator-=(operation &); // Clip
+    // string name;
     vector<point *> root_list; // 存該 operation 下的所有多邊形
     set<point *> out_list;
     vector<point *> out_list_buf; //先存好out焦點 如果沒有要被刪掉才推到out list之中
@@ -42,7 +46,7 @@ void operation::find_intersect()
             // 0是有焦點 1是要刪掉前面的 2是要刪掉後面的
             cout << "Find intersect: " << *root_list[i] << " " << *root_list[j] << endl;
 #endif
-            int state = find_intersect(root_list[i], root_list[j],*this);
+            int state = find_intersect(root_list[i], root_list[j], *this);
             switch (state)
             {
             case 1:
@@ -78,20 +82,22 @@ void operation::insert_intersect()
     }
 }
 
-void operation::find_intersect(operation & total){
-    #ifdef DEBUG
+void operation::find_intersect(operation &total)
+{
+#ifdef DEBUG
     cout << "----------intersect total root list----------" << endl;
 #endif
     cout << root_list.size() << endl;
     cout << total.root_list.size() << endl;
     for (int i = 0; i < root_list.size(); ++i)
+    {
         for (int j = 0; j < total.root_list.size(); ++j)
         {
 #ifdef DEBUG
             // 0是有焦點 1是要刪掉前面的 2是要刪掉後面的
             cout << "Find intersect: " << *root_list[i] << " " << *(total.root_list[j]) << endl;
 #endif
-            int state = find_intersect(root_list[i], total.root_list[j],total);
+            int state = find_intersect(root_list[i], total.root_list[j], total);
             cout << state << endl;
             switch (state)
             {
@@ -109,38 +115,56 @@ void operation::find_intersect(operation & total){
                 break;
             }
         }
+    }
 }
 // find cross point in two POLYGON
 // 找兩個 多邊形 的交點
 // o_b point*b 屬於的operation
-int operation::find_intersect(point *a, point *b , operation& o_b)
+int operation::find_intersect(point *a, point *b, operation &o_b)
 {
     point *p_k = a;
     point *p_l = b;
+    bool cross = false; // 紀錄有沒有交點，如果有交點才做 in out cross
     // 每兩個頂點都做 找交點
     ++glob_color;
     for (int k = 0; k < a->len; k++)
     {
         for (int l = 0; l < b->len; l++)
         {
-            find_cross(p_k, p_l);
+            // find_cross(p_k, p_l);
+            cross = (cross | find_cross(p_k, p_l));
             p_l = p_l->next;
         }
         p_k = p_k->next;
     }
     int return_num = 0;
-    bool has_out;
-    has_out = in_out_cross(a, b);
-    if (!has_out)
+    if (cross) // 有交點
     {
-        return_num += 1;
-        out_list_buf.clear();
+        bool has_out;
+        has_out = in_out_cross(a, b);
+        if (!has_out)
+        {
+            return_num += 1;
+            out_list_buf.clear();
+        }
+        has_out = o_b.in_out_cross(b, a);
+        if (!has_out)
+        {
+            return_num += 2;
+            o_b.out_list_buf.clear();
+        }
     }
-    has_out = in_out_cross(b, a);
-    if (!has_out)
+    else
     {
-        return_num += 2;
-        out_list_buf.clear();
+        if (!outside_poly(a, b)) // a再b裡面，a要刪掉
+            return_num = 1;
+        else
+        {
+            if (!outside_poly(b, a)) // b再a裡面，b要刪掉
+                return_num = 2;
+            else // 兩個是分開的 都不用刪掉
+                return_num = 0;
+        }
     }
     point *p;
     intersect_point *p_t;
@@ -192,14 +216,13 @@ int operation::find_intersect(point *a, point *b , operation& o_b)
         return 2;
         break;
     default:
-        for (unsigned int kk = 0; kk < out_list_buf.size(); ++kk){
+        for (unsigned int kk = 0; kk < out_list_buf.size(); ++kk)
             out_list.insert(out_list_buf[kk]);
-            o_b.out_list.insert(out_list_buf[kk]);
-        
-        }
-    }
-
+        for (unsigned int kk = 0; kk < o_b.out_list_buf.size(); ++kk)
+            o_b.out_list.insert(o_b.out_list_buf[kk]);
         return 0;
+    }
+    // return 0;
 }
 
 // cross 來 merge root
@@ -302,7 +325,7 @@ bool operation::outside_poly(point *root, point *cross)
 }
 
 // given two point a, b ; find cross point between a, a->next ,b ,b->bext
-void operation::find_cross(point *a, point *b)
+bool operation::find_cross(point *a, point *b)
 {
     long long x, y;
     bool verti_a = a->verti;
@@ -323,8 +346,10 @@ void operation::find_cross(point *a, point *b)
         if (inside_region(a, b, x, y))
         {
             new_intersect(a, b, x, y);
+            return true;
         }
     }
+    return false;
 }
 
 // add intersect b after point a
@@ -408,4 +433,68 @@ void operation::new_intersect(point *a, point *b, long long x, long long y)
         two_way_intersect(insert_a, insert_b);
     else
         two_way_intersect(insert_b, insert_a);
+}
+
+void operation::check_list(vector<point *> &new_list)
+{ // 判斷有些多邊形跟其他是分開的，根本不用何在一起，要直接加進去；感覺有點慢?
+    for (unsigned int k = 0; k < root_list.size(); ++k)
+    {
+        point *p = root_list[k];
+        bool isout = true;
+        // cout << p->len << " " << *p << endl;
+        for (unsigned int z = 0; z < root_list[k]->len; ++z)
+        {
+            if (p->pcolor == glob_color)
+            {
+                isout = false;
+                break;
+            }
+            // cout << p->pcolor << *p << endl;
+            p = p->next;
+        }
+        // cout << isout << endl;
+        if (isout)
+        {
+            new_list.push_back(root_list[k]);
+        }
+        else
+        {
+            root_list[k]->delete_poly();
+            delete root_list[k];
+        }
+    }
+    root_list = new_list;
+    // return new_list;
+}
+
+operation &operation::operator+=(operation &oper)
+{
+    operation &total = *this;
+    cout << "Merging" << endl;
+
+    cout << "size is " << total.root_list.size() << endl;
+    if ((total.root_list.size()) != 0)
+    {
+        oper.find_intersect(total);
+        total.insert_intersect();
+        oper.insert_intersect();
+        cout << "OUTLIST size of total" << out_list.size() << endl;
+        cout << "OUTLIST size of oper" << oper.out_list.size() << endl;
+        vector<point *> new_list = little_merge(oper.out_list);
+        oper.check_list(new_list);
+        total.check_list(new_list);
+    }
+    else
+        total.root_list = oper.root_list;
+    // cout << "size is " << total.root_list.size() << endl;
+
+    // vector<point *> new_list;
+    // int cnt = 0;
+    // ++glob_color;
+}
+
+operation &operation::operator-=(operation &clip)
+{
+    operation &root = *this;
+    cout << "Clippingg" << endl;
 }
