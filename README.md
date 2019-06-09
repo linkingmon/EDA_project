@@ -1,4 +1,5 @@
 # EDA_project
+- (6/10) 自己跟自己形成hole沒有寫到 [5]
 - (6/10) 完成大Merge
 - (6/10) 修正 [4]
 - (6/9) Delete intersect不完全 [4]
