@@ -472,23 +472,24 @@ void operation::check_list(vector<point *> &new_list)
 
 operation &operation::operator+=(operation &oper)
 {
-    operation &total = *this;
     cout << "Merging " << oper.name << endl;
 
-    cout << "size is " << total.root_list.size() << endl;
-    if ((total.root_list.size()) != 0)
+    cout << "size is " << root_list.size() << endl;
+    cout << "size is " << oper.root_list.size() << endl;
+    if ((root_list.size()) != 0)
     {
-        oper.find_intersect(total);
-        total.insert_intersect();
+        oper.find_intersect(*this);
+        insert_intersect();
         oper.insert_intersect();
-        cout << "OUTLIST size of total" << out_list.size() << endl;
-        cout << "OUTLIST size of oper" << oper.out_list.size() << endl;
-        vector<point *> new_list = little_merge(oper.out_list);
+        cout << "OUTLIST size of total " << out_list.size() << endl;
+        cout << "OUTLIST size of oper " << oper.out_list.size() << endl;
+        vector<point *> new_list = ::little_merge(oper.out_list);
+        cout << "MERGE DONE" << endl;
         oper.check_list(new_list);
-        total.check_list(new_list);
+        check_list(new_list);
     }
     else
-        total.root_list = oper.root_list;
+        root_list = oper.root_list;
     // cout << "size is " << total.root_list.size() << endl;
 
     // vector<point *> new_list;
