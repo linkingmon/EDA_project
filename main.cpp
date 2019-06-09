@@ -29,7 +29,7 @@ int main()
     // string filename = "sample_in.txt";
     fstream fin(filename.c_str(), fstream::in);
     vector<point *> total_root_list ; // store current overall polygon list
-    operation total("TOTAL");
+    operation total("TOTAL"); // store total polygon list
     total.root_list = total_root_list;
     // read operation
     vector<string> operations;       // store opertaion strings
@@ -131,9 +131,19 @@ int main()
                 oper.find_intersect(total);
                 total.insert_intersect();
                 oper.insert_intersect();
-                new_list = little_merge(oper.out_list);
+#ifdef DEBUG
+                cout << "----------operation----------" << endl;
+                cout << "There are " << oper.out_list.size() << " out intersects" << endl;
+                set<point *>::iterator iter;
+                for (iter = oper.out_list.begin(); iter != oper.out_list.end(); ++iter)
+                    cout << **iter << endl;
+                cout << "----memory leak checking-----" << endl;
+                cout << "Total points: " << point_cnt << " & intersects: " << intersect_cnt << endl;
+#endif
+                new_list = little_merge(total.out_list);
                 check_list(oper, new_list);
                 check_list(total, new_list);
+                total.root_list = new_list;
             }
         }
         else{
@@ -236,9 +246,9 @@ int main()
 #ifdef DEBUG
         cout << "----memory leak checking-----" << endl;
         cout << "Total points: " << point_cnt << " & intersects: " << intersect_cnt << endl;
-        cout << "Total polygons after merging in operation: " << oper.root_list.size() << endl;
+        cout << "Total polygons after merging in operation: " << total.root_list.size() << endl;
         char c = i + 49;
-        output_result(oper.root_list, string("result/Merge") + c + ".txt");
+        output_result(total.root_list, string("result/Merge") + c + ".txt");
 #endif
     }
 }

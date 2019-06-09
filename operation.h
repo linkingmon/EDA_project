@@ -15,7 +15,7 @@ public:
     void find_intersect(operation &);
     void insert_intersect();
     int find_intersect(point *a, point *b,operation &);
-    void find_cross(point *, point *);
+    bool find_cross(point *, point *);
     void add_intersect(point *a, point *b);
     bool inside_edge(long long x1, long long x2, long long y);
     void two_way_intersect(intersect_point *, intersect_point *);
@@ -117,13 +117,14 @@ int operation::find_intersect(point *a, point *b , operation& o_b)
 {
     point *p_k = a;
     point *p_l = b;
+    bool cross = false;
     // 每兩個頂點都做 找交點
     ++glob_color;
     for (int k = 0; k < a->len; k++)
     {
         for (int l = 0; l < b->len; l++)
         {
-            find_cross(p_k, p_l);
+            cross = (cross || find_cross(p_k, p_l) ) ;
             p_l = p_l->next;
         }
         p_k = p_k->next;
@@ -144,6 +145,13 @@ int operation::find_intersect(point *a, point *b , operation& o_b)
     }
     point *p;
     intersect_point *p_t;
+    if(cross){
+        for (unsigned int kk = 0; kk < out_list_buf.size(); ++kk){
+            out_list.insert(out_list_buf[kk]);
+            o_b.out_list.insert(out_list_buf[kk]);
+        }
+        return 0;
+    }
     switch (return_num)
     {
     case 1:
@@ -302,7 +310,7 @@ bool operation::outside_poly(point *root, point *cross)
 }
 
 // given two point a, b ; find cross point between a, a->next ,b ,b->bext
-void operation::find_cross(point *a, point *b)
+bool operation::find_cross(point *a, point *b)
 {
     long long x, y;
     bool verti_a = a->verti;
@@ -323,8 +331,10 @@ void operation::find_cross(point *a, point *b)
         if (inside_region(a, b, x, y))
         {
             new_intersect(a, b, x, y);
+            return false;
         }
     }
+    return false;
 }
 
 // add intersect b after point a
