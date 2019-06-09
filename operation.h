@@ -171,7 +171,7 @@ int operation::find_intersect(point *a, point *b, operation &o_b)
     //     }
     // }
     // cout << "CROSS" << cross << endl;
-    // cout << "RET: " << return_num << endl;
+    cout << "RET: " << return_num << endl;
     point *p;
     intersect_point *p_t;
     switch (return_num)
@@ -191,6 +191,7 @@ int operation::find_intersect(point *a, point *b, operation &o_b)
                 if (p_t->color == glob_color)
                 {
                     p->intersection.erase(p->intersection.begin() + j);
+                    delete p_t;
                     --j;
                 }
             }
@@ -214,6 +215,7 @@ int operation::find_intersect(point *a, point *b, operation &o_b)
                 if (p_t->color == glob_color)
                 {
                     p->intersection.erase(p->intersection.begin() + j);
+                    delete p_t;
                     --j;
                 }
             }
@@ -488,10 +490,14 @@ operation &operation::operator+=(operation &oper)
     if ((root_list.size()) != 0)
     {
         oper.find_intersect(*this);
-        // cout << root_list[0]->len << "LL" << endl;
+        cout << "sssize is " << root_list.size() << endl;
+        cout << "sssize is " << oper.root_list.size() << endl;
+        cout << root_list[0]->len << "LL" << endl;
+        cout << oper.root_list[0]->len << "LL" << endl;
         insert_intersect();
         oper.insert_intersect();
-        // cout << root_list[0]->len << "LL" << endl;
+        cout << root_list[0]->len << "LL" << endl;
+        cout << oper.root_list[0]->len << "LL" << endl;
 #ifdef DEBUG
         cout << "POLY 1: " << endl;
         root_list[0]->print_poly();

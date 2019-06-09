@@ -82,11 +82,11 @@ point::~point()
     // 所以不用清了
 
     // cout << "delete vertex" << *this << endl;
-    for (unsigned int j = 0; j < intersection.size(); ++j)
-    {
-        delete intersection[j];
-    }
-    intersection.clear();
+    // for (unsigned int j = intersection.size() - 1; j >= 0; --j)
+    // {
+    //     delete intersection[j];
+    // }
+    // intersection.clear();
 }
 // bool operator < (point* a,point* b)
 
@@ -239,6 +239,10 @@ void point::delete_poly()
     {
         p = p->next;
         // cout << "DELoo " << *(p->prev) << endl;
+        // cout << "KKKKK" << p->prev->intersection.size() << endl;
+        for (unsigned int j = 0; j < p->prev->intersection.size(); ++j)
+            delete p->prev->intersection[j];
+        p->prev->intersection.clear();
         delete p->prev;
     }
 }
