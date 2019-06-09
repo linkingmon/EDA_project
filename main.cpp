@@ -144,9 +144,13 @@ int main()
         {
             operation &oper = mapping[operations[i]];
             total += oper;
-            cout << "There are " << total.root_list.size() << " polygons after merging" << endl;
+            cout << "There are " << total.root_list.size() << " polygons after operator " << operations[i] << endl
+                 << endl;
             for (unsigned int jjj = 0; jjj < total.root_list.size(); ++jjj)
+            {
+                cout << "POLYGON" << jjj << endl;
                 total.root_list[jjj]->print_poly();
+            }
 #ifdef DEBUG
             cout << "----memory leak checking-----" << endl;
             cout << "Total points: " << point_cnt << " & intersects: " << intersect_cnt << endl;

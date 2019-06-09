@@ -267,7 +267,7 @@ intersect_point::intersect_point(long long xt, long long yt, int colort) : point
 {
     point_cnt -= 1;
     intersect_cnt += 1;
-    cout << "construct intersect" << *this << endl;
+    // cout << "construct intersect" << *this << endl;
 }
 
 intersect_point::~intersect_point()

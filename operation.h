@@ -171,7 +171,7 @@ int operation::find_intersect(point *a, point *b, operation &o_b)
     //     }
     // }
     // cout << "CROSS" << cross << endl;
-    cout << "RET: " << return_num << endl;
+    // cout << "RET: " << return_num << endl;
     point *p;
     intersect_point *p_t;
     switch (return_num)
@@ -446,7 +446,7 @@ void operation::new_intersect(point *a, point *b, long long x, long long y)
 
 void operation::check_list(vector<point *> &new_list)
 { // 判斷有些多邊形跟其他是分開的，根本不用何在一起，要直接加進去；感覺有點慢?
-    cout << "YYY" << new_list.size() << " " << root_list.size() << endl;
+    // cout << "YYY" << new_list.size() << " " << root_list.size() << endl;
     for (unsigned int k = 0; k < root_list.size(); ++k)
     {
         point *p = root_list[k];
@@ -483,21 +483,21 @@ operation &operation::operator+=(operation &oper)
     cout << "Merging " << oper.name << endl;
 #endif
 
-    cout << "size is " << root_list.size() << endl;
-    cout << "size is " << oper.root_list.size() << endl;
+    // cout << "size is " << root_list.size() << endl;
+    // cout << "size is " << oper.root_list.size() << endl;
     // cout << "size is " << out_list.size() << endl;
     // cout << "size is " << oper.out_list.size() << endl;
     if ((root_list.size()) != 0)
     {
         oper.find_intersect(*this);
-        cout << "sssize is " << root_list.size() << endl;
-        cout << "sssize is " << oper.root_list.size() << endl;
-        cout << root_list[0]->len << "LL" << endl;
-        cout << oper.root_list[0]->len << "LL" << endl;
+        // cout << "sssize is " << root_list.size() << endl;
+        // cout << "sssize is " << oper.root_list.size() << endl;
+        // cout << root_list[0]->len << "LL" << endl;
+        // cout << oper.root_list[0]->len << "LL" << endl;/
         insert_intersect();
         oper.insert_intersect();
-        cout << root_list[0]->len << "LL" << endl;
-        cout << oper.root_list[0]->len << "LL" << endl;
+        // cout << root_list[0]->len << "LL" << endl;
+        // cout << oper.root_list[0]->len << "LL" << endl;
 #ifdef DEBUG
         cout << "POLY 1: " << endl;
         root_list[0]->print_poly();
@@ -507,15 +507,15 @@ operation &operation::operator+=(operation &oper)
         cout << "OUTLIST size of oper " << oper.out_list.size() << endl;
 #endif
         oper.out_list.insert(out_list.begin(), out_list.end()); // 兩個的out道在一起
-        cout << "Total pointsdd: " << point_cnt << " & intersects: " << intersect_cnt << endl;
+        // cout << "Total pointsdd: " << point_cnt << " & intersects: " << intersect_cnt << endl;
         vector<point *> new_list = ::little_merge(oper.out_list);
-        cout << "Total pointscc: " << point_cnt << " & intersects: " << intersect_cnt << endl;
+        // cout << "Total pointscc: " << point_cnt << " & intersects: " << intersect_cnt << endl;
         out_list.clear();
         out_list_buf.clear();
         oper.out_list.clear();
         oper.out_list_buf.clear();
         oper.check_list(new_list);
-        cout << root_list[0]->len << "LL" << endl;
+        // cout << root_list[0]->len << "LL" << endl;
         check_list(new_list);
         root_list = new_list;
     }
