@@ -20,6 +20,7 @@ int main()
     // can choose file: sample_in.txt / OpenCase_1.txt / OpenCase_2.txt
     // string filename = "sample_in.txt";
     string filename = "test_merge.txt";
+    // string filename = "poly_with_hole.txt";
     // string filename = "sample_in.txt";
     fstream fin(filename.c_str(), fstream::in);
     vector<string> operations;      // store opertaion strings 按照順序存操作的次序
@@ -167,6 +168,7 @@ int main()
         else
         {
             cout << "Splitting" << endl;
+            output_result(total.root_list, string("result/Merge_all.txt"));
             // if(operations[i][1] == 'V')
             // else if(operations[i][1] == 'H')
             // else
