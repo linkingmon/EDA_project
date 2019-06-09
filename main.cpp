@@ -156,8 +156,10 @@ int main()
             cout << "Total points: " << point_cnt << " & intersects: " << intersect_cnt << endl;
             cout << "-----------------------------" << endl;
 #endif
+            char c = i + 49;
+            output_result(total.root_list, string("result/Total") + c + ".txt");
         }
-        else if (operations[i][0] == 'M')
+        else if (operations[i][0] == 'C')
         {
             operation &oper = mapping[operations[i]];
             total -= oper;
