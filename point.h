@@ -22,6 +22,14 @@ public:
     void sort_intersection();
     void sort_asc();
     void sort_dsc();
+    void print_poly()
+    {
+        point *p = this;
+        for (unsigned int i = 0; i < len; ++i)
+            cout << *p << " ";
+        p = p->next;
+        cout << endl;
+    }
     void delete_poly();
     friend ostream &operator<<(ostream &os, const point &p);
     virtual void print() { cout << *this << endl; };

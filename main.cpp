@@ -34,7 +34,7 @@ int main()
         operations.push_back(s);
         if (s != "SV" && s != "SH" && s != "SO")
         {
-            operation oper;
+            operation oper(s);
             mapping.insert(make_pair(s, oper));
         }
     }

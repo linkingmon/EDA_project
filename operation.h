@@ -10,7 +10,7 @@ private:
 protected:
 public:
     operation(){};
-    // operation(string s) : name(s){};
+    operation(string s) : name(s){};
     ~operation(){};
     void find_intersect();
     void find_intersect(operation &);
@@ -27,7 +27,7 @@ public:
     bool outside_poly(point *, point *);
     operation &operator+=(operation &); // Merge
     operation &operator-=(operation &); // Clip
-    // string name;
+    string name;
     vector<point *> root_list; // 存該 operation 下的所有多邊形
     set<point *> out_list;
     vector<point *> out_list_buf; //先存好out焦點 如果沒有要被刪掉才推到out list之中
@@ -138,34 +138,36 @@ int operation::find_intersect(point *a, point *b, operation &o_b)
         p_k = p_k->next;
     }
     int return_num = 0;
-    if (cross) // 有交點
+    // if (cross) // 有交點
+    // {
+    bool has_out;
+    has_out = in_out_cross(a, b);
+    if (!has_out)
     {
-        bool has_out;
-        has_out = in_out_cross(a, b);
-        if (!has_out)
-        {
-            return_num += 1;
-            out_list_buf.clear();
-        }
-        has_out = o_b.in_out_cross(b, a);
-        if (!has_out)
-        {
-            return_num += 2;
-            o_b.out_list_buf.clear();
-        }
+        return_num += 1;
+        out_list_buf.clear();
     }
-    else
+    has_out = o_b.in_out_cross(b, a);
+    if (!has_out)
     {
-        if (!outside_poly(a, b)) // a再b裡面，a要刪掉
-            return_num = 1;
-        else
-        {
-            if (!outside_poly(b, a)) // b再a裡面，b要刪掉
-                return_num = 2;
-            else // 兩個是分開的 都不用刪掉
-                return_num = 0;
-        }
+        return_num += 2;
+        o_b.out_list_buf.clear();
     }
+    // }
+    // else
+    // {
+    //     if (!outside_poly(a, b)) // a再b裡面，a要刪掉
+    //         return_num = 1;
+    //     else
+    //     {
+    //         if (!outside_poly(b, a)) // b再a裡面，b要刪掉
+    //             return_num = 2;
+    //         else // 兩個是分開的 都不用刪掉
+    //             return_num = 0;
+    //     }
+    // }
+    cout << "CROSS" << cross << endl;
+    cout << "RET: " << return_num << endl;
     point *p;
     intersect_point *p_t;
     switch (return_num)
@@ -218,8 +220,9 @@ int operation::find_intersect(point *a, point *b, operation &o_b)
     default:
         for (unsigned int kk = 0; kk < out_list_buf.size(); ++kk)
             out_list.insert(out_list_buf[kk]);
-        for (unsigned int kk = 0; kk < o_b.out_list_buf.size(); ++kk)
-            o_b.out_list.insert(o_b.out_list_buf[kk]);
+        if (this != &o_b)
+            for (unsigned int kk = 0; kk < o_b.out_list_buf.size(); ++kk)
+                o_b.out_list.insert(o_b.out_list_buf[kk]);
         return 0;
     }
     // return 0;
@@ -470,7 +473,7 @@ void operation::check_list(vector<point *> &new_list)
 operation &operation::operator+=(operation &oper)
 {
     operation &total = *this;
-    cout << "Merging" << endl;
+    cout << "Merging " << oper.name << endl;
 
     cout << "size is " << total.root_list.size() << endl;
     if ((total.root_list.size()) != 0)
