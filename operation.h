@@ -98,7 +98,7 @@ void operation::find_intersect(operation &total)
             cout << "Find intersect: " << *root_list[i] << " " << *(total.root_list[j]) << endl;
 #endif
             int state = find_intersect(root_list[i], total.root_list[j], total);
-            cout << state << endl;
+            cout << "X" << state << endl;
             switch (state)
             {
             case 1:
@@ -220,6 +220,7 @@ int operation::find_intersect(point *a, point *b, operation &o_b)
             out_list.insert(out_list_buf[kk]);
         for (unsigned int kk = 0; kk < o_b.out_list_buf.size(); ++kk)
             o_b.out_list.insert(o_b.out_list_buf[kk]);
+        return 0;
     }
     // return 0;
 }
