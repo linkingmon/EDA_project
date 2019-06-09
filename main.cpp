@@ -104,21 +104,34 @@ int main()
 #ifdef DEBUG
         cout << "----memory leak checking-----" << endl;
         cout << "Total points: " << point_cnt << " & intersects: " << intersect_cnt << endl;
+        cout << "-----------------------------" << endl;
 #endif
         // 小的 merge(每個operation裡面自己merge)
         vector<point *> new_list = little_merge(oper.out_list);
         oper.check_list(new_list);
+        oper.root_list = new_list;
         // new_list = little_merge(oper.out_list);
         // check_list(oper, new_list);
 #ifdef DEBUG
+        cout << "There are " << oper.root_list.size() << " polygons after little merging" << endl;
+        for (unsigned int jjj = 0; jjj < oper.root_list.size(); ++jjj)
+            oper.root_list[jjj]->print_poly();
         cout << "----memory leak checking-----" << endl;
         cout << "Total points: " << point_cnt << " & intersects: " << intersect_cnt << endl;
+        cout << "-----------------------------" << endl;
         cout << "Total polygons after merging in operation: " << oper.root_list.size() << endl;
         char c = i + 49;
         output_result(oper.root_list, string("result/Merge") + c + ".txt");
 #endif
     }
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#ifdef DEBUG
+    cout << "==========================================================" << endl;
+    cout << "==========================================================" << endl;
+    cout << "===================Merge / Clip / Split===================" << endl;
+    cout << "==========================================================" << endl;
+    cout << "==========================================================" << endl;
+#endif
     // 這邊開始做 Merge Clip Split
     // operation都存在Mapping裡面
     // vector<point *> total_root_list; // store current overall polygon list
@@ -126,11 +139,19 @@ int main()
     // total.root_list = total_root_list;
     for (unsigned int i = 0; i < operations.size(); ++i)
     {
-        cout << "Starting operation " << operations[i] << endl;
+        // cout << "Starting operation " << operations[i] << endl;
         if (operations[i][0] == 'M')
         {
             operation &oper = mapping[operations[i]];
             total += oper;
+            cout << "There are " << total.root_list.size() << " polygons after merging" << endl;
+            for (unsigned int jjj = 0; jjj < total.root_list.size(); ++jjj)
+                total.root_list[jjj]->print_poly();
+#ifdef DEBUG
+            cout << "----memory leak checking-----" << endl;
+            cout << "Total points: " << point_cnt << " & intersects: " << intersect_cnt << endl;
+            cout << "-----------------------------" << endl;
+#endif
         }
         else if (operations[i][0] == 'M')
         {

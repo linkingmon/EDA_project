@@ -1,5 +1,5 @@
 #include "point.h"
-
+// #define DEBUG
 static int glob_color = 0;
 void list_construct(point *);
 point *construct_new_poly(vector<point *> &);
@@ -69,18 +69,56 @@ point *construct_new_poly(vector<point *> &point_stream)
     //     {
     //         p_next = point_stream[i];
     //     }
-    point *root = new point(*(point_stream[0]));
-    point *p_prev = root;
-    for (unsigned int i = 1; i < point_stream.size(); ++i)
+    // for (unsigned int i = 0; i < point_stream.size(); ++i)
+    // cout << "STREAM: " << *point_stream[i] << endl;
+    vector<int> vec;
+    vec.reserve(point_stream.size()); // 0 水平 1 垂直 2 同一個點
+    point_stream.push_back(point_stream[0]);
+
+    for (unsigned int i = 0; i < point_stream.size() - 1; ++i)
     {
-        point *p = new point(*(point_stream[i]));
+        // cout << *point_stream[i];
+        if (point_stream[i]->x == point_stream[i + 1]->x)
+        {
+            if (point_stream[i]->y == point_stream[i + 1]->y)
+                vec[i] = 2;
+            else
+                vec[i] = 1;
+        }
+        else
+            vec[i] = 0;
+        // cout << " " << vec[i] << endl;
+    }
+    vector<point *> point_stream_simple;
+    int cnt = 0;
+    while (vec[cnt] == 2)
+        ++cnt;
+    int dir = vec[cnt];
+    point_stream_simple.push_back(point_stream[cnt]);
+    for (unsigned int i = cnt + 1; i < point_stream.size() - 1; ++i)
+    {
+        if (vec[i] == 2)
+            continue;
+        if (vec[i] != dir)
+        {
+            // cout << "PUSH " << *(point_stream[i]) << endl;
+            point_stream_simple.push_back(point_stream[i]);
+            dir = vec[i];
+        }
+    }
+
+    point *root = new point(*(point_stream_simple[0]));
+    point *p_prev = root;
+    for (unsigned int i = 1; i < point_stream_simple.size(); ++i)
+    {
+        point *p = new point(*(point_stream_simple[i]));
         p_prev->next = p;
         p->prev = p_prev;
         p_prev = p;
     }
     p_prev->next = root;
     root->prev = p_prev;
-    root->len = point_stream.size();
+    root->len = point_stream_simple.size();
     // 壓縮一下直接走到s_next
     list_construct(root);
     return root;
@@ -88,11 +126,17 @@ point *construct_new_poly(vector<point *> &point_stream)
 
 vector<point *> little_merge(set<point *> &out_list)
 {
+    set<point *>::iterator iter;
+    // cout << "OUT LIST size " << out_list.size() << endl;
+    // for (iter = out_list.begin(); iter != out_list.end(); ++iter)
+    // {
+    //     cout << **iter;
+    // }
     vector<point *> new_list;
     int cnt = 0;
     ++glob_color;
 #ifdef DEBUG
-    cout << "-----------merging-----------" << endl;
+// cout << "-----------merging-----------" << endl;
 #endif
     while (out_list.size() > 0)
     {

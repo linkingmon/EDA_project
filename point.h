@@ -27,7 +27,7 @@ public:
         point *p = this;
         for (unsigned int i = 0; i < len; ++i)
         {
-            cout << *p << " ";
+            p->print();
             p = p->next;
         }
         cout << endl;
@@ -82,11 +82,11 @@ point::~point()
     // 所以不用清了
 
     // cout << "delete vertex" << *this << endl;
-    // for (unsigned int j = 0; j < intersection.size(); ++j)
-    // {
-    //     delete intersection[j];
-    // }
-    // intersection.clear();
+    for (unsigned int j = 0; j < intersection.size(); ++j)
+    {
+        delete intersection[j];
+    }
+    intersection.clear();
 }
 // bool operator < (point* a,point* b)
 
@@ -261,7 +261,7 @@ intersect_point::intersect_point(long long xt, long long yt, int colort) : point
 {
     point_cnt -= 1;
     intersect_cnt += 1;
-    // cout << "construct intersect" << *this << endl;
+    cout << "construct intersect" << *this << endl;
 }
 
 intersect_point::~intersect_point()
