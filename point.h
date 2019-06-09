@@ -245,6 +245,8 @@ void point::delete_poly()
         p->prev->intersection.clear();
         delete p->prev;
     }
+    for (unsigned int j = 0; j < this->intersection.size(); ++j)
+        delete this->intersection[j];
 }
 
 class intersect_point : public point
