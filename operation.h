@@ -481,6 +481,10 @@ operation &operation::operator+=(operation &oper)
         oper.find_intersect(*this);
         insert_intersect();
         oper.insert_intersect();
+        cout << "POLY 1: " << endl;
+        root_list[0]->print_poly();
+        cout << "POLY 2: " << endl;
+        oper.root_list[0]->print_poly();
         cout << "OUTLIST size of total " << out_list.size() << endl;
         cout << "OUTLIST size of oper " << oper.out_list.size() << endl;
         vector<point *> new_list = ::little_merge(oper.out_list);

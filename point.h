@@ -26,8 +26,10 @@ public:
     {
         point *p = this;
         for (unsigned int i = 0; i < len; ++i)
+        {
             cout << *p << " ";
-        p = p->next;
+            p = p->next;
+        }
         cout << endl;
     }
     void delete_poly();
