@@ -47,11 +47,12 @@ public:
     point *s_next;
     int len; // ROOT 專用
     long long minx, miny, maxx, maxy;
-    int pcolor;
+    int pcolor; 
     // point* straright_next;
     short angle;
     bool verti;
     bool dir;
+    bool mark; // 標示有沒有走過
     // point &bool operator<(point &b);
 };
 
