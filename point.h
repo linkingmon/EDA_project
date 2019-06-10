@@ -238,7 +238,7 @@ void point::delete_poly()
 void point::delete_poly_tranf(set<point *> &out_list)
 {
     point *p = this->next;
-    cout << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHH" << endl;
+    // cout << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHH" << endl;
     // cout << "POLY" << *p << "LEN" << len << endl;
     for (unsigned int i = 0; i < len - 1; ++i)
     {

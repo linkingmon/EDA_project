@@ -16,12 +16,14 @@ void output_result(const vector<point *> &, string);
 
 int main()
 {
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
     string ang = "\\/X";
     // can choose file: sample_in.txt / OpenCase_1.txt / OpenCase_2.txt
     // string filename = "sample_in.txt";
     // string filename = "test_merge.txt";
-    string filename = "bug1.txt";
-    // string filename = "OpenCase_1.txt";
+    // string filename = "bug1.txt";
+    string filename = "OpenCase_1.txt";
     // string filename = "poly_with_hole.txt";
     // string filename = "sample_in.txt";
     fstream fin(filename.c_str(), fstream::in);
@@ -98,7 +100,7 @@ int main()
             }
         }
 #endif
-// Merge per operation
+        // Merge per operation
 #ifdef DEBUG
         cout << "----------operation----------" << endl;
         cout << "There are " << oper.out_list.size() << " out intersects" << endl;
@@ -117,7 +119,7 @@ int main()
         oper.root_list = new_list;
         // new_list = little_merge(oper.out_list);
         // check_list(oper, new_list);
-#ifdef DEBUG
+        // #ifdef DEBUG
         cout << "There are " << oper.root_list.size() << " polygons after little merging" << endl;
         for (unsigned int jjj = 0; jjj < oper.root_list.size(); ++jjj)
         {
@@ -134,7 +136,7 @@ int main()
         cout << "Total polygons after merging in operation: " << oper.root_list.size() << endl;
         char c = i + 49;
         output_result(oper.root_list, string("result/Merge") + c + ".txt");
-#endif
+        // #endif
     }
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef DEBUG

@@ -93,7 +93,7 @@ void list_construct(point *&root)
     point *p = root;
     for (unsigned int i = 0; i < root->len; ++i)
     {
-        p->print();
+        // p->print();
         p = p->next;
     }
     // cout << minx << " " << miny << " " << maxx << " " << maxy << endl;

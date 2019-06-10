@@ -1,7 +1,7 @@
 // #include "point.h"
 #include "glob_func.h"
 #include <set>
-#define DEBUG
+// #define DEBUG
 using namespace std;
 
 class operation
@@ -50,12 +50,16 @@ void operation::find_intersect()
             switch (state)
             {
             case 1:
-                root_list.erase(root_list.begin() + i);
+                root_list[i] = root_list[root_list.size() - 1];
+                root_list.pop_back();
+                // root_list.erase(root_list.begin() + i);
                 --i;
                 continue;
                 break;
             case 2:
-                root_list.erase(root_list.begin() + j);
+                root_list[j] = root_list[root_list.size() - 1];
+                root_list.pop_back();
+                // root_list.erase(root_list.begin() + j);
                 --j;
                 continue;
                 break;
@@ -132,7 +136,7 @@ int operation::find_intersect(point *a, point *b, operation &o_b)
     {
         // cout << a->minx << " " << a->miny << " " << a->maxx << " " << a->maxy << endl;
         // cout << b->minx << " " << b->miny << " " << b->maxx << " " << b->maxy << endl;
-        cout << "No Intersect" << endl;
+        // cout << "No Intersect" << endl;
         return 0;
     }
     out_list_buf.clear();
