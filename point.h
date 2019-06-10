@@ -45,7 +45,8 @@ public:
     point *next;
     point *prev;
     point *s_next;
-    int len;
+    int len; // ROOT 專用
+    long long minx, miny, maxx, maxy;
     int pcolor;
     // point* straright_next;
     short angle;
