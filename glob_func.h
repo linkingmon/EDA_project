@@ -80,6 +80,7 @@ void list_construct(point *&root)
         root->next->miny = miny;
         root->next->maxx = maxx;
         root->next->maxy = maxy;
+        // root->next->pcolor = root->pcolor;
         p->len = root->len - 1;
         delete root;
         root = p;
@@ -208,7 +209,9 @@ vector<point *> little_merge(set<point *> &out_list)
         while (p->pcolor != glob_color)
         {
             if(p->mark == true){
-                // cout << "break " << *p << " "<<p->pcolor<< endl;
+                #ifdef DEBUG
+                cout << "break " << *p << " "<<p->pcolor<< endl;
+                #endif
                 goto next_merge;
             }
             ++cnt;
@@ -250,7 +253,7 @@ vector<point *> little_merge(set<point *> &out_list)
 
             p->pcolor = glob_color;
 #ifdef DEBUG
-            cout << "WALK " << *p << " " << p->pcolor<<endl;
+            cout << "WALK " << *p << " " << p->pcolor << *(p->next) << " "<< p->next->pcolor<<endl;
 #endif            
             poly.push_back(p);
             p = p->next;

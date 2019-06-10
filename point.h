@@ -42,17 +42,17 @@ public:
 
     vector<point *> intersection;
     long long x, y;
-    point *next;
-    point *prev;
-    point *s_next;
+    point *next; // 後一個點
+    point *prev; // 前一個點
+    point *s_next; // 筆直走 走得最遠的點
     int len; // ROOT 專用
-    long long minx, miny, maxx, maxy;
-    int pcolor; 
+    long long minx, miny, maxx, maxy;//多邊形的邊界 
+    int pcolor; //merge時 做DFS用的
     // point* straright_next;
-    short angle;
-    bool verti;
-    bool dir;
-    bool mark; // 標示有沒有走過
+    short angle; //角度
+    bool verti; //垂直
+    bool dir;   //往正的地方走(上、右)
+    bool mark; // 標示有沒有走過(merge)
     // point &bool operator<(point &b);
 };
 
@@ -65,9 +65,9 @@ public:
     bool ispoint() { return false; };
     void print();
     intersect_point *cross_point;
-    int color;
-    bool in;
-    bool tran;
+    int color; // 標示交點屬於哪個多邊形
+    bool in; // 標示進入對面的多邊形否
+    bool tran; // 可以轉到對面的交點上
 };
 
 ostream &operator<<(ostream &os, const point &p)
@@ -317,5 +317,5 @@ intersect_point::~intersect_point()
 
 void intersect_point::print()
 {
-    cout << "II " << *this << (in ? "  in" : " out") << endl;
+    cout << "II " << *this << (in ? "  in " : " out ") << (tran ? " tran " : " unable") <<endl;
 }
