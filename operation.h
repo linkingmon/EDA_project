@@ -494,7 +494,7 @@ void operation::check_list(vector<point *> &new_list)
         // cout << p->len << " " << *p << endl;
         for (unsigned int z = 0; z < root_list[k]->len; ++z)
         {
-            if (p->mark == true)
+            if (p->pcolor == glob_color)
             {
                 isout = false;
                 break;

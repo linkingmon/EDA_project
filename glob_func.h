@@ -65,7 +65,6 @@ void list_construct(point *&root)
             maxx = temp->x;
         if (temp->y > maxy)
             maxy = temp->y;
-        temp->mark = false;
         temp = temp->next;
     }
     if (root->verti == root->prev->verti)
@@ -201,17 +200,13 @@ vector<point *> little_merge(set<point *> &out_list)
 #endif
         new_poly->pcolor = glob_color;
         poly.push_back(new_poly);
-        while (p->pcolor != glob_color)
+        while (p != new_poly)
         {
-            if(p->mark == true){
-                goto next_merge;
-            }
             ++cnt;
 #ifdef DEBUG
             cout << "WALK " << *p << endl;
 #endif
             p->pcolor = glob_color;
-            p->mark = true;
             poly.push_back(p);
             if (!p->ispoint())
             {
@@ -229,7 +224,6 @@ vector<point *> little_merge(set<point *> &out_list)
                 cout << "cross " << *p << endl;
 #endif
                 p->pcolor = glob_color;
-                p->mark = true;
                 poly.push_back(p);
                 if (p == new_poly)
                 {
@@ -251,8 +245,6 @@ vector<point *> little_merge(set<point *> &out_list)
         // 用新走出的形狀做出多邊形
         // 需要初始化更種參數：包刮：x, y next, prev, s_next, len, angle, verti, dir
         new_list.push_back(construct_new_poly(poly));
-        next_merge:
-            ++glob_color;
     }
     return new_list;
 }
