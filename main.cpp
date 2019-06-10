@@ -19,7 +19,8 @@ int main()
     string ang = "\\/X";
     // can choose file: sample_in.txt / OpenCase_1.txt / OpenCase_2.txt
     // string filename = "sample_in.txt";
-    string filename = "test_merge.txt";
+    // string filename = "test_merge.txt";
+    string filename = "bug1.txt";
     // string filename = "poly_with_hole.txt";
     // string filename = "sample_in.txt";
     fstream fin(filename.c_str(), fstream::in);
@@ -108,7 +109,7 @@ int main()
         cout << "-----------------------------" << endl;
 #endif
         // 小的 merge(每個operation裡面自己merge)
-        vector<point *> new_list = little_merge(oper.out_list);
+        vector<point *> new_list = ::little_merge(oper.out_list);
         oper.check_list(new_list);
         oper.root_list = new_list;
         // new_list = little_merge(oper.out_list);

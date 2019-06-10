@@ -3,6 +3,7 @@
 1. 吃 test_merge.txt 再跑 draw.py 可以在 result 資料夾看到結果
 2. 吃 poly_with_hole.txt 再跑 drawM.py 可以在 result2 資料夾看到有hole的多邊形(可以做Split)
 ## 進度
+- (6/10) 修正 [3]，還有把原先插到 out_list 的點刪掉
 - (6/10) 兩個L形成一個洞，然後一個大矩形蓋住有BUG [6]
 - (6/10) 自己跟自己形成hole沒有寫到 [5]
 - (6/10) 完成大Merge

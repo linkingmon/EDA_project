@@ -7,6 +7,7 @@ using namespace std;
 static int point_cnt = 0;
 static int intersect_cnt = 0;
 
+class interesect_point;
 class point
 {
 private:
@@ -33,6 +34,8 @@ public:
         cout << endl;
     }
     void delete_poly();
+    void delete_poly_tranf(set<point *> &);
+    void delete_poly_tranf(set<point *> &, set<point *> &);
     friend ostream &operator<<(ostream &os, const point &p);
     virtual void print() { cout << *this << endl; };
     virtual bool ispoint() { return true; };
@@ -49,6 +52,20 @@ public:
     bool verti;
     bool dir;
     // point &bool operator<(point &b);
+};
+
+class intersect_point : public point
+{
+private:
+public:
+    intersect_point(long long, long long, int);
+    ~intersect_point();
+    bool ispoint() { return false; };
+    void print();
+    intersect_point *cross_point;
+    int color;
+    bool in;
+    bool tran;
 };
 
 ostream &operator<<(ostream &os, const point &p)
@@ -249,25 +266,74 @@ void point::delete_poly()
         delete this->intersection[j];
 }
 
-class intersect_point : public point
+void point::delete_poly_tranf(set<point *> &out_list)
 {
-private:
-public:
-    intersect_point(long long, long long, int);
-    ~intersect_point();
-    bool ispoint() { return false; };
-    void print();
-    intersect_point *cross_point;
-    int color;
-    bool in;
-    bool tran;
-};
+    point *p = this->next;
+    // cout << "POLY" << *p << "LEN" << len << endl;
+    for (unsigned int i = 0; i < len - 1; ++i)
+    {
+        p = p->next;
+        // cout << "DELoo " << *(p->prev) << endl;
+        // cout << "KKKKK" << p->prev->intersection.size() << endl;
+        for (unsigned int j = 0; j < p->prev->intersection.size(); ++j)
+        {
+            intersect_point *p_t = static_cast<intersect_point *>(p->prev->intersection[j]);
+            p_t->cross_point->tran = false;
+            // cout << "HAVE DEL " << *(p_t->cross_point) << " " << *(p->prev->intersection[j]) << endl;
+            out_list.erase(p_t->cross_point);
+            out_list.erase(p->prev->intersection[j]);
+            delete p->prev->intersection[j];
+        }
+        p->prev->intersection.clear();
+        delete p->prev;
+    }
+    for (unsigned int j = 0; j < this->intersection.size(); ++j)
+    {
+        intersect_point *p_t = static_cast<intersect_point *>(this->intersection[j]);
+        // cout << "HAVE DEL " << *(p_t->cross_point) << " " << *(this->intersection[j]) << endl;
+        p_t->cross_point->tran = false;
+        out_list.erase(p_t->cross_point);
+        out_list.erase(this->intersection[j]);
+        delete this->intersection[j];
+    }
+}
+
+void point::delete_poly_tranf(set<point *> &out_list, set<point *> &out_list2)
+{
+    point *p = this->next;
+    for (unsigned int i = 0; i < len - 1; ++i)
+    {
+        p = p->next;
+        for (unsigned int j = 0; j < p->prev->intersection.size(); ++j)
+        {
+            intersect_point *p_t = static_cast<intersect_point *>(p->prev->intersection[j]);
+            p_t->cross_point->tran = false;
+            out_list.erase(p_t->cross_point);
+            out_list2.erase(p_t->cross_point);
+            out_list.erase(p->prev->intersection[j]);
+            out_list2.erase(p->prev->intersection[j]);
+            delete p->prev->intersection[j];
+        }
+        p->prev->intersection.clear();
+        delete p->prev;
+    }
+    for (unsigned int j = 0; j < this->intersection.size(); ++j)
+    {
+        intersect_point *p_t = static_cast<intersect_point *>(this->intersection[j]);
+        p_t->cross_point->tran = false;
+        out_list.erase(p_t->cross_point);
+        out_list2.erase(p_t->cross_point);
+        out_list.erase(this->intersection[j]);
+        out_list2.erase(this->intersection[j]);
+        delete this->intersection[j];
+    }
+}
 
 intersect_point::intersect_point(long long xt, long long yt, int colort) : point(xt, yt), color(colort), in(true)
 {
     point_cnt -= 1;
     intersect_cnt += 1;
-    // cout << "construct intersect" << *this << endl;
+    cout << "construct intersect" << *this << endl;
 }
 
 intersect_point::~intersect_point()

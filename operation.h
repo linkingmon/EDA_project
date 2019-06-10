@@ -1,7 +1,7 @@
 // #include "point.h"
 #include "glob_func.h"
 #include <set>
-// #define DEBUG
+#define DEBUG
 using namespace std;
 
 class operation
@@ -180,7 +180,10 @@ int operation::find_intersect(point *a, point *b, operation &o_b)
 #ifdef DEBUG
         cout << "Delete Polygon: " << *a << endl;
 #endif
-        a->delete_poly();
+        if (this != &o_b)
+            a->delete_poly_tranf(out_list, o_b.out_list); // 要把對面的tran清掉 // 還有要把out的點從out_list移除
+        else
+            a->delete_poly_tranf(out_list); // 要把對面的tran清掉 // 還有要把out的點從out_list移除
         delete a;
         p = b;
         for (unsigned int i = 0; i < b->len; ++i)
@@ -204,7 +207,10 @@ int operation::find_intersect(point *a, point *b, operation &o_b)
 #ifdef DEBUG
         cout << "Delete Polygon: " << *b << endl;
 #endif
-        b->delete_poly();
+        if (this != &o_b)
+            a->delete_poly_tranf(out_list, o_b.out_list); // 要把對面的tran清掉 // 還有要把out的點從out_list移除
+        else
+            a->delete_poly_tranf(out_list); // 要把對面的tran清掉 // 還有要把out的點從out_list移除
         delete b;
         p = a;
         for (unsigned int i = 0; i < a->len; ++i)

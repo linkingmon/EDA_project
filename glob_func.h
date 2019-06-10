@@ -1,5 +1,5 @@
 #include "point.h"
-// #define DEBUG
+#define DEBUG
 static int glob_color = 0;
 void list_construct(point *);
 point *construct_new_poly(vector<point *> &);
