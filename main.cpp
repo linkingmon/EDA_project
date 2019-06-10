@@ -191,6 +191,9 @@ int main()
         { // operations[i] = "SV" "SH" "SO"
             cout << "Splitting" << endl;
             output_result(total.root_list, string("result/Merge_all.txt"));
+            // Interval_Mgr IM;
+            // IM.build_interval(total.root_list[0], 1);
+            // IM.split_polygon();
             // if(operations[i][1] == 'V')
             // else if(operations[i][1] == 'H')
             // else

@@ -82,7 +82,6 @@ point::point(long long xt, long long yt) : x(xt), y(yt)
     point_cnt += 1;
     verti = false;
     dir = false;
-    mark = false;
 }
 // 複製新的多邊形
 point::point(const point &p2)

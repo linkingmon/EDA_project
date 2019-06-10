@@ -65,7 +65,6 @@ void list_construct(point *&root)
             maxx = temp->x;
         if (temp->y > maxy)
             maxy = temp->y;
-        temp->mark = false;
         temp = temp->next;
     }
     if (root->verti == root->prev->verti)
@@ -95,7 +94,7 @@ void list_construct(point *&root)
     point *p = root;
     for (unsigned int i = 0; i < root->len; ++i)
     {
-        // p->print();
+        p->print();
         p = p->next;
     }
     // cout << minx << " " << miny << " " << maxx << " " << maxy << endl;
@@ -190,9 +189,6 @@ vector<point *> little_merge(set<point *> &out_list)
 #endif
     while (out_list.size() > 0)
     {
-        #ifdef DEBUG
-        cout << "========================" << endl;
-        #endif  
         vector<point *> poly;
         point *new_poly;
         set<point *>::iterator iter;
@@ -201,12 +197,11 @@ vector<point *> little_merge(set<point *> &out_list)
         point *p = (*iter)->next;
         out_list.erase(*iter);
 #ifdef DEBUG
-        cout << "WALK " << *new_poly <<endl;
+        cout << "WALK " << *new_poly << endl;
 #endif
         new_poly->pcolor = glob_color;
-        new_poly->mark = true;
         poly.push_back(new_poly);
-        while (p->pcolor != glob_color)
+        while (p != new_poly)
         {
             if(p->mark == true){
                 #ifdef DEBUG
@@ -216,10 +211,9 @@ vector<point *> little_merge(set<point *> &out_list)
             }
             ++cnt;
 #ifdef DEBUG
-            // cout << "WALK " << *p << endl;
+            cout << "WALK " << *p << endl;
 #endif
             p->pcolor = glob_color;
-            p->mark = true;
             poly.push_back(p);
             if (!p->ispoint())
             {
@@ -237,11 +231,9 @@ vector<point *> little_merge(set<point *> &out_list)
                 cout << "cross " << *p << endl;
 #endif
                 p->pcolor = glob_color;
-                p->mark = true;
                 poly.push_back(p);
                 if (p == new_poly)
                 {
-                    cout << "point" << endl;
                     break;
                 }
                 if (!static_cast<intersect_point *>(p)->in)
@@ -250,8 +242,6 @@ vector<point *> little_merge(set<point *> &out_list)
                 }
             }
         back:
-
-            p->pcolor = glob_color;
 #ifdef DEBUG
             cout << "WALK " << *p << " " << p->pcolor << *(p->next) << " "<< p->next->pcolor<<endl;
 #endif            
@@ -261,8 +251,6 @@ vector<point *> little_merge(set<point *> &out_list)
         // 用新走出的形狀做出多邊形
         // 需要初始化更種參數：包刮：x, y next, prev, s_next, len, angle, verti, dir
         new_list.push_back(construct_new_poly(poly));
-        next_merge:
-            ++glob_color;
     }
     return new_list;
 }
