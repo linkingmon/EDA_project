@@ -1,7 +1,7 @@
 // #include "point.h"
 #include "glob_func.h"
 #include <set>
-#define DEBUG
+// #define DEBUG
 using namespace std;
 
 class operation
@@ -50,12 +50,16 @@ void operation::find_intersect()
             switch (state)
             {
             case 1:
-                root_list.erase(root_list.begin() + i);
+                root_list[i] = root_list[root_list.size() - 1];
+                root_list.pop_back();
+                // root_list.erase(root_list.begin() + i);
                 --i;
                 continue;
                 break;
             case 2:
-                root_list.erase(root_list.begin() + j);
+                root_list[j] = root_list[root_list.size() - 1];
+                root_list.pop_back();
+                // root_list.erase(root_list.begin() + j);
                 --j;
                 continue;
                 break;
@@ -63,6 +67,46 @@ void operation::find_intersect()
                 break;
             }
         }
+}
+
+void operation::find_intersect(operation &total)
+{
+#ifdef DEBUG
+    // cout << "----------intersect total root list----------" << endl;
+#endif
+    // cout << "CUR size" << root_list.size() << endl;
+    // cout << "TOTAL size" << total.root_list.size() << endl;
+    // cout << "CUR size" << out_list_buf.size() << endl;
+    // cout << "TOTAL size" << total.out_list_buf.size() << endl;
+    for (int i = 0; i < root_list.size(); ++i)
+    {
+        for (int j = 0; j < total.root_list.size(); ++j)
+        {
+#ifdef DEBUG
+            // 0是有焦點 1是要刪掉前面的 2是要刪掉後面的
+            // cout << "Find intersect: " << *root_list[i] << " " << *(total.root_list[j]) << endl;
+#endif
+            int state = find_intersect(root_list[i], total.root_list[j], total);
+            // cout << "CUR size" << out_list_buf.size() << endl;
+            // cout << "TOTAL size" << total.out_list_buf.size() << endl;
+            // cout << "X" << state << endl;
+            switch (state)
+            {
+            case 1:
+                root_list.erase(root_list.begin() + i);
+                --i;
+                continue;
+                break;
+            case 2:
+                total.root_list.erase(total.root_list.begin() + j);
+                --j;
+                continue;
+                break;
+            default:
+                break;
+            }
+        }
+    }
 }
 //insert intersect in one POLYGON
 void operation::insert_intersect()
@@ -83,46 +127,18 @@ void operation::insert_intersect()
     }
 }
 
-void operation::find_intersect(operation &total)
-{
-#ifdef DEBUG
-    // cout << "----------intersect total root list----------" << endl;
-#endif
-    // cout << root_list.size() << endl;
-    // cout << total.root_list.size() << endl;
-    for (int i = 0; i < root_list.size(); ++i)
-    {
-        for (int j = 0; j < total.root_list.size(); ++j)
-        {
-#ifdef DEBUG
-            // 0是有焦點 1是要刪掉前面的 2是要刪掉後面的
-            cout << "Find intersect: " << *root_list[i] << " " << *(total.root_list[j]) << endl;
-#endif
-            int state = find_intersect(root_list[i], total.root_list[j], total);
-            // cout << "X" << state << endl;
-            switch (state)
-            {
-            case 1:
-                root_list.erase(root_list.begin() + i);
-                --i;
-                continue;
-                break;
-            case 2:
-                total.root_list.erase(total.root_list.begin() + j);
-                --j;
-                continue;
-                break;
-            default:
-                break;
-            }
-        }
-    }
-}
 // find cross point in two POLYGON
 // 找兩個 多邊形 的交點
 // o_b point*b 屬於的operation
 int operation::find_intersect(point *a, point *b, operation &o_b)
 {
+    if (b->minx > a->maxx || b->miny > a->maxy || b->maxx < a->minx || b->maxy < a->miny)
+    {
+        // cout << a->minx << " " << a->miny << " " << a->maxx << " " << a->maxy << endl;
+        // cout << b->minx << " " << b->miny << " " << b->maxx << " " << b->maxy << endl;
+        // cout << "No Intersect" << endl;
+        return 0;
+    }
     out_list_buf.clear();
     o_b.out_list_buf.clear();
     point *p_k = a;
@@ -151,12 +167,14 @@ int operation::find_intersect(point *a, point *b, operation &o_b)
         return_num += 1;
         out_list_buf.clear();
     }
+    // cout << "HAS OUT" << has_out << endl;
     has_out = o_b.in_out_cross(b, a);
     if (!has_out)
     {
         return_num += 2;
         o_b.out_list_buf.clear();
     }
+    // cout << "HAS OUT" << has_out << endl;
     // }
     // else
     // {
@@ -178,7 +196,7 @@ int operation::find_intersect(point *a, point *b, operation &o_b)
     {
     case 1:
 #ifdef DEBUG
-        cout << "Delete Polygon: " << *a << endl;
+        cout << "Delete1 Polygon: " << *a << endl;
 #endif
         if (this != &o_b)
             a->delete_poly_tranf(out_list, o_b.out_list); // 要把對面的tran清掉 // 還有要把out的點從out_list移除
@@ -205,12 +223,12 @@ int operation::find_intersect(point *a, point *b, operation &o_b)
     case 2:
     case 3:
 #ifdef DEBUG
-        cout << "Delete Polygon: " << *b << endl;
+        cout << "Delete2 Polygon: " << *b << endl;
 #endif
         if (this != &o_b)
-            a->delete_poly_tranf(out_list, o_b.out_list); // 要把對面的tran清掉 // 還有要把out的點從out_list移除
+            b->delete_poly_tranf(out_list, o_b.out_list); // 要把對面的tran清掉 // 還有要把out的點從out_list移除
         else
-            a->delete_poly_tranf(out_list); // 要把對面的tran清掉 // 還有要把out的點從out_list移除
+            b->delete_poly_tranf(out_list); // 要把對面的tran清掉 // 還有要把out的點從out_list移除
         delete b;
         p = a;
         for (unsigned int i = 0; i < a->len; ++i)
@@ -230,12 +248,27 @@ int operation::find_intersect(point *a, point *b, operation &o_b)
         return 2;
         break;
     default:
+
+        // cout << "CUR OUT LIST " << out_list.size() << endl;
+        // cout << "CURR OUT LIST BUF" << out_list_buf.size() << endl;
         for (unsigned int kk = 0; kk < out_list_buf.size(); ++kk)
+        {
+            // cout << "KKK " << *(out_list_buf[kk]) << endl;
             out_list.insert(out_list_buf[kk]);
+        }
         if (this != &o_b)
+        {
+            // cout << "NOT SAME" << endl;
+            // cout << "OB OUT LIST " << o_b.out_list.size() << endl;
+            // cout << "OB OUT LIST BUF" << o_b.out_list_buf.size() << endl;
             for (unsigned int kk = 0; kk < o_b.out_list_buf.size(); ++kk)
+            {
+                // cout << "KKK " << *(o_b.out_list_buf[kk]) << endl;
                 o_b.out_list.insert(o_b.out_list_buf[kk]);
+            }
+        }
         return 0;
+        break;
     }
     // return 0;
 }
@@ -271,6 +304,7 @@ bool operation::in_out_cross(point *root, point *cross)
                     if (p_t->color == glob_color)
                     {
                         p_t->in = false;
+                        // cout << "PUSH " << *p_t << endl;
                         out_list_buf.push_back(p_t);
                         break;
                     }
@@ -333,7 +367,7 @@ bool operation::outside_poly(point *root, point *cross)
         }
         p = p->next;
     }
-    if (cross_cnt % 2)
+    if (cross_cnt % 2 == 1)
         return false;
     else
         return true;
@@ -509,10 +543,20 @@ operation &operation::operator+=(operation &oper)
         // root_list[0]->print_poly();
         // cout << "POLY 2: " << endl;
         // oper.root_list[0]->print_poly();
-        // cout << "OUTLIST size of total " << out_list.size() << endl;
-        // cout << "OUTLIST size of oper " << oper.out_list.size() << endl;
+        set<point *>::iterator iter;
+        // cout << "OUT LIST size " << out_list.size() << endl;
+        for (iter = out_list.begin(); iter != out_list.end(); ++iter)
+        {
+            cout << **iter;
+        }
+        // cout << "OPPER OUT LIST size " << oper.out_list.size() << endl;
+        for (iter = oper.out_list.begin(); iter != oper.out_list.end(); ++iter)
+        {
+            cout << **iter;
+        }
 #endif
         oper.out_list.insert(out_list.begin(), out_list.end()); // 兩個的out道在一起
+        // cout << "OPER LIST SIZE " << oper.out_list.size() << endl;
         // cout << "Total pointsdd: " << point_cnt << " & intersects: " << intersect_cnt << endl;
         vector<point *> new_list = ::little_merge(oper.out_list);
         // cout << "Total pointscc: " << point_cnt << " & intersects: " << intersect_cnt << endl;

@@ -124,38 +124,6 @@ void point::connect()
     }
     n->prev = intersection[--i];
     intersection[i]->next = n;
-    // bool reverse = false;
-    // int i;
-    // if (verti)
-    // {
-    //     if (y > next->y)
-    //         reverse = true;
-    // }
-    // else if (x > next->x)
-    //     reverse = true;
-    // if (reverse)
-    // {
-    //     for (i = intersection.size() - 1; i >= 0; --i)
-    //     {
-    //         intersection[i]->prev = temp;
-    //         temp->next = intersection[i];
-    //         temp = intersection[i];
-    //     }
-    //     n->prev = intersection[0];
-    //     intersection[0]->next = n;
-    // }
-    // else
-    // {
-    //     for (i = 0; i < intersection.size(); ++i)
-    //     {
-    //         intersection[i]->prev = temp;
-    //         temp->next = intersection[i];
-    //         temp = intersection[i];
-    //     }
-
-    //     n->prev = intersection[--i];
-    //     intersection[i]->next = n;
-    // }
 }
 
 void point::sort_asc()
@@ -270,6 +238,7 @@ void point::delete_poly()
 void point::delete_poly_tranf(set<point *> &out_list)
 {
     point *p = this->next;
+    // cout << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHH" << endl;
     // cout << "POLY" << *p << "LEN" << len << endl;
     for (unsigned int i = 0; i < len - 1; ++i)
     {
@@ -334,7 +303,7 @@ intersect_point::intersect_point(long long xt, long long yt, int colort) : point
 {
     point_cnt -= 1;
     intersect_cnt += 1;
-    cout << "construct intersect" << *this << endl;
+    // cout << "construct intersect" << *this << endl;
 }
 
 intersect_point::~intersect_point()

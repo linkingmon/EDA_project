@@ -16,12 +16,15 @@ void output_result(const vector<point *> &, string);
 
 int main()
 {
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
     string ang = "\\/X";
     // can choose file: sample_in.txt / OpenCase_1.txt / OpenCase_2.txt
     // string filename = "sample_in.txt";
     // string filename = "test_merge.txt";
     // string filename = "bug1.txt";
-    string filename = "poly_with_hole.txt";
+    string filename = "OpenCase_1.txt";
+    // string filename = "poly_with_hole.txt";
     // string filename = "sample_in.txt";
     fstream fin(filename.c_str(), fstream::in);
     vector<string> operations;      // store opertaion strings 按照順序存操作的次序
@@ -65,11 +68,13 @@ int main()
         point *root;
         while (read_operation(fin, &root))
         {
-            oper.root_list.push_back(root);
             list_construct(root); // 插入一些點的特殊性質：是否垂直、角的方向
+            oper.root_list.push_back(root);
+            // cout << "ROOTT" << *root << " " << root->len << " " << *(root->next) << endl;
 #ifdef DEBUG
             point *p = root;
             cout << "POLYGON" << oper.root_list.size() - 1 << endl;
+            // cout << "Range: (" << root->minx << ',' << root->miny << ") to (" << root->maxx << ',' << root->maxy << ")" << endl;
             for (int k = 0; k < root->len; ++k)
             {
                 cout << *p << " DIR" << (p->verti ? '|' : '-') << " Angle" << ang[p->angle] << " Snext" << *(p->s_next) << endl;
@@ -95,7 +100,7 @@ int main()
             }
         }
 #endif
-// Merge per operation
+        // Merge per operation
 #ifdef DEBUG
         cout << "----------operation----------" << endl;
         cout << "There are " << oper.out_list.size() << " out intersects" << endl;
@@ -114,17 +119,24 @@ int main()
         oper.root_list = new_list;
         // new_list = little_merge(oper.out_list);
         // check_list(oper, new_list);
-#ifdef DEBUG
+        // #ifdef DEBUG
         cout << "There are " << oper.root_list.size() << " polygons after little merging" << endl;
         for (unsigned int jjj = 0; jjj < oper.root_list.size(); ++jjj)
-            oper.root_list[jjj]->print_poly();
+        {
+            point *p = oper.root_list[jjj];
+            for (int k = 0; k < oper.root_list[jjj]->len; ++k)
+            {
+                cout << *p << " DIR" << (p->verti ? '|' : '-') << " Angle" << ang[p->angle] << " Snext" << *(p->s_next) << endl;
+                p = p->next;
+            }
+        }
         cout << "----memory leak checking-----" << endl;
         cout << "Total points: " << point_cnt << " & intersects: " << intersect_cnt << endl;
         cout << "-----------------------------" << endl;
         cout << "Total polygons after merging in operation: " << oper.root_list.size() << endl;
         char c = i + 49;
         output_result(oper.root_list, string("result/Merge") + c + ".txt");
-#endif
+        // #endif
     }
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef DEBUG
@@ -141,11 +153,21 @@ int main()
     // total.root_list = total_root_list;
     for (unsigned int i = 0; i < operations.size(); ++i)
     {
-        // cout << "Starting operation " << operations[i] << endl;
         if (operations[i][0] == 'M')
         {
             operation &oper = mapping[operations[i]];
+            // cout << "OPRRRRRRRRRR" << endl;
+            for (int h = 0; h < oper.root_list.size(); ++h)
+            {
+                point *p = oper.root_list[h];
+                for (int k = 0; k < oper.root_list[h]->len; ++k)
+                {
+                    cout << *p << " DIR" << (p->verti ? '|' : '-') << " Angle" << ang[p->angle] << " Snext" << *(p->s_next) << endl;
+                    p = p->next;
+                }
+            }
             total += oper;
+#ifdef DEBUG
             cout << "There are " << total.root_list.size() << " polygons after operator " << operations[i] << endl
                  << endl;
             for (unsigned int jjj = 0; jjj < total.root_list.size(); ++jjj)
@@ -153,13 +175,12 @@ int main()
                 cout << "POLYGON" << jjj << endl;
                 total.root_list[jjj]->print_poly();
             }
-#ifdef DEBUG
             cout << "----memory leak checking-----" << endl;
             cout << "Total points: " << point_cnt << " & intersects: " << intersect_cnt << endl;
             cout << "-----------------------------" << endl;
-#endif
             char c = i + 49;
             output_result(total.root_list, string("result/Total") + c + ".txt");
+#endif
         }
         else if (operations[i][0] == 'C')
         {
@@ -169,45 +190,13 @@ int main()
         else
         { // operations[i] = "SV" "SH" "SO"
             cout << "Splitting" << endl;
-            operations[i] output_result(total.root_list, string("result/Merge_all.txt"));
+            output_result(total.root_list, string("result/Merge_all.txt"));
             // if(operations[i][1] == 'V')
             // else if(operations[i][1] == 'H')
             // else
         }
     }
 }
-// find cross point in two vector of POLYGON
-// 找兩個 root list 的所有焦點
-// void find_intersect(operation a, operation b)
-// {
-//     #ifdef DEBUG
-//     cout << "----------intersect----------" << endl;
-//     #endif
-//     for (int i = 0; i < a.root_list.size(); ++i)
-//         for (int j = i + 1; j < b.root_list.size(); ++j)
-//         {
-// #ifdef DEBUG
-//             // 0是有焦點 1是要刪掉前面的 2是要刪掉後面的
-//             cout << "Find intersect: " << *(a.root_list[i]) << " " << *(b.root_list[j]) << endl;
-// #endif
-//             int state = find_intersect(a.root_list[i], b.root_list[j]);
-//             switch (state)
-//             {
-//             case 1:
-//                 a.root_list.erase(a.root_list.begin() + i);
-//                 --i;
-//                 continue;
-//                 break;
-//             case 2:
-//                 b.root_list.erase(b.root_list.begin() + j);
-//                 --j;
-//                 continue;
-//                 break;
-//             default:
-//                 break;
-//             }
-//         }
-// }
 
 inline bool read_operation(fstream &fin, point **root)
 {

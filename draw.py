@@ -3,7 +3,7 @@ import numpy as np
 
 cnt = 1
 # filename = 'sample_in.txt'
-filename = 'test_merge.txt'
+filename = 'OpenCase_1.txt'
 with open(filename, 'r') as f:
     L = f.read().splitlines()[2:]
     plt.figure()
@@ -23,6 +23,7 @@ with open(filename, 'r') as f:
             for j in range(arr.shape[1]-1):
                 plt.plot(arr[:, j], arr[:, j+1], color)
         if ll[0] == 'END':
+            # plt.show()
             plt.savefig('result/sample{}.png'.format(cnt))
             plt.clf()
             cnt += 1

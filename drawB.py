@@ -20,6 +20,7 @@ with open(filename, 'r') as f:
             arr = np.array([int(t) for t in ll[1:len(ll)-1]])
             arr = np.reshape(arr, (len(arr)//2, -1))
             color = 'b' if operation == 'MERGE' else 'r'
+            plt.plot(arr[0,0],arr[0,1], color='green', marker='o', markersize=12)
             for j in range(arr.shape[1]-1):
                 plt.plot(arr[:, j], arr[:, j+1], color)
         if ll[0] == 'END':
@@ -44,6 +45,7 @@ for zz in range(cnt-1):
                     arr = np.array([int(t) for t in ll[1:len(ll)-1]])
                     arr = np.reshape(arr, (len(arr)//2, -1))
                     color = 'b' if operation == 'MERGE' else 'r'
+                    plt.plot(arr[0,0],arr[0,1], color='green', marker='o', markersize=12)
                     for j in range(arr.shape[1]-1):
                         plt.plot(arr[:, j], arr[:, j+1], color)
                 if ll[0] == 'END':
@@ -69,6 +71,7 @@ for zz in range(cnt-1):
                     arr = np.array([int(t) for t in ll[1:len(ll)-1]])
                     arr = np.reshape(arr, (len(arr)//2, -1))
                     color = 'b' if operation == 'MERGE' else 'r'
+                    plt.plot(arr[0,0],arr[0,1], color='green', marker='o', markersize=12)
                     for j in range(arr.shape[1]-1):
                         plt.plot(arr[:, j], arr[:, j+1], color)
                 if ll[0] == 'END':
