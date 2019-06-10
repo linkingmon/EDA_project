@@ -20,8 +20,8 @@ int main()
     // can choose file: sample_in.txt / OpenCase_1.txt / OpenCase_2.txt
     // string filename = "sample_in.txt";
     // string filename = "test_merge.txt";
-    // string filename = "bug1.txt";
-    string filename = "poly_with_hole.txt";
+    string filename = "bug1.txt";
+    // string filename = "poly_with_hole.txt";
     // string filename = "sample_in.txt";
     fstream fin(filename.c_str(), fstream::in);
     vector<string> operations;      // store opertaion strings 按照順序存操作的次序
@@ -65,8 +65,9 @@ int main()
         point *root;
         while (read_operation(fin, &root))
         {
-            oper.root_list.push_back(root);
             list_construct(root); // 插入一些點的特殊性質：是否垂直、角的方向
+            oper.root_list.push_back(root);
+            // cout << "ROOTT" << *root << " " << root->len << " " << *(root->next) << endl;
 #ifdef DEBUG
             point *p = root;
             cout << "POLYGON" << oper.root_list.size() - 1 << endl;
@@ -169,7 +170,7 @@ int main()
         else
         { // operations[i] = "SV" "SH" "SO"
             cout << "Splitting" << endl;
-            operations[i] output_result(total.root_list, string("result/Merge_all.txt"));
+            output_result(total.root_list, string("result/Merge_all.txt"));
             // if(operations[i][1] == 'V')
             // else if(operations[i][1] == 'H')
             // else

@@ -178,7 +178,7 @@ int operation::find_intersect(point *a, point *b, operation &o_b)
     {
     case 1:
 #ifdef DEBUG
-        cout << "Delete Polygon: " << *a << endl;
+        cout << "Delete1 Polygon: " << *a << endl;
 #endif
         if (this != &o_b)
             a->delete_poly_tranf(out_list, o_b.out_list); // 要把對面的tran清掉 // 還有要把out的點從out_list移除
@@ -205,12 +205,12 @@ int operation::find_intersect(point *a, point *b, operation &o_b)
     case 2:
     case 3:
 #ifdef DEBUG
-        cout << "Delete Polygon: " << *b << endl;
+        cout << "Delete2 Polygon: " << *b << endl;
 #endif
         if (this != &o_b)
-            a->delete_poly_tranf(out_list, o_b.out_list); // 要把對面的tran清掉 // 還有要把out的點從out_list移除
+            b->delete_poly_tranf(out_list, o_b.out_list); // 要把對面的tran清掉 // 還有要把out的點從out_list移除
         else
-            a->delete_poly_tranf(out_list); // 要把對面的tran清掉 // 還有要把out的點從out_list移除
+            b->delete_poly_tranf(out_list); // 要把對面的tran清掉 // 還有要把out的點從out_list移除
         delete b;
         p = a;
         for (unsigned int i = 0; i < a->len; ++i)

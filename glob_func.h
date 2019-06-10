@@ -1,14 +1,14 @@
 #include "point.h"
 #define DEBUG
 static int glob_color = 0;
-void list_construct(point *);
+void list_construct(point *&);
 point *construct_new_poly(vector<point *> &);
 vector<point *> little_merge(set<point *> &);
 // void check_list(operation &, vector<point *> &);
 
 // to construct a link
 // 增加 point 的特殊性質
-void list_construct(point *root)
+void list_construct(point *&root)
 {
     point *temp = root;
     long long minx, miny, maxx, maxy;
@@ -65,6 +65,16 @@ void list_construct(point *root)
     root->miny = miny;
     root->maxx = maxx;
     root->maxy = maxy;
+    if (root->verti == root->prev->verti)
+    {
+        point *p = root->next;
+        root->prev->next = root->next;
+        root->next->prev = root->prev;
+        root->prev->s_next = root->next;
+        p->len = root->len - 1;
+        delete root;
+        root = p;
+    }
 }
 
 // 需要初始化更種參數：包刮：x, y next, prev, s_next, len, angle, verti, dir
