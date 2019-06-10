@@ -505,12 +505,12 @@ operation &operation::operator+=(operation &oper)
         // cout << root_list[0]->len << "LL" << endl;
         // cout << oper.root_list[0]->len << "LL" << endl;
 #ifdef DEBUG
-        cout << "POLY 1: " << endl;
-        root_list[0]->print_poly();
-        cout << "POLY 2: " << endl;
-        oper.root_list[0]->print_poly();
-        cout << "OUTLIST size of total " << out_list.size() << endl;
-        cout << "OUTLIST size of oper " << oper.out_list.size() << endl;
+        // cout << "POLY 1: " << endl;
+        // root_list[0]->print_poly();
+        // cout << "POLY 2: " << endl;
+        // oper.root_list[0]->print_poly();
+        // cout << "OUTLIST size of total " << out_list.size() << endl;
+        // cout << "OUTLIST size of oper " << oper.out_list.size() << endl;
 #endif
         oper.out_list.insert(out_list.begin(), out_list.end()); // 兩個的out道在一起
         // cout << "Total pointsdd: " << point_cnt << " & intersects: " << intersect_cnt << endl;

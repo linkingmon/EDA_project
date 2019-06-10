@@ -11,6 +11,9 @@ vector<point *> little_merge(set<point *> &);
 void list_construct(point *root)
 {
     point *temp = root;
+    long long minx, miny, maxx, maxy;
+    minx = miny = 9223372036854775807;
+    maxx = maxy = -9223372036854775808;
     for (int i = 0; i < root->len; ++i)
     {
         if (temp->next->x == temp->x) // 判斷是否是垂直線
@@ -29,7 +32,7 @@ void list_construct(point *root)
         else
             temp->angle = 2;
         point *s_next = temp->next;
-        if (temp->verti)
+        if (temp->verti) // 找 straight next
         {
             while (s_next->next->x == temp->x)
                 s_next = s_next->next;
@@ -48,8 +51,20 @@ void list_construct(point *root)
             }
         }
         temp->s_next = s_next;
+        if (temp->x < minx)
+            minx = temp->x;
+        if (temp->y < miny)
+            miny = temp->y;
+        if (temp->x > maxx)
+            maxx = temp->x;
+        if (temp->y > maxy)
+            maxy = temp->y;
         temp = temp->next;
     }
+    root->minx = minx;
+    root->miny = miny;
+    root->maxx = maxx;
+    root->maxy = maxy;
 }
 
 // 需要初始化更種參數：包刮：x, y next, prev, s_next, len, angle, verti, dir
