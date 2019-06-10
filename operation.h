@@ -1,5 +1,5 @@
 // #include "point.h"
-#include "glob_func.h"
+#include "interval.h"
 #include <set>
 // #define DEBUG
 using namespace std;
