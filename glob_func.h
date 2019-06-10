@@ -189,6 +189,9 @@ vector<point *> little_merge(set<point *> &out_list)
 #endif
     while (out_list.size() > 0)
     {
+        #ifdef DEBUG
+        cout << "========================" << endl;
+        #endif  
         vector<point *> poly;
         point *new_poly;
         set<point *>::iterator iter;
@@ -197,18 +200,20 @@ vector<point *> little_merge(set<point *> &out_list)
         point *p = (*iter)->next;
         out_list.erase(*iter);
 #ifdef DEBUG
-        cout << "WALK " << *new_poly << endl;
+        cout << "WALK " << *new_poly <<endl;
 #endif
         new_poly->pcolor = glob_color;
+        new_poly->mark = true;
         poly.push_back(new_poly);
         while (p->pcolor != glob_color)
         {
             if(p->mark == true){
+                // cout << "break " << *p << " "<<p->pcolor<< endl;
                 goto next_merge;
             }
             ++cnt;
 #ifdef DEBUG
-            cout << "WALK " << *p << endl;
+            // cout << "WALK " << *p << endl;
 #endif
             p->pcolor = glob_color;
             p->mark = true;
@@ -233,6 +238,7 @@ vector<point *> little_merge(set<point *> &out_list)
                 poly.push_back(p);
                 if (p == new_poly)
                 {
+                    cout << "point" << endl;
                     break;
                 }
                 if (!static_cast<intersect_point *>(p)->in)
@@ -241,10 +247,11 @@ vector<point *> little_merge(set<point *> &out_list)
                 }
             }
         back:
-#ifdef DEBUG
-            cout << "WALK " << *p << endl;
-#endif
+
             p->pcolor = glob_color;
+#ifdef DEBUG
+            cout << "WALK " << *p << " " << p->pcolor<<endl;
+#endif            
             poly.push_back(p);
             p = p->next;
         }
