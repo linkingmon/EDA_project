@@ -3,6 +3,7 @@
 1. 吃 test_merge.txt 再跑 draw.py 可以在 result 資料夾看到結果
 2. 吃 poly_with_hole.txt 再跑 drawM.py 可以在 result2 資料夾看到有hole的多邊形(可以做Split)
 ## 進度
+- (6/10) 修正 ~~[8]~~，(verti和dir只有if沒有else)
 - (6/10) OpenCase_1.txt M1 成功，C1當掉 [8]
 - (6/10) 修正 ~~[2]~~，跑得很快
 - (6/10) 修正 root 前後可能連成一條線(修正完之後每個點一定是"角") [7] 修正 ~~[7]~~

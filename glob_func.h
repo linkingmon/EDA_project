@@ -18,6 +18,8 @@ void list_construct(point *&root)
     {
         if (temp->next->x == temp->x) // 判斷是否是垂直線
             temp->verti = true;
+        else
+            temp->verti = false;
         if (temp->prev->x != temp->next->x && temp->prev->y != temp->next->y) // 判斷是哪種角
         {                                                                     //是角
             if ((temp->prev->x - temp->next->x < 0) ^ (temp->prev->y - temp->next->y < 0))
@@ -40,6 +42,8 @@ void list_construct(point *&root)
             {
                 temp->dir = true;
             }
+            else
+                temp->dir = false;
         }
         else
         {
@@ -49,6 +53,8 @@ void list_construct(point *&root)
             {
                 temp->dir = true;
             }
+            else
+                temp->dir = false;
         }
         temp->s_next = s_next;
         if (temp->x < minx)
@@ -61,20 +67,37 @@ void list_construct(point *&root)
             maxy = temp->y;
         temp = temp->next;
     }
-    root->minx = minx;
-    root->miny = miny;
-    root->maxx = maxx;
-    root->maxy = maxy;
     if (root->verti == root->prev->verti)
     {
+        // cout << *root << "IS " << root->verti << endl;
+        // cout << *(root->prev) << "IS " << root->prev->verti << endl;
         point *p = root->next;
         root->prev->next = root->next;
         root->next->prev = root->prev;
         root->prev->s_next = root->next;
+        root->next->minx = minx;
+        root->next->miny = miny;
+        root->next->maxx = maxx;
+        root->next->maxy = maxy;
         p->len = root->len - 1;
         delete root;
         root = p;
     }
+    else
+    {
+        root->minx = minx;
+        root->miny = miny;
+        root->maxx = maxx;
+        root->maxy = maxy;
+    }
+    point *p = root;
+    for (unsigned int i = 0; i < root->len; ++i)
+    {
+        p->print();
+        p = p->next;
+    }
+    // cout << minx << " " << miny << " " << maxx << " " << maxy << endl;
+    // cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXxx" << endl;
 }
 
 // 需要初始化更種參數：包刮：x, y next, prev, s_next, len, angle, verti, dir
@@ -151,7 +174,7 @@ point *construct_new_poly(vector<point *> &point_stream)
 
 vector<point *> little_merge(set<point *> &out_list)
 {
-    set<point *>::iterator iter;
+    // set<point *>::iterator iter;
     // cout << "OUT LIST size " << out_list.size() << endl;
     // for (iter = out_list.begin(); iter != out_list.end(); ++iter)
     // {
