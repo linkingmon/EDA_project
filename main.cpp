@@ -20,7 +20,8 @@ int main()
     // can choose file: sample_in.txt / OpenCase_1.txt / OpenCase_2.txt
     // string filename = "sample_in.txt";
     // string filename = "test_merge.txt";
-    string filename = "bug1.txt";
+    // string filename = "bug1.txt";
+    string filename = "OpenCase_1.txt";
     // string filename = "poly_with_hole.txt";
     // string filename = "sample_in.txt";
     fstream fin(filename.c_str(), fstream::in);
@@ -71,11 +72,12 @@ int main()
 #ifdef DEBUG
             point *p = root;
             cout << "POLYGON" << oper.root_list.size() - 1 << endl;
-            for (int k = 0; k < root->len; ++k)
-            {
-                cout << *p << " DIR" << (p->verti ? '|' : '-') << " Angle" << ang[p->angle] << " Snext" << *(p->s_next) << endl;
-                p = p->next;
-            }
+            // cout << "Range: (" << root->minx << ',' << root->miny << ") to (" << root->maxx << ',' << root->maxy << ")" << endl;
+            // for (int k = 0; k < root->len; ++k)
+            // {
+            //     cout << *p << " DIR" << (p->verti ? '|' : '-') << " Angle" << ang[p->angle] << " Snext" << *(p->s_next) << endl;
+            //     p = p->next;
+            // }
 #endif
         }
         // 對每個 operation 的 list 都做 Merge

@@ -1,7 +1,7 @@
 // #include "point.h"
 #include "glob_func.h"
 #include <set>
-#define DEBUG
+// #define DEBUG
 using namespace std;
 
 class operation
@@ -64,24 +64,6 @@ void operation::find_intersect()
             }
         }
 }
-//insert intersect in one POLYGON
-void operation::insert_intersect()
-{
-    for (int i = 0; i < root_list.size(); ++i)
-    {
-        point *a = root_list[i];
-        int len = 0;
-        for (int j = 0; j < root_list[i]->len; ++j)
-        {
-            point *temp = a->next;
-            a->connect();
-            len += a->intersection.size();
-            a->intersection.clear();
-            a = temp;
-        }
-        root_list[i]->len += len;
-    }
-}
 
 void operation::find_intersect(operation &total)
 {
@@ -118,11 +100,32 @@ void operation::find_intersect(operation &total)
         }
     }
 }
+//insert intersect in one POLYGON
+void operation::insert_intersect()
+{
+    for (int i = 0; i < root_list.size(); ++i)
+    {
+        point *a = root_list[i];
+        int len = 0;
+        for (int j = 0; j < root_list[i]->len; ++j)
+        {
+            point *temp = a->next;
+            a->connect();
+            len += a->intersection.size();
+            a->intersection.clear();
+            a = temp;
+        }
+        root_list[i]->len += len;
+    }
+}
+
 // find cross point in two POLYGON
 // 找兩個 多邊形 的交點
 // o_b point*b 屬於的operation
 int operation::find_intersect(point *a, point *b, operation &o_b)
 {
+    if (b->minx > a->maxx || b->miny > a->maxy || b->maxx < a->minx || b->maxy < a->miny)
+        return 0;
     out_list_buf.clear();
     o_b.out_list_buf.clear();
     point *p_k = a;
