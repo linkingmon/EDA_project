@@ -3,7 +3,7 @@ import numpy as np
 
 cnt = 1
 # filename = 'sample_in.txt'
-filename = 'OpenCase_1.txt'
+filename = 'TEST.txt'
 with open(filename, 'r') as f:
     L = f.read().splitlines()[2:]
     plt.figure()

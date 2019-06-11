@@ -1,3 +1,5 @@
+#ifndef POINT_H
+#define POINT_H
 #include <iostream>
 #include <vector>
 #include <set>
@@ -37,7 +39,11 @@ public:
     void delete_poly_tranf(set<point *> &);
     void delete_poly_tranf(set<point *> &, set<point *> &);
     friend ostream &operator<<(ostream &os, const point &p);
-    virtual void print() { cout << *this << endl; };
+    virtual void print()
+    {
+        string ang = "\\/X";
+        cout << *this << " DIR" << (this->verti ? '|' : '-') << " Angle" << ang[this->angle] << " Snext" << *(this->s_next) << endl;
+    };
     virtual bool ispoint() { return true; };
 
     vector<point *> intersection;
@@ -317,3 +323,4 @@ void intersect_point::print()
 {
     cout << "II " << *this << (in ? "  in" : " out") << endl;
 }
+#endif

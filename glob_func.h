@@ -1,3 +1,5 @@
+#ifndef GLOB_FUNC_H
+#define GLOB_FUNC_H
 #include "point.h"
 // #define DEBUG
 static int glob_color = 0;
@@ -69,8 +71,6 @@ void list_construct(point *&root)
     }
     if (root->verti == root->prev->verti)
     {
-        // cout << *root << "IS " << root->verti << endl;
-        // cout << *(root->prev) << "IS " << root->prev->verti << endl;
         point *p = root->next;
         root->prev->next = root->next;
         root->next->prev = root->prev;
@@ -91,34 +91,11 @@ void list_construct(point *&root)
         root->maxy = maxy;
     }
     point *p = root;
-    for (unsigned int i = 0; i < root->len; ++i)
-    {
-        p->print();
-        p = p->next;
-    }
-    // cout << minx << " " << miny << " " << maxx << " " << maxy << endl;
-    // cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXxx" << endl;
 }
 
 // 需要初始化更種參數：包刮：x, y next, prev, s_next, len, angle, verti, dir
 point *construct_new_poly(vector<point *> &point_stream)
 {
-    //     point *root = new point(point_stream[0]);
-    // #ifdef DEBUG
-    //     if (point_stream.size() < 4)
-    //     {
-    //         cout << "POLY has only " << point_stream.size() << " vertices" << endl;
-    //         assert(0);
-    //     }
-    // #endif
-    //     point *p = point_stream[0];
-    //     point *p_next = point_stream[1];
-    //     for (unsigned int i = 2; i < point_stream.size(); ++i)
-    //     {
-    //         p_next = point_stream[i];
-    //     }
-    // for (unsigned int i = 0; i < point_stream.size(); ++i)
-    // cout << "STREAM: " << *point_stream[i] << endl;
     vector<int> vec;
     vec.reserve(point_stream.size()); // 0 水平 1 垂直 2 同一個點
     point_stream.push_back(point_stream[0]);
@@ -174,12 +151,6 @@ point *construct_new_poly(vector<point *> &point_stream)
 
 vector<point *> little_merge(set<point *> &out_list)
 {
-    // set<point *>::iterator iter;
-    // cout << "OUT LIST size " << out_list.size() << endl;
-    // for (iter = out_list.begin(); iter != out_list.end(); ++iter)
-    // {
-    //     cout << **iter;
-    // }
     vector<point *> new_list;
     int cnt = 0;
     ++glob_color;
@@ -249,35 +220,4 @@ vector<point *> little_merge(set<point *> &out_list)
     return new_list;
 }
 
-// void check_list(operation &oper, vector<point *> &new_list)
-// {
-//     // cout << "new list size is " << new_list.size() << endl;
-//     // 判斷有些多邊形跟其他是分開的，根本不用何在一起，要直接加進去；感覺有點慢?
-//     for (unsigned int k = 0; k < oper.root_list.size(); ++k)
-//     {
-//         point *p = oper.root_list[k];
-//         bool isout = true;
-//         // cout << p->len << " " << *p << endl;
-//         for (unsigned int z = 0; z < oper.root_list[k]->len; ++z)
-//         {
-//             if (p->pcolor == glob_color)
-//             {
-//                 isout = false;
-//                 break;
-//             }
-//             // cout << p->pcolor << *p << endl;
-//             p = p->next;
-//         }
-//         // cout << isout << endl;
-//         if (isout)
-//         {
-//             new_list.push_back(oper.root_list[k]);
-//         }
-//         else
-//         {
-//             oper.root_list[k]->delete_poly();
-//             delete oper.root_list[k];
-//         }
-//     }
-//     oper.root_list = new_list;
-// }
+#endif
