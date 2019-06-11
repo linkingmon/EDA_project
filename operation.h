@@ -424,11 +424,14 @@ bool operation::inside_edge(long long x1, long long x2, long long x)
 
 // to check (x,y) is inside the region a , a->next , b , b->next
 // if (x,y) is on the (a->next and b->next) return false
+// 如果 (x,y) 是 a->next and b 也 return false
 bool operation::inside_region(point *a, point *b, long long x, long long y)
 {
     if (a->verti)
     {
         if (y == a->next->y && x == b->next->x)
+            return false;
+        if (y == a->next->y && x == b->x)
             return false;
         bool b_b = inside_edge(b->x, b->next->x, x);
         bool b_c = inside_edge(a->y, a->next->y, y);
@@ -437,6 +440,8 @@ bool operation::inside_region(point *a, point *b, long long x, long long y)
     else
     {
         if (x == a->next->x && y == b->next->y)
+            return false;
+        if (x == a->next->x && y == b->y)
             return false;
         bool b_a = inside_edge(a->x, a->next->x, x);
         bool b_d = inside_edge(b->y, b->next->y, y);
@@ -494,7 +499,7 @@ void operation::check_list(vector<point *> &new_list)
         // cout << p->len << " " << *p << endl;
         for (unsigned int z = 0; z < root_list[k]->len; ++z)
         {
-            if (p->pcolor == glob_color)
+            if (p->mark == true)
             {
                 isout = false;
                 break;
