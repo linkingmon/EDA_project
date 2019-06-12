@@ -18,7 +18,7 @@ public:
     void add_intersect(point *a, point *b);
     bool inside_edge(long long x1, long long x2, long long y);
     void two_way_intersect(intersect_point *, intersect_point *);
-    void new_intersect(point *a, point *b, long long x, long long y);
+    void new_intersect(point *a, point *b, long long x, long long y, bool &a_is_in, bool &b_is_in);
     bool inside_region(point *a, point *b, long long x, long long y);
     bool in_out_cross(point *, point *);
     void check_list(vector<point *> &, point *&);
@@ -30,15 +30,28 @@ public:
     };
     void output(string);
     void print();
+    void start_print() { printon = true; };
+    void close_print() { printon = false; };
+    void print_outlist();
+    bool check_point(point *&a, point *&b, long long int &x, long long int &y, bool &a_is_in, bool &b_is_in);
+    short cal_state(point *&a, long long int &x, long long int &y);
+    bool isleft(point *&p, point *&line);
+    bool head2head(point *&a, point *&line);
+    bool tail2head(point *&a, point *&line);
+    bool head2tail(point *&a, point *&line);
+    bool mid2head(point *&a, point *&line);
+    bool mid2tail(point *&a, point *&line);
 
 private:
     vector<point *> root_list;
     set<point *> out_list;
     vector<point *> out_list_buf;
+    bool printon;
 };
 
 littlemerge::littlemerge()
 {
+    printon = false;
 }
 littlemerge::~littlemerge()
 {
@@ -78,6 +91,13 @@ void littlemerge::print()
     }
     cout << "END DATA" << endl;
 }
+void littlemerge::print_outlist()
+{
+    set<point *>::iterator iter;
+    for (iter = out_list.begin(); iter != out_list.end(); ++iter)
+        (*iter)->print();
+    cout << "XXX" << endl;
+}
 void littlemerge::insert(point *&root)
 {
     ::list_construct(root);
@@ -96,9 +116,13 @@ void littlemerge::merge(point *&root)
         return;
     }
     bool del = find_intersect(root);
+    if (printon)
+        print_outlist();
     if (!del)
         return;
     insert_intersect(root);
+    if (printon)
+        root->print_poly();
     vector<point *> new_list;
     int cnt = 0;
     ++glob_color;
@@ -111,13 +135,15 @@ void littlemerge::merge(point *&root)
         new_poly = *iter;
         point *p = (*iter)->next;
         out_list.erase(*iter);
-        // cout << "WALK " << *new_poly << endl;
+        if (printon)
+            cout << "WALK " << *new_poly << endl;
         new_poly->pcolor = glob_color;
         poly.push_back(new_poly);
         while (p != new_poly)
         {
             ++cnt;
-            // cout << "WALK " << *p << endl;
+            if (printon)
+                cout << "WALK " << *p << endl;
             p->pcolor = glob_color;
             poly.push_back(p);
             if (!p->ispoint())
@@ -131,7 +157,8 @@ void littlemerge::merge(point *&root)
                     goto back;
                 }
                 p = static_cast<intersect_point *>(p)->cross_point;
-                // cout << "cross " << *p << endl;
+                if (printon)
+                    cout << "cross " << *p << endl;
                 p->pcolor = glob_color;
                 poly.push_back(p);
                 if (p == new_poly)
@@ -144,13 +171,19 @@ void littlemerge::merge(point *&root)
                 }
             }
         back:
-            // cout << "WALK " << *p << endl;
+            if (printon)
+                cout << "WALK " << *p << endl;
             p->pcolor = glob_color;
             poly.push_back(p);
             p = p->next;
         }
         // 用新走出的形狀做出多邊形
         // 需要初始化更種參數：包刮：x, y next, prev, s_next, len, angle, verti, dir
+        if (printon)
+        {
+            cout << "=====" << endl;
+            print_outlist();
+        }
         new_list.push_back(construct_new_poly(poly));
     }
     check_list(new_list, root);
@@ -289,20 +322,28 @@ bool littlemerge::in_out_cross(point *root, point *cross)
         if (outside)
         {
             has_out = true;
-            if (p->prev->intersection.size() > 0)
-            {
-                p->prev->sort_intersection();
-                for (int j = p->prev->intersection.size() - 1; j >= 0; --j)
-                {
-                    intersect_point *p_t = static_cast<intersect_point *>(p->prev->intersection[j]);
-                    if (p_t->color == glob_color)
-                    {
-                        p_t->in = false;
-                        out_list_buf.push_back(p_t);
-                        break;
-                    }
-                }
-            }
+            // if (p->prev->intersection.size() > 0)
+            // {
+            //     p->prev->sort_intersection();
+            //     if (printon)
+            //     {
+            //         // cout << "XXXXXXXXXXXX" << endl;
+            //         // cout << *(p->prev) << " " << *p << endl;
+            //         for (unsigned int kk = 0; kk < p->prev->intersection.size(); ++kk)
+            //             p->prev->intersection[kk]->print();
+            //         // cout << "XXXXXXXXXXXX" << endl;
+            //     }
+            //     for (int j = p->prev->intersection.size() - 1; j >= 0; --j)
+            //     {
+            //         intersect_point *p_t = static_cast<intersect_point *>(p->prev->intersection[j]);
+            //         if (p_t->color == glob_color)
+            //         {
+            //             p_t->in = false;
+            //             out_list_buf.push_back(p_t);
+            //             break;
+            //         }
+            //     }
+            // }
         }
         p = p->next;
     }
@@ -365,7 +406,9 @@ void littlemerge::find_cross(point *a, point *b)
         y = verti_b ? a->y : b->y;
         if (inside_region(a, b, x, y))
         {
-            new_intersect(a, b, x, y);
+            bool a_is_in, b_is_in;
+            if (check_point(a, b, x, y, a_is_in, b_is_in))
+                new_intersect(a, b, x, y, a_is_in, b_is_in);
         }
     }
 }
@@ -380,13 +423,9 @@ void littlemerge::add_intersect(point *a, point *b)
 bool littlemerge::inside_edge(long long x1, long long x2, long long x)
 {
     if (x >= x1 && x <= x2)
-    {
         return true;
-    }
     else if (x <= x1 && x >= x2)
-    {
         return true;
-    }
     else
         return false;
 }
@@ -396,6 +435,8 @@ bool littlemerge::inside_region(point *a, point *b, long long x, long long y)
     {
         if (y == a->next->y && x == b->next->x)
             return false;
+        if (y == a->next->y && x == b->x)
+            return false;
         bool b_b = inside_edge(b->x, b->next->x, x);
         bool b_c = inside_edge(a->y, a->next->y, y);
         return (b_b && b_c);
@@ -403,6 +444,8 @@ bool littlemerge::inside_region(point *a, point *b, long long x, long long y)
     else
     {
         if (x == a->next->x && y == b->next->y)
+            return false;
+        if (x == a->next->x && y == b->y)
             return false;
         bool b_a = inside_edge(a->x, a->next->x, x);
         bool b_d = inside_edge(b->y, b->next->y, y);
@@ -419,10 +462,14 @@ void littlemerge::two_way_intersect(intersect_point *a, intersect_point *b)
     b->tran = false;
 }
 // the new intersect (x,y) is right after point a and point b
-void littlemerge::new_intersect(point *a, point *b, long long x, long long y)
+void littlemerge::new_intersect(point *a, point *b, long long x, long long y, bool &a_is_in, bool &b_is_in)
 {
-    intersect_point *insert_a = new intersect_point(x, y, glob_color);
-    intersect_point *insert_b = new intersect_point(x, y, glob_color);
+    intersect_point *insert_a = new intersect_point(x, y, glob_color, a_is_in);
+    if (!a_is_in)
+        out_list_buf.push_back(insert_a);
+    intersect_point *insert_b = new intersect_point(x, y, glob_color, b_is_in);
+    if (!b_is_in)
+        out_list_buf.push_back(insert_b);
     add_intersect(a, insert_a);
     add_intersect(b, insert_b);
     bool order = true;
@@ -521,6 +568,323 @@ void littlemerge::check_list(vector<point *> &new_list, point *&root)
     {
         root->delete_poly();
         delete root;
+    }
+}
+// 傳入：a和b為頭的邊和交點的x、y座標
+// 已經確定有交點了
+bool littlemerge::check_point(point *&a, point *&b, long long int &x, long long int &y, bool &a_is_in, bool &b_is_in)
+{ // return false則沒有交點
+    // 左邊是裡面
+    // [1] a尾碰到b(交點在a尾)，(1) b尾：無交點 (2) b中間：對a來說交點是in；對b來說交點看在a的左邊還是右邊 (3)b頭；b看在a的左邊是裡面；右邊看狀況；如果A轉B的方向就是in反方向out
+    // [2] a中間碰到b(交點在a中間)， (1)b尾：對b來中是in，對a來說看在b的左右邊 (2)b中間：看在對方的左右邊 (3)b頭：看往對方的哪一邊
+    // [3] a頭碰到b(交點在a頭)，(1)b尾：無 (2)b中間：左右邊 (3)b頭：對a來說：b在左邊就是in，在右邊要看b是不是從右邊來
+    int state_a = cal_state(a, x, y);
+    int state_b = cal_state(b, x, y);
+    if (state_a == 1)
+    {
+        if (state_b == 2)
+        {
+            a_is_in = true; //a的下一個如果在b線段的左邊就是in
+            b_is_in = mid2tail(b, a);
+        }
+        else if (state_b == 3)
+        {
+            a_is_in = tail2head(a, b);
+            b_is_in = head2tail(b, a);
+        }
+        else
+            return false;
+    }
+    else if (state_a == 2)
+    {
+        if (state_b == 1)
+        {
+            a_is_in = mid2tail(a, b);
+            b_is_in = true;
+        }
+        else if (state_b == 2)
+        {
+            a_is_in = isleft(a->next, b);
+            b_is_in = isleft(b->next, a);
+        }
+        else
+        {
+            a_is_in = mid2head(a, b);
+            b_is_in = isleft(b->next, a);
+        }
+    }
+    else
+    {
+        if (state_b == 1)
+        {
+            a_is_in = head2tail(a, b);
+            b_is_in = tail2head(b, a);
+        }
+        else if (state_b == 3)
+        {
+            a_is_in = head2head(a, b);
+            b_is_in = head2head(b, a);
+        }
+        else
+        {
+            a_is_in = isleft(a->next, b);
+            b_is_in = mid2head(b, a);
+        }
+    }
+    return true;
+}
+short littlemerge::cal_state(point *&a, long long int &x, long long int &y)
+{ // 交點一定在a上面，RETURN三種狀況：1：交點在A尾；2：交點在A中間；3：交點在A頭
+    if (a->verti)
+    {
+        // a是垂直線的狀況
+        if (a->y == y)
+            return 3;
+        else if (a->next->y == y)
+            return 1;
+        else
+            return 2;
+    }
+    else
+    {
+        if (a->x == x)
+            return 3;
+        else if (a->next->x == x)
+            return 1;
+        else
+            return 2;
+    }
+}
+bool littlemerge::isleft(point *&p, point *&line)
+{ //判斷p點是不是在line的左邊
+    if (line->verti)
+        return ((p->x > line->x) ^ line->dir);
+    else
+        return ((p->y < line->y) ^ line->dir);
+}
+bool littlemerge::head2head(point *&a, point *&line)
+{ //判斷a點是不是在line的裡面
+    if (line->verti)
+    {
+        if (line->dir)
+        {
+            if (!a->dir)
+                return true;
+            else if (!line->prev->dir)
+                return true;
+            else
+                return false;
+        }
+        else
+        {
+            if (a->dir)
+                return true;
+            else if (!line->prev->dir)
+                return false;
+            else
+                return true;
+        }
+    }
+    else
+    {
+        if (line->dir)
+        {
+            if (a->dir)
+                return true;
+            else if (!line->prev->dir)
+                return false;
+            else
+                return true;
+        }
+        else
+        {
+            if (!a->dir)
+                return true;
+            else if (!line->prev->dir)
+                return true;
+            else
+                return false;
+        }
+    }
+}
+bool littlemerge::tail2head(point *&a, point *&line)
+{ //a尾在line頭上，判斷a是不是在line裡面
+    if (line->verti)
+    {
+        if (line->dir)
+        {
+            if (a->next->dir)
+                return true;
+            if (line->prev->dir)
+                return false;
+            else
+                return true;
+        }
+        else
+        {
+            if (!a->next->dir)
+                return true;
+            if (line->prev->dir)
+                return true;
+            else
+                return false;
+        }
+    }
+    else
+    {
+        if (line->dir)
+        {
+            if (a->next->dir)
+                return true;
+            if (line->prev->dir)
+                return true;
+            else
+                return false;
+        }
+        else
+        {
+            if (!a->next->dir)
+                return true;
+            if (line->prev->dir)
+                return false;
+            else
+                return true;
+        }
+    }
+}
+bool littlemerge::head2tail(point *&a, point *&line)
+{ //a尾在line頭上，判斷a是不是在line裡面
+    if (line->verti)
+    {
+        if (line->dir)
+        {
+            if (!a->dir)
+                return true;
+            if (line->next->dir)
+                return true;
+            else
+                return false;
+        }
+        else
+        {
+            if (a->dir)
+                return true;
+            if (!line->next->dir)
+                return true;
+            else
+                return false;
+        }
+    }
+    else
+    {
+        if (line->dir)
+        {
+            if (a->dir)
+                return true;
+            if (!line->next->dir)
+                return true;
+            else
+                return false;
+        }
+        else
+        {
+            if (!a->dir)
+                return true;
+            if (line->next->dir)
+                return true;
+            else
+                return false;
+        }
+    }
+}
+bool littlemerge::mid2head(point *&a, point *&line)
+{ //line從a的中間射出
+    if (line->verti)
+    {
+        if (line->dir)
+        {
+            if (!a->dir)
+                return true;
+            else if (line->prev->dir)
+                return false;
+            else
+                return true;
+        }
+        else
+        {
+            if (a->dir)
+                return true;
+            else if (line->prev->dir)
+                return true;
+            else
+                return false;
+        }
+    }
+    else
+    {
+        if (line->dir)
+        {
+            if (a->dir)
+                return true;
+            else if (line->prev->dir)
+                return true;
+            else
+                return false;
+        }
+        else
+        {
+            if (!a->dir)
+                return true;
+            else if (line->prev->dir)
+                return false;
+            else
+                return true;
+        }
+    }
+}
+bool littlemerge::mid2tail(point *&a, point *&line)
+{ //line從a的中間涉入
+    if (line->verti)
+    {
+        if (line->dir)
+        {
+            if (!a->dir)
+                return true;
+            else if (!line->next->dir)
+                return false;
+            else
+                return true;
+        }
+        else
+        {
+            if (a->dir)
+                return true;
+            else if (!line->next->dir)
+                return true;
+            else
+                return false;
+        }
+    }
+    else
+    {
+        if (line->dir)
+        {
+            if (a->dir)
+                return true;
+            else if (line->next->dir)
+                return false;
+            else
+                return true;
+        }
+        else
+        {
+            if (!a->dir)
+                return true;
+            else if (line->next->dir)
+                return true;
+            else
+                return false;
+        }
     }
 }
 #endif

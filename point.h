@@ -48,17 +48,17 @@ public:
 
     vector<point *> intersection;
     long long x, y;
-    point *next; // 後一個點
-    point *prev; // 前一個點
-    point *s_next; // 筆直走 走得最遠的點
-    int len; // ROOT 專用
-    long long minx, miny, maxx, maxy;//多邊形的邊界 
-    int pcolor; //merge時 做DFS用的
+    point *next;                      // 後一個點
+    point *prev;                      // 前一個點
+    point *s_next;                    // 筆直走 走得最遠的點
+    int len;                          // ROOT 專用
+    long long minx, miny, maxx, maxy; //多邊形的邊界
+    int pcolor;                       //merge時 做DFS用的
     // point* straright_next;
     short angle; //角度
-    bool verti; //垂直
-    bool dir;   //往正的地方走(上、右)
-    bool mark; // 標示有沒有走過(merge)
+    bool verti;  //垂直
+    bool dir;    //往正的地方走(上、右)
+    bool mark;   // 標示有沒有走過(merge)
     // point &bool operator<(point &b);
 };
 
@@ -66,13 +66,13 @@ class intersect_point : public point
 {
 private:
 public:
-    intersect_point(long long, long long, int);
+    intersect_point(long long, long long, int, bool);
     ~intersect_point();
     bool ispoint() { return false; };
     void print();
     intersect_point *cross_point;
     int color; // 標示交點屬於哪個多邊形
-    bool in; // 標示進入對面的多邊形否
+    bool in;   // 標示進入對面的多邊形否
     bool tran; // 可以轉到對面的交點上
 };
 
@@ -307,7 +307,7 @@ void point::delete_poly_tranf(set<point *> &out_list, set<point *> &out_list2)
     }
 }
 
-intersect_point::intersect_point(long long xt, long long yt, int colort) : point(xt, yt), color(colort), in(true)
+intersect_point::intersect_point(long long xt, long long yt, int colort, bool is_in) : point(xt, yt), color(colort), in(is_in)
 {
     point_cnt -= 1;
     intersect_cnt += 1;
@@ -323,11 +323,6 @@ intersect_point::~intersect_point()
 
 void intersect_point::print()
 {
-<<<<<<< HEAD
     cout << "II " << *this << (in ? "  in" : " out") << endl;
 }
 #endif
-=======
-    cout << "II " << *this << (in ? "  in " : " out ") << (tran ? " tran " : " unable") <<endl;
-}
->>>>>>> d093c6b8706d66ace502596c7dd76c66c15b9cd3

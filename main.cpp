@@ -19,7 +19,7 @@ int main()
 {
     ios_base::sync_with_stdio(0);
     cin.tie(0);
-    string filename = "OpenCase_1.txt";
+    string filename = "test_merge.txt";
     fstream fin(filename.c_str(), fstream::in);
     vector<string> operations;      // store opertaion strings 按照順序存操作的次序
     map<string, operation> mapping; // map string to its operation
@@ -66,10 +66,15 @@ int main()
         {
             cout << cnt++ << endl;
             LM->insert(root);
-            if (cnt == 232)
-                LM->output("TEST.txt");
+            if (cnt == 85)
+                LM->close_print();
+            if (cnt == 84)
+            {
+                // LM->output("TEST.txt");
+                LM->start_print();
+            }
         }
-        LM->print();
+        // LM->print();
         LM->output(string("result/Merge") + char(i + 49) + ".txt");
         LM->clear();
     }
@@ -115,7 +120,7 @@ inline bool read_operation(fstream &fin, point **root)
     area += p->area(*root);
 
     // see if it is clock wise or counter clockwise
-    // cout << ((area > 0) ? "Counter-clockwise" : "Clockwise") << endl;
+    cout << ((area > 0) ? "Counter-clockwise" : "Clockwise") << endl;
 
     // if it is clockwise, reverse it
     if (area < 0)

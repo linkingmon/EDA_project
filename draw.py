@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 cnt = 1
-# filename = 'sample_in.txt'
-filename = 'TEST.txt'
+# filename = 'test_merge.txt'
+filename = 'OpenCase_1.txt'
 with open(filename, 'r') as f:
     L = f.read().splitlines()[2:]
     plt.figure()
