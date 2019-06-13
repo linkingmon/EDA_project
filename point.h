@@ -48,7 +48,7 @@ public:
         cout << *this << " DIR" << (this->verti ? '|' : '-') << " Angle" << ang[this->angle] << " Snext" << *(this->s_next) << endl;
     };
     virtual bool ispoint() { return true; };
-
+    void setcounterclockwise();
     vector<point *> intersection;
     long long x, y;
     point *next;                      // 後一個點
@@ -62,6 +62,7 @@ public:
     bool verti;  //垂直
     bool dir;    //往正的地方走(上、右)
     bool mark;   // 標示有沒有走過(merge)
+    bool counterclockwise;
     // point &bool operator<(point &b);
 };
 
@@ -79,6 +80,15 @@ public:
     bool tran; // 可以轉到對面的交點上
 };
 
+void point::setcounterclockwise(){
+    point* p = this;
+    double area = 0;
+    for(unsigned int i = 0 ; i < this->len; ++i){
+        area += p->area(p->next);
+        p = p->next;
+    }
+    counterclockwise = (area > 0);
+}
 ostream &operator<<(ostream &os, const point &p)
 {
     os << '(' << setw(4) << p.x << ',' << setw(4) << p.y << ')';

@@ -1,4 +1,7 @@
+#ifndef INTERVAL_H
+#define INTERVAL_H
 #include <vector>
+#include <string>
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
@@ -41,18 +44,19 @@ class Interval_Mgr
 {
 public:
     ~Interval_Mgr() { clear(); }
-    void build_interval( point* &p, bool direction);
+    void build_interval( vector<point*> &rootList, bool direction);
     void split_polygon();
     bool find_intersections(Interval* &p);
     void combine_interval(Interval* &p);
     void add_interval(Interval* &p);
     void add_rectangle(Interval* &p);
+    void move_rectangle(vector<Rectangle*>& totalList );
     void clear();
 private:
     vector<Interval*> _intervalList;
     vector<Interval*> _currentList;
     vector<size_t> _intersections;
-    vector<Rectangle> _rectList;
+    vector<Rectangle* > _rectList;
     bool _direction; // 0 horizontal; 1 vertical;
 };
 
@@ -75,63 +79,75 @@ void Interval_Mgr::clear()
         delete _intervalList[i]; 
         _intervalList[i] = 0;
     }
+    for (size_t i=0; i<_rectList.size(); i++){
+        if (_rectList[i]!=0){
+            delete _rectList[i];
+            _rectList[i]=0;
+        }
+    }
+    _intervalList.clear();
+    _rectList.clear();
 }
 
 
-void Interval_Mgr::build_interval( point* &p, bool direction)
+void Interval_Mgr::build_interval( vector<point*> &rootList, bool direction)
 {
     _direction = direction;
-    size_t n_vertex = p->len;
-    // for (size_t i=0; i<n_vertex; i++){
-    //     cout << *p << endl;
-    //     p = p->next;
-    // }
-    // p = p->prev;
-    if (_direction==0){ //horizontal
-        if (p->verti){
-            for (size_t i=0; i<n_vertex; i+=2){
-                cout << *p->prev << " " << *p << endl;
-                if (p->prev->x < p->x){
-                    _intervalList.push_back(new Interval(p->prev->x, p->x, p->y, 0));
-                } else {
-                    _intervalList.push_back(new Interval(p->x, p->prev->x, p->y, 1));
+    for (size_t pi=0; pi<rootList.size(); pi++){
+        point* p = rootList[pi];
+        size_t n_vertex = p->len;
+        // for (size_t i=0; i<n_vertex; i++){
+        //     cout << *p << endl;
+        //     p = p->next;
+        // }
+        // p = p->prev;
+        if (_direction==0){ //horizontal
+            if (p->verti){
+                for (size_t i=0; i<n_vertex; i+=2){
+                    cout << *p->prev << " " << *p << endl;
+                    if (p->prev->x < p->x){
+                        _intervalList.push_back(new Interval(p->prev->x, p->x, p->y, 0));
+                    } else {
+                        _intervalList.push_back(new Interval(p->x, p->prev->x, p->y, 1));
+                    }
+                    p = p->next->next;
                 }
-                p = p->next->next;
+            } else {
+                for (size_t i=0; i<n_vertex; i+=2){
+                    cout << *p << " " << *p->next << endl;
+                    if (p->x < p->next->x){
+                        _intervalList.push_back(new Interval(p->x, p->next->x, p->y, 0));
+                    } else {
+                        _intervalList.push_back(new Interval(p->next->x, p->x, p->y, 1));
+                    }
+                    p = p->next->next;
+                }
             }
-        } else {
-            for (size_t i=0; i<n_vertex; i+=2){
-                cout << *p << " " << *p->next << endl;
-                if (p->x < p->next->x){
-                    _intervalList.push_back(new Interval(p->x, p->next->x, p->y, 0));
-                } else {
-                    _intervalList.push_back(new Interval(p->next->x, p->x, p->y, 1));
+        } else { // vertical
+            if (p->verti){
+                for (size_t i=0; i<n_vertex; i+=2){
+                    cout << *p << " " << *p->next << endl;
+                    if (p->y > p->next->y){
+                        _intervalList.push_back(new Interval(p->next->y, p->y, p->x, 0));
+                    } else {
+                        _intervalList.push_back(new Interval(p->y, p->next->y, p->x, 1));
+                    }
+                    p = p->next->next;
                 }
-                p = p->next->next;
-            }
-        }
-    } else { // vertical
-        if (p->verti){
-            for (size_t i=0; i<n_vertex; i+=2){
-                cout << *p << " " << *p->next << endl;
-                if (p->y > p->next->y){
-                    _intervalList.push_back(new Interval(p->next->y, p->y, p->x, 0));
-                } else {
-                    _intervalList.push_back(new Interval(p->y, p->next->y, p->x, 1));
+            } else {
+                for (size_t i=0; i<n_vertex; i+=2){
+                    cout << *p->prev << " " << *p << endl;
+                    if (p->prev->y > p->y){
+                        _intervalList.push_back(new Interval(p->y, p->prev->y, p->x, 0));
+                    } else {
+                        _intervalList.push_back(new Interval(p->prev->y, p->y, p->x, 1));
+                    }
+                    p = p->next->next;
                 }
-                p = p->next->next;
-            }
-        } else {
-            for (size_t i=0; i<n_vertex; i+=2){
-                cout << *p->prev << " " << *p << endl;
-                if (p->prev->y > p->y){
-                    _intervalList.push_back(new Interval(p->y, p->prev->y, p->x, 0));
-                } else {
-                    _intervalList.push_back(new Interval(p->prev->y, p->y, p->x, 1));
-                }
-                p = p->next->next;
             }
         }
     }
+    
     sort(_intervalList.begin(), _intervalList.end(), ::compare_Interval);
     for (size_t i=0; i<_intervalList.size(); i++){
         cout << *_intervalList[i] << endl;
@@ -229,25 +245,35 @@ void Interval_Mgr::add_rectangle(Interval* &p)
         for(size_t i=0; i<_intersections.size(); i++){
             Interval* I=_currentList[_intersections[i]];
             if(p->get_position()>I->get_position()){
-                _rectList.push_back(Rectangle(I->get_left(), I->get_position(), I->get_right(), p->get_position()));
-                cout << _rectList.back();
+                _rectList.push_back(new Rectangle(I->get_left(), I->get_position(), I->get_right(), p->get_position()));
+                cout << *_rectList.back() << endl;
             }
         }
     } else {
         for(size_t i=0; i<_intersections.size(); i++){
             Interval* I=_currentList[_intersections[i]];
             if(p->get_position()>I->get_position()){
-                _rectList.push_back(Rectangle(I->get_position(), I->get_left(), p->get_position(), I->get_right()));
-                cout << _rectList.back();
+                _rectList.push_back(new Rectangle(I->get_position(), I->get_left(), p->get_position(), I->get_right()));
+                cout << *_rectList.back() << endl;
             }
         }
     }
 
 }
 
+void Interval_Mgr::move_rectangle(vector<Rectangle*>& totalList )
+{
+    for (size_t i=0; i<_rectList.size(); i++){
+        totalList.push_back(_rectList[i]);
+        _rectList[i] = 0;
+    }
+}
+
 bool compare_Interval (Interval* a, Interval* b) { return a->get_position()<b->get_position(); }
 
 ostream& operator << (ostream& os, const Rectangle& rect)
 {
-    os << "RECT " << rect._LLX << " " << rect._LLY << " " << rect._URX << " " << rect._URY  << endl;
+    os << "RECT " << rect._LLX << " " << rect._LLY << " " << rect._URX << " " << rect._URY << " ;" ;
 }
+
+#endif

@@ -20,7 +20,7 @@ int main()
 {
     ios_base::sync_with_stdio(0);
     cin.tie(0);
-    string filename = "OpenCase_1.txt";
+    string filename = "split/split4.in";
     fstream fin(filename.c_str(), fstream::in);
     vector<string> operations;      // store opertaion strings 按照順序存操作的次序
     map<string, operation> mapping; // map string to its operation
@@ -70,8 +70,16 @@ int main()
         LM->set_oper(oper);
         LM->clear();
     }
-    OperMgr *opermgr = new OperMgr(operations, mapping);
-    opermgr->do_operation();
+    // OperMgr *opermgr = new OperMgr(operations, mapping);
+    // opermgr->do_operation();
+    
+    
+    operation & oper = mapping[operations[0]];
+    SplitMgr* SM = new SplitMgr();
+    SM->splitH(oper.root_list);
+    SM->output_rect("split/split4_SH.out");
+    delete SM;
+
 }
 
 inline bool read_operation(fstream &fin, point **root)
