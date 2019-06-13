@@ -18,7 +18,7 @@ public:
     point(long long xt, long long yt);
     point(const point &); // copy constructor
     virtual ~point();
-    float area(point *p)
+    double area(point *&p)
     {
         return x / DIV * (p->y) / DIV - y / DIV * (p->x) / DIV;
     }
@@ -33,7 +33,8 @@ public:
         point *p = this;
         for (unsigned int i = 0; i < len; ++i)
         {
-            p->print();
+            // p->print();
+            cout << *p << endl;
             p = p->next;
         }
         cout << endl;
@@ -97,7 +98,7 @@ ostream &operator<<(ostream &os, const point &p)
 
 point::point(long long xt, long long yt) : x(xt), y(yt)
 {
-    // cout << "construct vertex" << *this << endl;
+    // cout << "construct vertex" << *this << this << endl;
     point_cnt += 1;
     verti = false;
     dir = false;

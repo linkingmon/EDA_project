@@ -8,24 +8,25 @@
 #include <map>
 #include "operation.h"
 #include "littlemerge.h"
-#include "OperMgr.h"
+#include "SplitMgr.h"
 
 #define DEBUG
 using namespace std;
 
-inline bool read_operation(fstream &, point **);
+inline bool read_operation(fstream &fin, point *&root, bool isclip);
 void find_intersect(operation, operation);
 
 int main()
 {
     ios_base::sync_with_stdio(0);
     cin.tie(0);
-    string filename = "split/split4.in";
+    string filename = "poly_with_hole.txt";
     fstream fin(filename.c_str(), fstream::in);
     vector<string> operations;      // store opertaion strings 按照順序存操作的次序
     map<string, operation> mapping; // map string to its operation
     string s;
     fin >> s;
+
     while (1)
     {
         fin >> s;
@@ -38,51 +39,39 @@ int main()
             mapping.insert(make_pair(s, oper));
         }
     }
-#ifdef DEBUG
-    cout << "All operations: ";
-    for (int i = 0; i < operations.size(); ++i)
-        cout << operations[i] << " ";
-    cout << endl;
-    map<string, operation>::iterator iter;
-    for (iter = mapping.begin(); iter != mapping.end(); ++iter)
-        cout << "Have construct operation class with name " << iter->first << endl;
-#endif
 
-    for (int i = 0; i < mapping.size(); ++i)
+    for (unsigned int i = 0; i < mapping.size(); ++i)
     {
-#ifdef DEBUG
-        cout << "=============================" << endl;
-#endif
         fin >> s >> s >> s;
         operation &oper = mapping[s];
+        bool isclip = (s[0] == 'C'); // 如果是 Clip 就存順時針
         fin >> s;
-        // read points and construct list
         point *root;
-        int cnt = 0;
-        littlemerge *LM = new littlemerge;
-        while (read_operation(fin, &root))
-        {
-            cout << cnt++ << endl;
-            LM->insert(root);
-        }
-        // LM->print();
-        LM->output(string("result/Merge") + char(i + 49) + ".txt");
-        LM->set_oper(oper);
-        LM->clear();
+        while (read_operation(fin, root, isclip))
+            oper.root_list.push_back(root);
     }
-    // OperMgr *opermgr = new OperMgr(operations, mapping);
-    // opermgr->do_operation();
-    
-    
-    operation & oper = mapping[operations[0]];
-    SplitMgr* SM = new SplitMgr();
-    SM->splitH(oper.root_list);
-    SM->output_rect("split/split4_SH.out");
-    delete SM;
 
+    littlemerge * LM = new littlemerge();
+    for(unsigned int i = 0 ; i < operations.size() ; ++i){
+        if(operations[i][0] == 'S'){
+            SplitMgr *SM = new SplitMgr();
+            LM->output("split/total4_SH.out");
+            SM->splitH(LM->get_list());
+            SM->output_rect("split/split4_SH.out");
+            delete SM;
+        }
+        else{
+            operation& oper = mapping[operations[i]];
+            for(unsigned int j = 0 ; j < oper.root_list.size() ; ++j)
+                LM->insert(oper.root_list[j]);
+            // LM->print()
+            // LM->output(string("result/result") + char(i + 49) + ".txt");
+        }
+    }
+    delete LM;
 }
 
-inline bool read_operation(fstream &fin, point **root)
+inline bool read_operation(fstream &fin, point *&root, bool isclip)
 {
     // read points and construct polygon
     string s, s2;
@@ -93,14 +82,16 @@ inline bool read_operation(fstream &fin, point **root)
         return false;
 
     // read first 2 dummy int
-    // 文喬老大說有可能最後不會出現
-    fin >> s >> s;
+    // 第一個座標在最後有可能不會給，要先存起來
+    fin >> s >> s2;
+    long long first_x = (long long)(atoi(s.c_str()));
+    long long first_y = (long long)(atoi(s2.c_str()));
 
     // read root
     fin >> s >> s2;
     point *p;
     point *prev = new point((long long)(atoi(s.c_str())), (long long)(atoi(s2.c_str())));
-    *root = prev;
+    root = prev;
     int cnt = 1;
 
     // area for detecting if clockwise
@@ -109,30 +100,45 @@ inline bool read_operation(fstream &fin, point **root)
     {
         p = new point((long long)(atoi(s.c_str())), (long long)(atoi(s2.c_str())));
         p->prev = prev;
-        // prev->straight_next = p;
         prev->next = p;
         area += prev->area(p);
         prev = p;
         ++cnt;
     }
-    // p->straight_next = *root;
-    p->next = *root;
-    (*root)->prev = p;
-    (*root)->len = cnt;
-    area += p->area(*root);
+    if(p->x != first_x || p->y != first_y){
+        ++cnt;
+        p = new point(first_x, first_y);
+        p->prev = prev;
+        prev->next = p;
+        area += prev->area(p);
+        prev = p;
+    }
+    p->next = root;
+    root->prev = p;
+    root->len = cnt;
+    area += p->area(root);
 
     // see if it is clock wise or counter clockwise
     // cout << ((area > 0) ? "Counter-clockwise" : "Clockwise") << endl;
 
     // if it is clockwise, reverse it
-    if (area < 0)
+    if (!isclip && area < 0)
     {
-        point *p = *root;
-        for (int i = 0; i < (*root)->len; ++i)
+        point *p = root;
+        for (int i = 0; i < root->len; ++i)
         {
             p->swap_dir();
             p = p->prev;
         }
     }
+    else if(isclip && area > 0){
+        point *p = root;
+        for (int i = 0; i < root->len; ++i)
+        {
+            p->swap_dir();
+            p = p->prev;
+        }
+    }
+    // root->print_poly();
     return true;
 }

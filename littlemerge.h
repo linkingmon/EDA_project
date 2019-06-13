@@ -38,6 +38,7 @@ public:
     bool mid2head(point *&a, point *&line);
     bool mid2tail(point *&a, point *&line);
     void set_oper(operation &oper);
+    vector<point*>& get_list(){return root_list;};
 
 private:
     vector<point *> root_list;
@@ -59,7 +60,6 @@ void littlemerge::set_oper(operation &oper)
 }
 void littlemerge::clear()
 {
-    root_list.clear();
     out_list.clear();
     out_list_buf.clear();
 }
@@ -71,7 +71,8 @@ void littlemerge::output(string filename)
     for (unsigned int i = 0; i < root_list.size(); ++i)
     {
         point *p = root_list[i];
-        fout << "POLYGON ";
+        p->setcounterclockwise();
+        fout << (p->counterclockwise ? "POLYGON " : "HOLE ");
         for (unsigned int j = 0; j < root_list[i]->len; ++j)
         {
             fout << p->x << " " << p->y << " ";
@@ -103,15 +104,11 @@ void littlemerge::print_outlist()
     set<point *>::iterator iter;
     for (iter = out_list.begin(); iter != out_list.end(); ++iter)
         (*iter)->print();
-    cout << "XXX" << endl;
 }
 void littlemerge::insert(point *&root)
 {
     ::list_construct(root);
-    // root->print_poly();
-    // root_list.push_back(root);
-    out_list.clear();
-    out_list_buf.clear();
+    clear();
     merge(root);
 }
 

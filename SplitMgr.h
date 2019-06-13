@@ -11,32 +11,33 @@ public:
     void splitO(vector<point *> &total){};
     void output_rect(string outPath);
     bool outside_poly(point *root, point *cross);
-    void build_polygon_table(vector<vector<point *>> &, vector<point *> &);
+    void build_polygon_table(vector<vector<point *> > &, vector<point *> &);
     void clear();
 
 private:
     Interval_Mgr _IM;
-    vector<Rectangle*> _rectList;
+    vector<Rectangle *> _rectList;
 };
 
 void SplitMgr::splitV(vector<point *> &total)
 {
-    vector<vector<point *>> polygon_table;
+    vector<vector<point *> > polygon_table;
     build_polygon_table(polygon_table, total);
-    for (size_t i=0; i<polygon_table.size(); i++){
+    for (size_t i = 0; i < polygon_table.size(); i++)
+    {
         _IM.build_interval(polygon_table[i], 1);
         _IM.split_polygon();
         _IM.move_rectangle(_rectList);
         _IM.clear();
     }
-    
 }
 
 void SplitMgr::splitH(vector<point *> &total)
 {
-    vector<vector<point *>> polygon_table;
+    vector<vector<point *> > polygon_table;
     build_polygon_table(polygon_table, total);
-    for (size_t i=0; i<polygon_table.size(); i++){
+    for (size_t i = 0; i < polygon_table.size(); i++)
+    {
         _IM.build_interval(polygon_table[i], 0);
         _IM.split_polygon();
         _IM.move_rectangle(_rectList);
@@ -44,17 +45,21 @@ void SplitMgr::splitH(vector<point *> &total)
     }
 }
 
-void SplitMgr::output_rect(string outPath){
+void SplitMgr::output_rect(string outPath)
+{
     ofstream outfile(outPath.c_str());
-    for (size_t i=0; i<_rectList.size(); i++){
+    for (size_t i = 0; i < _rectList.size(); i++)
+    {
         outfile << *_rectList[i] << endl;
     }
 }
 
-void SplitMgr::clear(){
-    for (size_t i=0; i<_rectList.size(); i++){
+void SplitMgr::clear()
+{
+    for (size_t i = 0; i < _rectList.size(); i++)
+    {
         delete _rectList[i];
-        _rectList[i]=0;
+        _rectList[i] = 0;
     }
 }
 
@@ -100,29 +105,34 @@ bool SplitMgr::outside_poly(point *root, point *cross)
         return true;
 }
 
-void SplitMgr::build_polygon_table(vector<vector<point *>> & polygon_table, vector<point *> &total)
+void SplitMgr::build_polygon_table(vector<vector<point *> > &polygon_table, vector<point *> &total)
 {
-    for (size_t i=0; i<total.size(); i++){
+    for (size_t i = 0; i < total.size(); i++)
+    {
         bool new_poly = 1;
-        point* p = total[i];
-        for (size_t j=0; j<polygon_table.size(); j++){
-            if (!outside_poly(p, polygon_table[j][0])){
+        point *p = total[i];
+        for (size_t j = 0; j < polygon_table.size(); j++)
+        {
+            if (!outside_poly(p, polygon_table[j][0]))
+            {
                 polygon_table[j].push_back(p);
                 new_poly = 0;
                 break;
-            } else if (!outside_poly(polygon_table[j][0], p)){
+            }
+            else if (!outside_poly(polygon_table[j][0], p))
+            {
                 polygon_table[j].insert(polygon_table[j].begin(), p);
                 new_poly = 0;
                 break;
             }
         }
-        if (new_poly){
+        if (new_poly)
+        {
             vector<point *> poly;
             poly.push_back(p);
             polygon_table.push_back(poly);
         }
     }
 }
-
 
 #endif
