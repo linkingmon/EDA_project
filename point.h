@@ -18,7 +18,10 @@ public:
     point(long long xt, long long yt);
     point(const point &); // copy constructor
     virtual ~point();
-    float area(point *p) { return x / DIV * (p->y) / DIV - y / DIV * (p->x) / DIV; }
+    float area(point *p)
+    {
+        return x / DIV * (p->y) / DIV - y / DIV * (p->x) / DIV;
+    }
     // virtual void print() { cout << x << " " << y << endl; }
     void swap_dir() { swap(next, prev); };
     void connect();
@@ -323,6 +326,6 @@ intersect_point::~intersect_point()
 
 void intersect_point::print()
 {
-    cout << "II " << *this << (in ? "  in" : " out") << endl;
+    cout << "II " << *this << (in ? "  in" : " out") << " tran" << tran << endl;
 }
 #endif

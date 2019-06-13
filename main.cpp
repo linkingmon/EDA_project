@@ -8,18 +8,19 @@
 #include <map>
 #include "operation.h"
 #include "littlemerge.h"
+#include "OperMgr.h"
+
 #define DEBUG
 using namespace std;
 
 inline bool read_operation(fstream &, point **);
 void find_intersect(operation, operation);
-void output_result(const vector<point *> &, string);
 
 int main()
 {
     ios_base::sync_with_stdio(0);
     cin.tie(0);
-    string filename = "test_merge.txt";
+    string filename = "OpenCase_1.txt";
     fstream fin(filename.c_str(), fstream::in);
     vector<string> operations;      // store opertaion strings 按照順序存操作的次序
     map<string, operation> mapping; // map string to its operation
@@ -53,9 +54,6 @@ int main()
         cout << "=============================" << endl;
 #endif
         fin >> s >> s >> s;
-#ifdef DEBUG
-        cout << "Constructing list of operation: " << s << endl;
-#endif
         operation &oper = mapping[s];
         fin >> s;
         // read points and construct list
@@ -66,18 +64,14 @@ int main()
         {
             cout << cnt++ << endl;
             LM->insert(root);
-            if (cnt == 85)
-                LM->close_print();
-            if (cnt == 84)
-            {
-                // LM->output("TEST.txt");
-                LM->start_print();
-            }
         }
         // LM->print();
         LM->output(string("result/Merge") + char(i + 49) + ".txt");
+        LM->set_oper(oper);
         LM->clear();
     }
+    OperMgr *opermgr = new OperMgr(operations, mapping);
+    opermgr->do_operation();
 }
 
 inline bool read_operation(fstream &fin, point **root)
@@ -102,7 +96,7 @@ inline bool read_operation(fstream &fin, point **root)
     int cnt = 1;
 
     // area for detecting if clockwise
-    float area = 0;
+    double area = 0;
     while (fin >> s && s != ";" && fin >> s2)
     {
         p = new point((long long)(atoi(s.c_str())), (long long)(atoi(s2.c_str())));
@@ -120,7 +114,7 @@ inline bool read_operation(fstream &fin, point **root)
     area += p->area(*root);
 
     // see if it is clock wise or counter clockwise
-    cout << ((area > 0) ? "Counter-clockwise" : "Clockwise") << endl;
+    // cout << ((area > 0) ? "Counter-clockwise" : "Clockwise") << endl;
 
     // if it is clockwise, reverse it
     if (area < 0)
@@ -133,24 +127,4 @@ inline bool read_operation(fstream &fin, point **root)
         }
     }
     return true;
-}
-
-// 輸出txt黨 給python吃 看對不對
-void output_result(const vector<point *> &root_list, string filename)
-{
-    fstream fout(filename.c_str(), fstream::out);
-    fout << "OPERATION M1 ;\n\n";
-    fout << "DATA MERGE M1 ;" << endl;
-    for (unsigned int i = 0; i < root_list.size(); ++i)
-    {
-        point *p = root_list[i];
-        fout << "POLYGON ";
-        for (unsigned int j = 0; j < root_list[i]->len; ++j)
-        {
-            fout << p->x << " " << p->y << " ";
-            p = p->next;
-        }
-        fout << root_list[i]->x << " " << root_list[i]->y << " ;" << endl;
-    }
-    fout << "END DATA" << endl;
 }

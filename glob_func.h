@@ -5,8 +5,6 @@
 static int glob_color = 0;
 void list_construct(point *&);
 point *construct_new_poly(vector<point *> &);
-vector<point *> little_merge(set<point *> &);
-// void check_list(operation &, vector<point *> &);
 
 // to construct a link
 // 增加 point 的特殊性質
@@ -102,7 +100,6 @@ point *construct_new_poly(vector<point *> &point_stream)
 
     for (unsigned int i = 0; i < point_stream.size() - 1; ++i)
     {
-        // cout << *point_stream[i];
         if (point_stream[i]->x == point_stream[i + 1]->x)
         {
             if (point_stream[i]->y == point_stream[i + 1]->y)
@@ -112,7 +109,6 @@ point *construct_new_poly(vector<point *> &point_stream)
         }
         else
             vec[i] = 0;
-        // cout << " " << vec[i] << endl;
     }
     vector<point *> point_stream_simple;
     int cnt = 0;
@@ -126,7 +122,6 @@ point *construct_new_poly(vector<point *> &point_stream)
             continue;
         if (vec[i] != dir)
         {
-            // cout << "PUSH " << *(point_stream[i]) << endl;
             point_stream_simple.push_back(point_stream[i]);
             dir = vec[i];
         }
@@ -148,76 +143,4 @@ point *construct_new_poly(vector<point *> &point_stream)
     list_construct(root);
     return root;
 }
-
-vector<point *> little_merge(set<point *> &out_list)
-{
-    vector<point *> new_list;
-    int cnt = 0;
-    ++glob_color;
-#ifdef DEBUG
-// cout << "-----------merging-----------" << endl;
-#endif
-    while (out_list.size() > 0)
-    {
-        vector<point *> poly;
-        point *new_poly;
-        set<point *>::iterator iter;
-        iter = out_list.begin();
-        new_poly = *iter;
-        point *p = (*iter)->next;
-        out_list.erase(*iter);
-#ifdef DEBUG
-        cout << "WALK " << *new_poly << endl;
-#endif
-        new_poly->pcolor = glob_color;
-        poly.push_back(new_poly);
-        while (p != new_poly)
-        {
-            ++cnt;
-#ifdef DEBUG
-            cout << "WALK " << *p << endl;
-#endif
-            p->pcolor = glob_color;
-            poly.push_back(p);
-            if (!p->ispoint())
-            {
-                if (!static_cast<intersect_point *>(p)->in)
-                {
-                    out_list.erase(p);
-                }
-                if (!static_cast<intersect_point *>(p)->tran)
-                {
-                    // cout << "No tran in intersect" << *p << endl;
-                    goto back;
-                }
-                p = static_cast<intersect_point *>(p)->cross_point;
-#ifdef DEBUG
-                cout << "cross " << *p << endl;
-#endif
-                p->pcolor = glob_color;
-                poly.push_back(p);
-                if (p == new_poly)
-                {
-                    break;
-                }
-                if (!static_cast<intersect_point *>(p)->in)
-                {
-                    out_list.erase(p);
-                }
-            }
-        back:
-#ifdef DEBUG
-            cout << "WALK " << *p << endl;
-#endif
-            p->pcolor = glob_color;
-            poly.push_back(p);
-            p = p->next;
-        }
-        // 用新走出的形狀做出多邊形
-        // 需要初始化更種參數：包刮：x, y next, prev, s_next, len, angle, verti, dir
-        new_list.push_back(construct_new_poly(poly));
-    }
-    return new_list;
-}
-
 #endif

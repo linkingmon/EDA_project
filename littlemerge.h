@@ -2,6 +2,7 @@
 #define LITTLEMERGE_H
 #include "glob_func.h"
 #include "point.h"
+#include "operation.h"
 
 class littlemerge
 {
@@ -22,12 +23,7 @@ public:
     bool inside_region(point *a, point *b, long long x, long long y);
     bool in_out_cross(point *, point *);
     void check_list(vector<point *> &, point *&);
-    void clear()
-    {
-        root_list.clear();
-        out_list.clear();
-        out_list_buf.clear();
-    };
+    void clear();
     void output(string);
     void print();
     void start_print() { printon = true; };
@@ -41,6 +37,7 @@ public:
     bool head2tail(point *&a, point *&line);
     bool mid2head(point *&a, point *&line);
     bool mid2tail(point *&a, point *&line);
+    void set_oper(operation &oper);
 
 private:
     vector<point *> root_list;
@@ -55,6 +52,16 @@ littlemerge::littlemerge()
 }
 littlemerge::~littlemerge()
 {
+}
+void littlemerge::set_oper(operation &oper)
+{
+    oper.root_list = root_list;
+}
+void littlemerge::clear()
+{
+    root_list.clear();
+    out_list.clear();
+    out_list_buf.clear();
 }
 void littlemerge::output(string filename)
 {
@@ -122,7 +129,11 @@ void littlemerge::merge(point *&root)
         return;
     insert_intersect(root);
     if (printon)
+    {
         root->print_poly();
+        cout << "=========" << endl;
+        root_list[0]->print_poly();
+    }
     vector<point *> new_list;
     int cnt = 0;
     ++glob_color;
@@ -408,7 +419,11 @@ void littlemerge::find_cross(point *a, point *b)
         {
             bool a_is_in, b_is_in;
             if (check_point(a, b, x, y, a_is_in, b_is_in))
+            {
+                if (printon)
+                    cout << *a << *b << x << ' ' << y << ' ' << a_is_in << ' ' << b_is_in << endl;
                 new_intersect(a, b, x, y, a_is_in, b_is_in);
+            }
         }
     }
 }
@@ -433,20 +448,20 @@ bool littlemerge::inside_region(point *a, point *b, long long x, long long y)
 {
     if (a->verti)
     {
-        if (y == a->next->y && x == b->next->x)
-            return false;
-        if (y == a->next->y && x == b->x)
-            return false;
+        // if (y == a->next->y && x == b->next->x)
+        //     return false;
+        // if (y == a->next->y && x == b->x)
+        //     return false;
         bool b_b = inside_edge(b->x, b->next->x, x);
         bool b_c = inside_edge(a->y, a->next->y, y);
         return (b_b && b_c);
     }
     else
     {
-        if (x == a->next->x && y == b->next->y)
-            return false;
-        if (x == a->next->x && y == b->y)
-            return false;
+        // if (x == a->next->x && y == b->next->y)
+        //     return false;
+        // if (x == a->next->x && y == b->y)
+        //     return false;
         bool b_a = inside_edge(a->x, a->next->x, x);
         bool b_d = inside_edge(b->y, b->next->y, y);
         return (b_a && b_d);
@@ -589,8 +604,12 @@ bool littlemerge::check_point(point *&a, point *&b, long long int &x, long long 
         }
         else if (state_b == 3)
         {
-            a_is_in = tail2head(a, b);
+            if (a->next->dir == b->dir && a->dir == b->prev->dir)
+                return false;
+            // a_is_in = tail2head(a, b);
             b_is_in = head2tail(b, a);
+            a_is_in = true;
+            // b_is_in = true;
         }
         else
             return false;
@@ -617,8 +636,11 @@ bool littlemerge::check_point(point *&a, point *&b, long long int &x, long long 
     {
         if (state_b == 1)
         {
+            if (b->next->dir == a->dir && b->dir == a->prev->dir)
+                return false;
             a_is_in = head2tail(a, b);
-            b_is_in = tail2head(b, a);
+            // b_is_in = tail2head(b, a);
+            b_is_in = true;
         }
         else if (state_b == 3)
         {
