@@ -9,8 +9,9 @@ class littlemerge
 public:
     littlemerge();
     ~littlemerge();
-    void insert(point *&);
+    void insert(point *&, bool);
     void merge(point *&);
+    void clip(point *&);
     bool find_intersect(point *&);
     int find_intersect(point *, point *);
     bool outside_poly(point *, point *);
@@ -26,9 +27,10 @@ public:
     void clear();
     void output(string);
     void print();
+    void print_outlist();
+    void print_outbuf();
     void start_print() { printon = true; };
     void close_print() { printon = false; };
-    void print_outlist();
     bool check_point(point *&a, point *&b, long long int &x, long long int &y, bool &a_is_in, bool &b_is_in);
     short cal_state(point *&a, long long int &x, long long int &y);
     bool isleft(point *&p, point *&line);
@@ -38,13 +40,14 @@ public:
     bool mid2head(point *&a, point *&line);
     bool mid2tail(point *&a, point *&line);
     void set_oper(operation &oper);
-    vector<point*>& get_list(){return root_list;};
+    vector<point *> &get_list() { return root_list; };
 
 private:
     vector<point *> root_list;
     set<point *> out_list;
     vector<point *> out_list_buf;
     bool printon;
+    bool ismerge;
 };
 
 littlemerge::littlemerge()
@@ -66,8 +69,8 @@ void littlemerge::clear()
 void littlemerge::output(string filename)
 {
     fstream fout(filename.c_str(), fstream::out);
-    fout << "OPERATION M1 ;\n\n";
-    fout << "DATA MERGE M1 ;" << endl;
+    fout << "OPERATION X1 ;\n\n";
+    fout << "DATA MERGE X1 ;" << endl;
     for (unsigned int i = 0; i < root_list.size(); ++i)
     {
         point *p = root_list[i];
@@ -84,8 +87,9 @@ void littlemerge::output(string filename)
 }
 void littlemerge::print()
 {
-    cout << "OPERATION M1 ;\n\n";
-    cout << "DATA MERGE M1 ;" << endl;
+    cout << "================RESULT=================" << endl;
+    cout << "OPERATION X1 ;\n\n";
+    cout << "DATA " << (ismerge ? "MERGE" : "CLIP") << " X1 ;" << endl;
     for (unsigned int i = 0; i < root_list.size(); ++i)
     {
         point *p = root_list[i];
@@ -98,18 +102,32 @@ void littlemerge::print()
         cout << root_list[i]->x << " " << root_list[i]->y << " ;" << endl;
     }
     cout << "END DATA" << endl;
+    cout << "=======================================" << endl;
 }
 void littlemerge::print_outlist()
 {
     set<point *>::iterator iter;
+    cout << "================OUTLIST================" << endl;
     for (iter = out_list.begin(); iter != out_list.end(); ++iter)
         (*iter)->print();
+    cout << "=======================================" << endl;
 }
-void littlemerge::insert(point *&root)
+void littlemerge::print_outbuf()
 {
+    cout << "=================OUTBUF================" << endl;
+    for (unsigned int i = 0; i < out_list_buf.size(); ++i)
+        out_list_buf[i]->print();
+    cout << "=======================================" << endl;
+}
+void littlemerge::insert(point *&root, bool ismerge_t)
+{
+    ismerge = ismerge_t;
     ::list_construct(root);
     clear();
-    merge(root);
+    if (ismerge)
+        merge(root);
+    else
+        clip(root);
 }
 
 void littlemerge::merge(point *&root)
@@ -198,6 +216,83 @@ void littlemerge::merge(point *&root)
     root_list = new_list;
 }
 
+void littlemerge::clip(point *&root)
+{
+    if (root_list.size() == 0)
+    {
+        return;
+    }
+    bool del = find_intersect(root);
+    print_outlist();
+    // print_outbuf();
+    printon = true;
+    if (!del)
+        return;
+    insert_intersect(root);
+    // root->print_poly();
+    // root_list[0]->print_poly();
+    vector<point *> new_list;
+    int cnt = 0;
+    ++glob_color;
+    while (out_list.size() > 0)
+    {
+        vector<point *> poly;
+        point *new_poly;
+        set<point *>::iterator iter;
+        iter = out_list.begin();
+        new_poly = *iter;
+        point *p = (*iter)->next;
+        out_list.erase(*iter);
+        if (printon)
+            cout << "WALK " << *new_poly << endl;
+        new_poly->pcolor = glob_color;
+        poly.push_back(new_poly);
+        while (p != new_poly)
+        {
+            ++cnt;
+            if (printon)
+                cout << "WALK " << *p << endl;
+            p->pcolor = glob_color;
+            poly.push_back(p);
+            if (!p->ispoint())
+            {
+                if (!static_cast<intersect_point *>(p)->in)
+                {
+                    out_list.erase(p);
+                }
+                if (!static_cast<intersect_point *>(p)->tran)
+                {
+                    goto back;
+                }
+                p = static_cast<intersect_point *>(p)->cross_point;
+                if (printon)
+                    cout << "cross " << *p << endl;
+                p->pcolor = glob_color;
+                poly.push_back(p);
+                if (p == new_poly)
+                {
+                    break;
+                }
+                if (!static_cast<intersect_point *>(p)->in)
+                {
+                    out_list.erase(p);
+                }
+            }
+        back:
+            if (printon)
+                cout << "WALK " << *p << endl;
+            p->pcolor = glob_color;
+            poly.push_back(p);
+            p = p->next;
+        }
+        // 用新走出的形狀做出多邊形
+        // 需要初始化更種參數：包刮：x, y next, prev, s_next, len, angle, verti, dir
+        new_list.push_back(construct_new_poly(poly));
+    }
+    check_list(new_list, root);
+    root_list = new_list;
+}
+
 bool littlemerge::find_intersect(point *&root)
 {
     for (int i = 0; i < root_list.size(); ++i)
@@ -241,6 +336,7 @@ int littlemerge::find_intersect(point *a, point *b)
     }
     int return_num = 0;
     bool has_out;
+    // 如果是 clip b 是洞
     has_out = in_out_cross(a, b);
     if (!has_out)
     {
@@ -257,10 +353,7 @@ int littlemerge::find_intersect(point *a, point *b)
     intersect_point *p_t;
     switch (return_num)
     {
-    case 1:
-#ifdef DEBUG
-        cout << "Delete1 Polygon: " << *a << endl;
-#endif
+    case 1:                             // 如果b是洞那一樣
         a->delete_poly_tranf(out_list); // 要把對面的tran清掉 // 還有要把out的點從out_list移除
         delete a;
         p = b;
@@ -280,29 +373,101 @@ int littlemerge::find_intersect(point *a, point *b)
         }
         return 1;
         break;
-    case 2:
-    case 3:
-#ifdef DEBUG
-        cout << "Delete2 Polygon: " << *b << endl;
-#endif
-        b->delete_poly_tranf(out_list); // 要把對面的tran清掉 // 還有要把out的點從out_list移除
-        delete b;
-        p = a;
-        for (unsigned int i = 0; i < a->len; ++i)
+    case 2: // 如果b是洞，看a，a如果是洞就刪掉b，如果a不是洞那就把b直接加到list中
+        if (ismerge)
         {
-            for (unsigned int j = 0; j < p->intersection.size(); ++j)
+            b->delete_poly_tranf(out_list); // 要把對面的tran清掉 // 還有要把out的點從out_list移除
+            delete b;
+            p = a;
+            for (unsigned int i = 0; i < a->len; ++i)
             {
-                p_t = static_cast<intersect_point *>(p->intersection[j]);
-                if (p_t->color == glob_color)
+                for (unsigned int j = 0; j < p->intersection.size(); ++j)
                 {
-                    p->intersection.erase(p->intersection.begin() + j);
-                    delete p_t;
-                    --j;
+                    p_t = static_cast<intersect_point *>(p->intersection[j]);
+                    if (p_t->color == glob_color)
+                    {
+                        p->intersection.erase(p->intersection.begin() + j);
+                        delete p_t;
+                        --j;
+                    }
                 }
+                p = p->next;
             }
-            p = p->next;
+            return 2;
         }
-        return 2;
+        else
+        {
+            a->setcounterclockwise();
+            if (!a->counterclockwise)
+            {
+                b->delete_poly_tranf(out_list); // 要把對面的tran清掉 // 還有要把out的點從out_list移除
+                delete b;
+                p = a;
+                for (unsigned int i = 0; i < a->len; ++i)
+                {
+                    for (unsigned int j = 0; j < p->intersection.size(); ++j)
+                    {
+                        p_t = static_cast<intersect_point *>(p->intersection[j]);
+                        if (p_t->color == glob_color)
+                        {
+                            p->intersection.erase(p->intersection.begin() + j);
+                            delete p_t;
+                            --j;
+                        }
+                    }
+                    p = p->next;
+                }
+                return 2;
+            }
+            else
+            {
+                root_list.push_back(b);
+                return 2;
+            }
+        }
+    case 3: // 如果b是洞要刪掉a
+        if (ismerge)
+        {
+            b->delete_poly_tranf(out_list); // 要把對面的tran清掉 // 還有要把out的點從out_list移除
+            delete b;
+            p = a;
+            for (unsigned int i = 0; i < a->len; ++i)
+            {
+                for (unsigned int j = 0; j < p->intersection.size(); ++j)
+                {
+                    p_t = static_cast<intersect_point *>(p->intersection[j]);
+                    if (p_t->color == glob_color)
+                    {
+                        p->intersection.erase(p->intersection.begin() + j);
+                        delete p_t;
+                        --j;
+                    }
+                }
+                p = p->next;
+            }
+            return 2;
+        }
+        else
+        {
+            a->delete_poly_tranf(out_list); // 要把對面的tran清掉 // 還有要把out的點從out_list移除
+            delete a;
+            p = b;
+            for (unsigned int i = 0; i < b->len; ++i)
+            {
+                for (unsigned int j = 0; j < p->intersection.size(); ++j)
+                {
+                    p_t = static_cast<intersect_point *>(p->intersection[j]);
+                    if (p_t->color == glob_color)
+                    {
+                        p->intersection.erase(p->intersection.begin() + j);
+                        delete p_t;
+                        --j;
+                    }
+                }
+                p = p->next;
+            }
+            return 1;
+        }
         break;
     default:
         for (unsigned int kk = 0; kk < out_list_buf.size(); ++kk)
@@ -471,16 +636,19 @@ void littlemerge::two_way_intersect(intersect_point *a, intersect_point *b)
     a->cross_point = b;
     a->tran = true;
     b->cross_point = a;
-    b->tran = false;
+    if (!ismerge)
+        b->tran = true;
+    else
+        b->tran = false;
 }
 // the new intersect (x,y) is right after point a and point b
 void littlemerge::new_intersect(point *a, point *b, long long x, long long y, bool &a_is_in, bool &b_is_in)
 {
     intersect_point *insert_a = new intersect_point(x, y, glob_color, a_is_in);
-    if (!a_is_in)
+    if (a_is_in ^ ismerge)
         out_list_buf.push_back(insert_a);
     intersect_point *insert_b = new intersect_point(x, y, glob_color, b_is_in);
-    if (!b_is_in)
+    if (b_is_in ^ ismerge)
         out_list_buf.push_back(insert_b);
     add_intersect(a, insert_a);
     add_intersect(b, insert_b);

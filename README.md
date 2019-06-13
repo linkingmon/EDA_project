@@ -1,8 +1,13 @@
 # EDA_project
 ## 說明
-1. 吃 test_merge.txt 再跑 draw.py 可以在 result 資料夾看到結果
-2. 吃 poly_with_hole.txt 再跑 drawM.py 可以在 result2 資料夾看到有hole的多邊形(可以做Split)
+1. 跑 drawS.py 可看到最後結果
 ## 進度
+- (6/14) Clip有bug：(1)tran會有錯誤 (2)in交點非常多(可能要重新考慮什麼是in交點) [10]
+- (6/14) 不管是Merge還是Clip都是merge，Merge從out開始，Clip從in開始；另外如果有包含關係不太一樣要特別處理
+- (6/14) 在讀到Clip時，直接把list存成順時針
+- (6/14) 修改讀檔最後一個點可能不會給的錯誤[9] ~~[9]~~
+- (6/13) SplitV/H完成
+- (6/13) 重新設計演匴法 ~~[6]~~，利用左邊是裡面的概念+特殊狀況判斷
 - (6/10) 修正 ~~[8]~~，(verti和dir只有if沒有else)
 - (6/10) OpenCase_1.txt M1 成功，C1當掉 [8]
 - (6/10) 修正 ~~[2]~~，跑得很快

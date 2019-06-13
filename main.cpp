@@ -51,21 +51,24 @@ int main()
             oper.root_list.push_back(root);
     }
 
-    littlemerge * LM = new littlemerge();
-    for(unsigned int i = 0 ; i < operations.size() ; ++i){
-        if(operations[i][0] == 'S'){
+    littlemerge *LM = new littlemerge();
+    for (unsigned int i = 0; i < operations.size(); ++i)
+    {
+        if (operations[i][0] == 'S')
+        {
             SplitMgr *SM = new SplitMgr();
             LM->output("split/total4_SH.out");
             SM->splitH(LM->get_list());
             SM->output_rect("split/split4_SH.out");
             delete SM;
         }
-        else{
-            operation& oper = mapping[operations[i]];
-            for(unsigned int j = 0 ; j < oper.root_list.size() ; ++j)
-                LM->insert(oper.root_list[j]);
-            // LM->print()
-            // LM->output(string("result/result") + char(i + 49) + ".txt");
+        else
+        {
+            operation &oper = mapping[operations[i]];
+            for (unsigned int j = 0; j < oper.root_list.size(); ++j)
+                LM->insert(oper.root_list[j], operations[i][0] == 'M');
+            LM->print();
+            LM->output(string("result/Merge") + char(i + 49) + ".txt");
         }
     }
     delete LM;
@@ -105,7 +108,8 @@ inline bool read_operation(fstream &fin, point *&root, bool isclip)
         prev = p;
         ++cnt;
     }
-    if(p->x != first_x || p->y != first_y){
+    if (p->x != first_x || p->y != first_y)
+    {
         ++cnt;
         p = new point(first_x, first_y);
         p->prev = prev;
@@ -131,7 +135,8 @@ inline bool read_operation(fstream &fin, point *&root, bool isclip)
             p = p->prev;
         }
     }
-    else if(isclip && area > 0){
+    else if (isclip && area > 0)
+    {
         point *p = root;
         for (int i = 0; i < root->len; ++i)
         {
