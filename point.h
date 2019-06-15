@@ -1,9 +1,9 @@
 #ifndef POINT_H
 #define POINT_H
-#include <iostream>
-#include <vector>
-#include <set>
 #include <iomanip>
+#include <iostream>
+#include <set>
+#include <vector>
 using namespace std;
 #define DIV 922337203685477580.0
 static int point_cnt = 0;
@@ -18,10 +18,7 @@ public:
     point(long long xt, long long yt);
     point(const point &); // copy constructor
     virtual ~point();
-    double area(point *&p)
-    {
-        return x / DIV * (p->y) / DIV - y / DIV * (p->x) / DIV;
-    }
+    double area(point *&p) { return x / DIV * (p->y) / DIV - y / DIV * (p->x) / DIV; }
     // virtual void print() { cout << x << " " << y << endl; }
     void swap_dir() { swap(next, prev); };
     void connect();
@@ -58,13 +55,14 @@ public:
     point *s_next;                    // 筆直走 走得最遠的點
     int len;                          // ROOT 專用
     long long minx, miny, maxx, maxy; //多邊形的邊界
-    int pcolor;                       //merge時 做DFS用的
+    int pcolor;                       // merge時 做DFS用的
     // point* straright_next;
     short angle; //角度
     bool verti;  //垂直
     bool dir;    //往正的地方走(上、右)
     bool mark;   // 標示有沒有走過(merge)
     bool counterclockwise;
+    double areas;
     // point &bool operator<(point &b);
 };
 
@@ -85,13 +83,13 @@ public:
 void point::setcounterclockwise()
 {
     point *p = this;
-    double area = 0;
+    areas = 0;
     for (unsigned int i = 0; i < this->len; ++i)
     {
-        area += p->area(p->next);
+        areas += p->area(p->next);
         p = p->next;
     }
-    bool cc = (area > 0);
+    bool cc = (areas > 0);
     for (unsigned int i = 0; i < len; ++i)
     {
         p->counterclockwise = cc;
@@ -119,6 +117,8 @@ point::point(const point &p2)
     point_cnt += 1;
     x = p2.x;
     y = p2.y;
+    verti = p2.verti;
+    dir = p2.dir;
 }
 
 // 把頂點裡面存的交點清掉
@@ -343,8 +343,5 @@ intersect_point::~intersect_point()
     // cout << "delete intersect" << *this << endl;
 }
 
-void intersect_point::print()
-{
-    cout << "II " << *this << (in ? "  in" : " out") << " tran" << tran << endl;
-}
+void intersect_point::print() { cout << "II " << *this << (in ? "  in" : " out") << " tran" << tran << endl; }
 #endif

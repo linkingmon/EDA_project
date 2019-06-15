@@ -10,19 +10,26 @@ point *construct_new_poly(vector<point *> &);
 // 增加 point 的特殊性質
 void list_construct(point *&root)
 {
+    static fstream lfout("list_construct.txt", fstream::out);
     point *temp = root;
     long long minx, miny, maxx, maxy;
     minx = miny = 9223372036854775807;
     maxx = maxy = -9223372036854775808;
     for (int i = 0; i < root->len; ++i)
     {
-        if (temp->next->x == temp->x) // 判斷是否是垂直線
+        lfout << "OLD" << *(temp) << *(temp->next) << temp->verti << ' ' << temp->dir << endl;
+        if (temp->next->x == temp->x)
+        { // 判斷是否是垂直線
             temp->verti = true;
+        }
         else
+        {
             temp->verti = false;
+        }
+        lfout << "NEW" << *(temp) << *(temp->next) << temp->verti << ' ' << temp->dir << endl;
         if (temp->prev->x != temp->next->x && temp->prev->y != temp->next->y) // 判斷是哪種角
         {                                                                     //是角
-            if ((temp->prev->x - temp->next->x < 0) ^ (temp->prev->y - temp->next->y < 0))
+            if ((temp->prev->x - temp->next->x < 0) != (temp->prev->y - temp->next->y < 0))
             { //一正一負 負斜率 左上右下角
                 temp->angle = 1;
             }
@@ -32,7 +39,9 @@ void list_construct(point *&root)
             }
         }
         else
+        {
             temp->angle = 2;
+        }
         point *s_next = temp->next;
         if (temp->verti) // 找 straight next
         {
@@ -65,6 +74,7 @@ void list_construct(point *&root)
             maxx = temp->x;
         if (temp->y > maxy)
             maxy = temp->y;
+        lfout << "END" << *(temp) << *(temp->next) << temp->verti << ' ' << temp->dir << endl;
         temp = temp->next;
     }
     if (root->verti == root->prev->verti)
@@ -88,7 +98,6 @@ void list_construct(point *&root)
         root->maxx = maxx;
         root->maxy = maxy;
     }
-    point *p = root;
 }
 
 // 需要初始化更種參數：包刮：x, y next, prev, s_next, len, angle, verti, dir
