@@ -75,16 +75,14 @@ int main()
         else
         {
             operation &oper = mapping[operations[i]];
-            if (i != 2)
-                continue;
+            // if (i > 2)
+            //     continue;
             for (unsigned int j = 0; j < oper.root_list.size(); ++j)
             {
-                // LM->output("ALL.txt");
-                cout << operations[i] << ' ' << i << ' ' << j << endl;
-                // if (j == 233)
+                cerr << operations[i] << ' ' << i << ' ' << j << endl;
+                // if (j == 3687)
                 // {
                 //     LM->output("ALL.txt");
-                //     LM->start_print();
                 // }
                 LM->insert(oper.root_list[j], operations[i][0] == 'M');
             }

@@ -135,6 +135,14 @@ point *construct_new_poly(vector<point *> &point_stream)
             dir = vec[i];
         }
     }
+    for (unsigned int i = 0; i < point_stream_simple.size() - 1; ++i)
+    {
+        if (point_stream_simple[i]->x == point_stream_simple[i + 1]->x && point_stream_simple[i]->y == point_stream_simple[i + 1]->y)
+        {
+            point_stream_simple.erase(point_stream_simple.begin() + i);
+            --i;
+        }
+    }
 
     point *root = new point(*(point_stream_simple[0]));
     point *p_prev = root;

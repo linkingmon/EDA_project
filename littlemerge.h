@@ -221,7 +221,7 @@ void littlemerge::clip(point *&root)
         delete root;
         return;
     }
-    return;
+    // return;
     // 不知道哪裡有bug，再list construct一次
     // for (unsigned int i = 0; i < root_list.size(); ++i)
     //     list_construct(root_list[i]);
@@ -766,7 +766,15 @@ void littlemerge::check_list(vector<point *> &new_list, point *&root)
             }
         }
         else
-            new_list.push_back(root);
+        {
+            if (ismerge)
+                new_list.push_back(root);
+            else
+            {
+                root->delete_poly();
+                delete root;
+            }
+        }
     }
     else
     {

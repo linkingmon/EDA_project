@@ -2,6 +2,13 @@
 ## 說明
 1. 跑 drawS.py 可看到最後結果
 ## 進度
+- (6/16) Clip會Clip出一條線??[11]，merge在Opencase2也會，不能有線(不能Split)
+- (6/16) OpenCase_1.txt的merge完成，都沒問題(Clip還沒)
+- (6/15) 修改要merge或clip的多邊形被包含的情況：被包含時min_poly_area(min_hole_are)存最小包含該多邊形的多邊形(洞)面積，如果是merge若min_poly_area小於min_hole_area就要刪掉，否則留下；clip則相反。
+- (6/15) 修改delete多邊形後，delete交點的方法：再new intersect時把頂點的指標存到intersect_list最後去頂點pop_back
+- (6/15) 修正root_list中會有交點的問題
+- (6/15) 新演算法：遇到交點只走out的交點(對面是out就換，自己是out就繼續走(一直保持最外的性質))
+- (6/15) 新演算法：交點找法一樣。但若有兩個in或兩個out就不要找交點(參考check_point function) ~~[10]~~
 - (6/14) Clip有bug：(1)tran會有錯誤 (2)in交點非常多(可能要重新考慮什麼是in交點) [10]
 - (6/14) 不管是Merge還是Clip都是merge，Merge從out開始，Clip從in開始；另外如果有包含關係不太一樣要特別處理
 - (6/14) 在讀到Clip時，直接把list存成順時針
