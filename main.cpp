@@ -20,58 +20,77 @@ int main()
 {
     ios_base::sync_with_stdio(0);
     cin.tie(0);
-    string filename = "poly_with_hole.txt";
-    fstream fin(filename.c_str(), fstream::in);
-    vector<string> operations;      // store opertaion strings 按照順序存操作的次序
-    map<string, operation> mapping; // map string to its operation
-    string s;
-    fin >> s;
-
-    while (1)
+    int number_id = 0;
+    for (unsigned int number = 'a'; number < 'a' + 25; ++number)
     {
+        string filename = string("special/case") + char(number) + string(".txt");
+        // string filename = string("OpenCase_1.txt");
+        fstream fin(filename.c_str(), fstream::in);
+        if (!fin)
+        {
+            cerr << filename << endl;
+            cerr << "Error reading file" << endl;
+            return 0;
+        }
+        vector<string> operations;      // store opertaion strings 按照順序存操作的次序
+        map<string, operation> mapping; // map string to its operation
+        string s;
         fin >> s;
-        if (s == ";")
-            break;
-        operations.push_back(s);
-        if (s != "SV" && s != "SH" && s != "SO")
-        {
-            operation oper(s);
-            mapping.insert(make_pair(s, oper));
-        }
-    }
 
-    for (unsigned int i = 0; i < mapping.size(); ++i)
-    {
-        fin >> s >> s >> s;
-        operation &oper = mapping[s];
-        bool isclip = (s[0] == 'C'); // 如果是 Clip 就存順時針
-        fin >> s;
-        point *root;
-        while (read_operation(fin, root, isclip))
-            oper.root_list.push_back(root);
-    }
+        while (1)
+        {
+            fin >> s;
+            if (s == ";")
+                break;
+            operations.push_back(s);
+            if (s != "SV" && s != "SH" && s != "SO")
+            {
+                operation oper(s);
+                mapping.insert(make_pair(s, oper));
+            }
+        }
 
-    littlemerge *LM = new littlemerge();
-    for (unsigned int i = 0; i < operations.size(); ++i)
-    {
-        if (operations[i][0] == 'S')
+        for (unsigned int i = 0; i < mapping.size(); ++i)
         {
-            SplitMgr *SM = new SplitMgr();
-            LM->output("split/total4_SH.out");
-            SM->splitH(LM->get_list());
-            SM->output_rect("split/split4_SH.out");
-            delete SM;
+            fin >> s >> s >> s;
+            operation &oper = mapping[s];
+            bool isclip = (s[0] == 'C'); // 如果是 Clip 就存順時針
+            fin >> s;
+            point *root;
+            while (read_operation(fin, root, isclip))
+                oper.root_list.push_back(root);
         }
-        else
+
+        littlemerge *LM = new littlemerge();
+        for (unsigned int i = 0; i < operations.size(); ++i)
         {
-            operation &oper = mapping[operations[i]];
-            for (unsigned int j = 0; j < oper.root_list.size(); ++j)
-                LM->insert(oper.root_list[j], operations[i][0] == 'M');
-            LM->print();
-            LM->output(string("result/Merge") + char(i + 49) + ".txt");
+            if (operations[i][0] == 'S')
+            {
+                SplitMgr *SM = new SplitMgr();
+                LM->output("split/total4_SH.out");
+                SM->splitH(LM->get_list());
+                SM->output_rect("split/split4_SH.out");
+                delete SM;
+            }
+            else
+            {
+                operation &oper = mapping[operations[i]];
+                // if (i != 2)
+                //     continue;
+                for (unsigned int j = 0; j < oper.root_list.size(); ++j)
+                {
+                    // LM->output("ALL.txt");
+                    LM->insert(oper.root_list[j], operations[i][0] == 'M');
+                }
+                // LM->print();
+                // LM->output(string("result/Merge") + char(i + 49) + ".txt");
+                // LM->output(string("result/Merge") + char(i + 49) + ".txt");
+            }
         }
+        LM->print();
+        LM->output(string("special_res/res") + char(number) + string(".txt"));
+        delete LM;
     }
-    delete LM;
 }
 
 inline bool read_operation(fstream &fin, point *&root, bool isclip)

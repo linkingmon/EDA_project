@@ -3,7 +3,7 @@ import numpy as np
 
 cnt = 1
 # filename = 'sample_in.txt'
-filename = 'TEST.txt'
+filename = 'ALL.txt'
 with open(filename, 'r') as f:
     L = f.read().splitlines()[2:]
     plt.figure()
@@ -27,4 +27,3 @@ with open(filename, 'r') as f:
             pass
     plt.show()
     # plt.savefig('result/sample.png'.format(cnt))
-    

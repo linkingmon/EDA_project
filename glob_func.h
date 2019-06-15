@@ -103,12 +103,12 @@ point *construct_new_poly(vector<point *> &point_stream)
         if (point_stream[i]->x == point_stream[i + 1]->x)
         {
             if (point_stream[i]->y == point_stream[i + 1]->y)
-                vec[i] = 2;
+                vec.push_back(2);
             else
-                vec[i] = 1;
+                vec.push_back(1);
         }
         else
-            vec[i] = 0;
+            vec.push_back(0);
     }
     vector<point *> point_stream_simple;
     int cnt = 0;
@@ -140,7 +140,10 @@ point *construct_new_poly(vector<point *> &point_stream)
     root->prev = p_prev;
     root->len = point_stream_simple.size();
     // 壓縮一下直接走到s_next
+    // cout << "LLLLLLLLLLLLLLLLLLLLListLLLLLLLLLLLLLL" << endl;
+    // root->print_poly();
     list_construct(root);
+    // root->print_poly();
     return root;
 }
 #endif

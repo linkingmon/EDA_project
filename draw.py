@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 cnt = 1
-filename = 'ALL.txt'
+filename = 'poly_with_hole.txt'
 # filename = 'test_merge.txt'
 # filename = 'OpenCase_1.txt'
 with open(filename, 'r') as f:

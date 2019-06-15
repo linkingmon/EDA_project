@@ -33,8 +33,8 @@ public:
         point *p = this;
         for (unsigned int i = 0; i < len; ++i)
         {
-            // p->print();
-            cout << *p << endl;
+            p->print();
+            // cout << *p << endl;
             p = p->next;
         }
         cout << endl;
@@ -46,7 +46,8 @@ public:
     virtual void print()
     {
         string ang = "\\/X";
-        cout << *this << " DIR" << (this->verti ? '|' : '-') << " Angle" << ang[this->angle] << " Snext" << *(this->s_next) << endl;
+        // cout << *this << " DIR" << (this->verti ? '|' : '-') << " Angle" << ang[this->angle] << " Snext" << *(this->s_next) << endl;
+        cout << *this << this->intersection.size() << endl;
     };
     virtual bool ispoint() { return true; };
     void setcounterclockwise();
@@ -81,14 +82,21 @@ public:
     bool tran; // 可以轉到對面的交點上
 };
 
-void point::setcounterclockwise(){
-    point* p = this;
+void point::setcounterclockwise()
+{
+    point *p = this;
     double area = 0;
-    for(unsigned int i = 0 ; i < this->len; ++i){
+    for (unsigned int i = 0; i < this->len; ++i)
+    {
         area += p->area(p->next);
         p = p->next;
     }
-    counterclockwise = (area > 0);
+    bool cc = (area > 0);
+    for (unsigned int i = 0; i < len; ++i)
+    {
+        p->counterclockwise = cc;
+        p = p->next;
+    }
 }
 ostream &operator<<(ostream &os, const point &p)
 {
