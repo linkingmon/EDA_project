@@ -132,18 +132,22 @@ point *construct_new_poly(vector<point *> &point_stream)
         if (vec[i] != dir)
         {
             point_stream_simple.push_back(point_stream[i]);
+            assert(vec[i] != 2);
             dir = vec[i];
         }
     }
     for (unsigned int i = 0; i < point_stream_simple.size() - 1; ++i)
     {
+        assert(point_stream_simple[i]->x != point_stream_simple[i + 1]->x || point_stream_simple[i]->y != point_stream_simple[i + 1]->y);
         if (point_stream_simple[i]->x == point_stream_simple[i + 1]->x && point_stream_simple[i]->y == point_stream_simple[i + 1]->y)
         {
             point_stream_simple.erase(point_stream_simple.begin() + i);
             --i;
         }
     }
-
+    // Assert 沒有相同點出現
+    for (unsigned int i = 0; i < point_stream_simple.size() - 1; ++i)
+        assert(point_stream_simple[i]->x != point_stream_simple[i + 1]->x || point_stream_simple[i]->y != point_stream_simple[i + 1]->y);
     point *root = new point(*(point_stream_simple[0]));
     point *p_prev = root;
     for (unsigned int i = 1; i < point_stream_simple.size(); ++i)

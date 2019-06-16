@@ -24,7 +24,7 @@ int main()
     // for (unsigned int number = 'a'; number < 'a' + 25; ++number)
     // {
     //     string filename = string("special/case") + char(number) + string(".txt");
-    string filename = string("OpenCase_1.txt");
+    string filename = string("OpenCase_2.txt");
     fstream fin(filename.c_str(), fstream::in);
     if (!fin)
     {
@@ -80,10 +80,12 @@ int main()
             for (unsigned int j = 0; j < oper.root_list.size(); ++j)
             {
                 cerr << operations[i] << ' ' << i << ' ' << j << endl;
-                // if (j == 3687)
+                // LM->output(string("ALL") + char(j + 65) + ".txt", oper.root_list[j]);
+                // if (j == 14)
                 // {
-                //     LM->output("ALL.txt");
+                //     LM->start_print();
                 // }
+                // assert(j != 15);
                 LM->insert(oper.root_list[j], operations[i][0] == 'M');
             }
             LM->print();

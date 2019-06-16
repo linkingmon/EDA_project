@@ -44,10 +44,12 @@ public:
     {
         string ang = "\\/X";
         // cout << *this << " DIR" << (this->verti ? '|' : '-') << " Angle" << ang[this->angle] << " Snext" << *(this->s_next) << endl;
-        cout << *this << this->intersection.size() << endl;
+        cout << *this << this->intersection.size() << ' ' << this << endl;
     };
     virtual bool ispoint() { return true; };
     void setcounterclockwise();
+    bool operator!=(point q) { return x != q.x || y != q.y; };
+    bool operator==(point q) { return x == q.x && y == q.y; };
     vector<point *> intersection;
     long long x, y;
     point *next;                      // 後一個點
@@ -164,7 +166,8 @@ void point::sort_asc()
         {
             point *key = intersection[i];
             int j = i - 1;
-            while (j >= 0 && key->y < intersection[j]->y)
+            while (j >= 0 && (key->y < intersection[j]->y || (key->y == intersection[j]->y && static_cast<intersect_point *>(intersection[j])->in)))
+            // while (j >= 0 && key->y < intersection[j]->y)
             {
                 intersection[j + 1] = intersection[j];
                 --j;
@@ -178,7 +181,8 @@ void point::sort_asc()
         {
             point *key = intersection[i];
             int j = i - 1;
-            while (j >= 0 && key->x < intersection[j]->x)
+            while (j >= 0 && (key->x < intersection[j]->x || (key->x == intersection[j]->x && static_cast<intersect_point *>(intersection[j])->in)))
+            // while (j >= 0 && key->x < intersection[j]->x)
             {
                 intersection[j + 1] = intersection[j];
                 --j;
@@ -196,7 +200,8 @@ void point::sort_dsc()
         {
             point *key = intersection[i];
             int j = i - 1;
-            while (j >= 0 && key->y > intersection[j]->y)
+            while (j >= 0 && (key->y > intersection[j]->y || (key->y == intersection[j]->y && static_cast<intersect_point *>(intersection[j])->in)))
+            // while (j >= 0 && key->y > intersection[j]->y)
             {
                 intersection[j + 1] = intersection[j];
                 --j;
@@ -210,7 +215,8 @@ void point::sort_dsc()
         {
             point *key = intersection[i];
             int j = i - 1;
-            while (j >= 0 && key->x > intersection[j]->x)
+            while (j >= 0 && (key->x > intersection[j]->x || (key->x == intersection[j]->x && static_cast<intersect_point *>(intersection[j])->in)))
+            // while (j >= 0 && key->x > intersection[j]->x)
             {
                 intersection[j + 1] = intersection[j];
                 --j;
@@ -343,5 +349,5 @@ intersect_point::~intersect_point()
     // cout << "delete intersect" << *this << endl;
 }
 
-void intersect_point::print() { cout << "II " << *this << (in ? "  in" : " out") << " tran" << tran << endl; }
+void intersect_point::print() { cout << "II " << *this << (in ? "  in" : " out") << " tran" << tran << ' ' << this << endl; }
 #endif

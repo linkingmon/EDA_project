@@ -2,6 +2,9 @@
 ## 說明
 1. 跑 drawS.py 可看到最後結果
 ## 進度
+- (6/16) Merge完成，可以把 OpenCase_1.txt 或 OpenCase_2.txt 或2中的C1、C2改成M3、M4來測試
+- (6/16) 修改交點sorting順序，如果座標相同，in的擺在後面。因為out不會影響繼續在該路徑行走，in的對面有可能是out必須要換。如果沒有這樣sort，會少merge多邊形。
+- (6/16) ~~[12]~~ 修改一個點走出去再走回來轉彎(一條線)在list construct後會變一個點。用assert確定正確性。
 - (6/16) List construct[12]
 - (6/16) Clip會Clip出一條線??[11]，merge在Opencase2也會，不能有線(不能Split)
 - (6/16) OpenCase_1.txt的merge完成，都沒問題(Clip還沒)
