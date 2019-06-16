@@ -2,6 +2,7 @@
 ## 說明
 1. 跑 drawS.py 可看到最後結果
 ## 進度
+- (6/16) List construct[12]
 - (6/16) Clip會Clip出一條線??[11]，merge在Opencase2也會，不能有線(不能Split)
 - (6/16) OpenCase_1.txt的merge完成，都沒問題(Clip還沒)
 - (6/15) 修改要merge或clip的多邊形被包含的情況：被包含時min_poly_area(min_hole_are)存最小包含該多邊形的多邊形(洞)面積，如果是merge若min_poly_area小於min_hole_area就要刪掉，否則留下；clip則相反。
