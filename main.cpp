@@ -92,7 +92,7 @@ int main()
                 //     cerr << operations[i] << ' ' << i << ' ' << j << endl;
                 // LM->start_print();
                 // }
-                char buffer[3];
+                // char buffer[3];
                 // if (i == 2 && j == 85)
                 // LM->output("AllA.txt", oper.root_list[j]);
                 // if (i == 2 && j == 86)
@@ -119,6 +119,7 @@ int main()
             // LM->output(string("result/Merge") + char(i + 49) + ".txt");
         }
     }
+    LM->memory_check();
     // LM->print();
     // LM->output(string("special_res/res") + char(number) + string(".txt"));
     delete LM;

@@ -26,6 +26,7 @@ public:
     bool in_out_cross(point *, point *);
     void check_list(vector<point *> &, point *&);
     void clear();
+    void memory_check();
     void output(string);
     void output(string, point *root);
     void print();
@@ -86,6 +87,26 @@ void littlemerge::output(string filename)
         fout << root_list[i]->x << " " << root_list[i]->y << " ;" << endl;
     }
     fout << "END DATA" << endl;
+}
+void littlemerge::memory_check()
+{
+    cerr << "===========================================================" << endl;
+    cerr << "total points: " << point_cnt << " & total intersects: " << intersect_cnt << endl;
+    int sum = 0;
+    for (unsigned int i = 0; i < root_list.size(); ++i)
+        sum += root_list[i]->len;
+    cerr << "There are total " << sum << " points in list." << endl;
+    cerr << "-----------------------------------------------------------" << endl;
+    if (point_cnt == sum && intersect_cnt == 0)
+    {
+        cerr << "----------------There are no memory leak!!!----------------" << endl;
+    }
+    else
+    {
+        cerr << "----------------There are memory leak!!!-------------------" << endl;
+    }
+    cerr << "-----------------------------------------------------------" << endl;
+    cerr << "===========================================================" << endl;
 }
 void littlemerge::output(string filename, point *root)
 {
