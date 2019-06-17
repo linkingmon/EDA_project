@@ -2,16 +2,20 @@
 #define SPLITMGR_H
 #include "interval.h"
 
+
+
 class SplitMgr
 {
 public:
     ~SplitMgr() { clear(); }
     void splitV(vector<point *> &total);
     void splitH(vector<point *> &total);
-    void splitO(vector<point *> &total){};
+    void splitO(vector<point *> &total);
     void output_rect(string outPath);
     bool outside_poly(point *root, point *cross);
     void build_polygon_table(vector<vector<point *> > &, vector<point *> &);
+    void find_concave(vector<point *>& concaveList, vector<point *>& polygon);
+    void find_diagonal(vector<vector<Diagonal> >& diagonalList, vector<point *>& polygon);
     void clear();
 
 private:
@@ -42,6 +46,17 @@ void SplitMgr::splitH(vector<point *> &total)
         _IM.split_polygon();
         _IM.move_rectangle(_rectList);
         _IM.clear();
+    }
+}
+
+void SplitMgr::splitO(vector<point *> &total)
+{
+    vector<vector<point *> > polygon_table;
+    build_polygon_table(polygon_table, total);
+    vector<vector<Diagonal> > diagonalList;
+    for (size_t i = 0; i < polygon_table.size(); i++)
+    {
+        find_diagonal(diagonalList, polygon_table[i]);
     }
 }
 
@@ -138,5 +153,35 @@ void SplitMgr::build_polygon_table(vector<vector<point *> > &polygon_table, vect
         }
     }
 }
+
+void SplitMgr::find_concave(vector<point *>& concaveList, vector<point *>& polygon)
+{
+    concaveList.clear();
+    for (size_t i=0; i<polygon.size(); i++)
+    {
+        point* p = polygon[i];
+        size_t n_vertex = p->len;
+        for (size_t j=0; j<n_vertex; j++)
+        {
+            if (p->verti && (p->dir!=p->prev->dir)) concaveList.push_back(p);
+            if (!p->verti && (p->dir==p->prev->dir)) concaveList.push_back(p);
+            p = p->next;
+        }
+    }
+    cout << "Concave vertices: ";
+    for (size_t i=0; i<concaveList.size(); i++){
+        cout << *concaveList[i] << endl;
+    }
+}
+
+void SplitMgr::find_diagonal(vector<vector<Diagonal> >& diagonalList, vector<point *>& polygon)
+{
+    vector<point *> concaveList;
+    find_concave(concaveList, polygon);
+    
+
+    
+}
+
 
 #endif
