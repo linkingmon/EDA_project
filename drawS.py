@@ -1,21 +1,21 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-filename_t = 'split/total4_SH.out'
-filename = 'split/split4_SH.out'
+filename_t = 'split/total4_S.out'
+filename = 'split/split4_S.out'
 with open(filename, 'r') as f:
     L = f.read().splitlines()
     # plt.hold(True)
     # print(L)
     operation = 'None'
     plt.figure()
-    plt.subplot(1,2,1)
+    plt.subplot(1, 2, 1)
     for i in range(len(L)):
         ll = L[i].split(' ')
-        if ll[0]=='RECT':
-            arr = np.array([[ll[1], ll[3], ll[3], ll[1], ll[1]], 
+        if ll[0] == 'RECT':
+            arr = np.array([[ll[1], ll[3], ll[3], ll[1], ll[1]],
                             [ll[2], ll[2], ll[4], ll[4], ll[2]]], dtype='int')
-            
+
             plt.plot(arr[0], arr[1], 'm')
 
         # if ll[0] == 'POLYGON':
@@ -27,7 +27,7 @@ with open(filename, 'r') as f:
 
 with open(filename_t, 'r') as f:
     L = f.read().splitlines()[2:]
-    plt.subplot(1,2,2)
+    plt.subplot(1, 2, 2)
     for i in range(len(L)):
         ll = L[i].split(' ')
         if ll[0] == 'POLYGON':
