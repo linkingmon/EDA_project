@@ -92,7 +92,7 @@ int main()
                 //     cerr << operations[i] << ' ' << i << ' ' << j << endl;
                 // LM->start_print();
                 // }
-                // char buffer[3];
+                char buffer[3];
                 // if (i == 2 && j == 85)
                 // LM->output("AllA.txt", oper.root_list[j]);
                 // if (i == 2 && j == 86)
@@ -101,16 +101,15 @@ int main()
                 //     LM->start_print();
                 // }
                 // assert(i != 3);
+                // if (i == 2 || i == 3)
+                //     continue;
                 // if (i == 3)
                 // {
+                //     // assert(j != 20);
                 //     itoa(j, buffer, 10);
                 //     LM->output(string("BUG/All") + buffer + ".txt", oper.root_list[j]);
-                // }
-                // if (i == 3 && j == 13)
-                // {
-                //     //     assert(j != 46);
-                //     // if (j == 45)
-                //     LM->start_print();
+                //     if (j == 18)
+                //         LM->start_print();
                 // }
                 LM->insert(oper.root_list[j], operations[i][0] == 'M');
             }

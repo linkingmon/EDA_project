@@ -833,28 +833,29 @@ void littlemerge::check_list(vector<point *> &new_list, point *&root)
                 isout = false;
                 break;
             }
+            point *p_next = p->next;
             if (!p->ispoint())
             {
                 has_new_point = true;
-                if (*p == *(p->prev) || *p == *(p->next))
-                {
-                    cut_len += 1;
-                    p->prev->next = p->next;
-                    p->next->prev = p->prev;
-                    delete p;
-                }
-                else
-                {
-                    point *new_point = new point(*p);
-                    assert(*p != *(p->prev) && *p != *(p->next));
-                    new_point->prev = p->prev;
-                    p->prev->next = new_point;
-                    new_point->next = p->next;
-                    p->next->prev = new_point;
-                    delete p;
-                }
+                // if (*p == *(p->prev) || *p == *(p->next))
+                // {
+                cut_len += 1;
+                p->prev->next = p->next;
+                p->next->prev = p->prev;
+                delete p;
+                // }
+                // else
+                // {
+                //     point *new_point = new point(*p);
+                //     assert(*p != *(p->prev) && *p != *(p->next));
+                //     new_point->prev = p->prev;
+                //     p->prev->next = new_point;
+                //     new_point->next = p->next;
+                //     p->next->prev = new_point;
+                //     delete p;
+                // }
             }
-            p = p->next;
+            p = p_next;
         }
         root_list[k]->len -= cut_len;
         if (isout)
@@ -1100,18 +1101,38 @@ bool littlemerge::head2head(point *&a, point *&line)
             if (!a->dir)
                 return true;
             else if (!line->prev->dir)
-                return true;
+            {
+                if (!ismerge)
+                    return (true == line->counterclockwise);
+                else
+                    return true;
+            }
             else
-                return false;
+            {
+                if (!ismerge)
+                    return (false == line->counterclockwise);
+                else
+                    return false;
+            }
         }
         else
         {
             if (a->dir)
                 return true;
             else if (!line->prev->dir)
-                return false;
+            {
+                if (!ismerge)
+                    return (false == line->counterclockwise);
+                else
+                    return false;
+            }
             else
-                return true;
+            {
+                if (!ismerge)
+                    return (true == line->counterclockwise);
+                else
+                    return true;
+            }
         }
     }
     else
@@ -1121,18 +1142,38 @@ bool littlemerge::head2head(point *&a, point *&line)
             if (a->dir)
                 return true;
             else if (!line->prev->dir)
-                return false;
+            {
+                if (!ismerge)
+                    return (false == line->counterclockwise);
+                else
+                    return false;
+            }
             else
-                return true;
+            {
+                if (!ismerge)
+                    return (true == line->counterclockwise);
+                else
+                    return true;
+            }
         }
         else
         {
             if (!a->dir)
                 return true;
             else if (!line->prev->dir)
-                return true;
+            {
+                if (!ismerge)
+                    return (true == line->counterclockwise);
+                else
+                    return true;
+            }
             else
-                return false;
+            {
+                if (!ismerge)
+                    return (false == line->counterclockwise);
+                else
+                    return false;
+            }
         }
     }
 }
@@ -1235,18 +1276,18 @@ bool littlemerge::mid2head(point *&a, point *&line)
             if (!a->dir)
                 return true;
             else if (line->prev->dir)
-                return false;
+                return (false == line->counterclockwise);
             else
-                return true;
+                return (true == line->counterclockwise);
         }
         else
         {
             if (a->dir)
                 return true;
             else if (line->prev->dir)
-                return true;
+                return (true == line->counterclockwise);
             else
-                return false;
+                return (false == line->counterclockwise);
         }
     }
     else
@@ -1256,18 +1297,18 @@ bool littlemerge::mid2head(point *&a, point *&line)
             if (a->dir)
                 return true;
             else if (line->prev->dir)
-                return true;
+                return (true == line->counterclockwise);
             else
-                return false;
+                return (false == line->counterclockwise);
         }
         else
         {
             if (!a->dir)
                 return true;
             else if (line->prev->dir)
-                return false;
+                return (false == line->counterclockwise);
             else
-                return true;
+                return (true == line->counterclockwise);
         }
     }
 }
