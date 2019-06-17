@@ -134,7 +134,7 @@ void SplitMgr::build_polygon_table(vector<vector<point *> > &polygon_table, vect
                 break;
             }
         }
-        
+
         if (new_poly)
         {
             vector<point *> poly;
@@ -144,7 +144,7 @@ void SplitMgr::build_polygon_table(vector<vector<point *> > &polygon_table, vect
                 if (!outside_poly(polygon_table[j][0], p))
                 {
                     poly.insert(poly.end(), polygon_table[j].begin(), polygon_table[j].end());
-                    polygon_table.erase(polygon_table.begin()+j);
+                    polygon_table.erase(polygon_table.begin() + j);
                     j--;
                 }
             }
