@@ -15,6 +15,7 @@ using namespace std;
 class Interval;
 class Interval_Mgr;
 class Rectangle;
+class Diagonal;
 bool compare_Interval (Interval* a, Interval* b);
 
 
@@ -51,6 +52,7 @@ public:
     void add_interval(Interval* &p);
     void add_rectangle(Interval* &p);
     void move_rectangle(vector<Rectangle*>& totalList );
+    void find_diagonal(vector<vector<Diagonal> >& diagonalList, vector<point *> concaveList, vector<point *>& polygon);
     void clear();
 private:
     vector<Interval*> _intervalList;
@@ -70,6 +72,16 @@ private:
     long long _LLY;
     long long _URX;
     long long _URY;
+
+};
+
+class Diagonal
+{
+public:
+    Diagonal(point* p1, point* p2, bool vertical): _p1(p1), _p2(p2), _vertical(vertical) {}
+    point* _p1;
+    point* _p2;
+    bool _vertical;
 
 };
 
@@ -266,6 +278,14 @@ void Interval_Mgr::move_rectangle(vector<Rectangle*>& totalList )
     for (size_t i=0; i<_rectList.size(); i++){
         totalList.push_back(_rectList[i]);
         _rectList[i] = 0;
+    }
+}
+
+void find_diagonal(vector<vector<Diagonal> >& diagonalList, vector<point *> concaveList, vector<point *>& polygon)
+{
+    for (size_t i=0; i<concaveList.size(); i++)
+    {
+        
     }
 }
 

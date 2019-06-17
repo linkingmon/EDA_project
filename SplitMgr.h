@@ -2,6 +2,8 @@
 #define SPLITMGR_H
 #include "interval.h"
 
+
+
 class SplitMgr
 {
 public:
@@ -13,7 +15,7 @@ public:
     bool outside_poly(point *root, point *cross);
     void build_polygon_table(vector<vector<point *> > &, vector<point *> &);
     void find_concave(vector<point *>& concaveList, vector<point *>& polygon);
-    void find_diagonal(vector<point *>& concaveList);
+    void find_diagonal(vector<vector<Diagonal> >& diagonalList, vector<point *>& polygon);
     void clear();
 
 private:
@@ -51,11 +53,10 @@ void SplitMgr::splitO(vector<point *> &total)
 {
     vector<vector<point *> > polygon_table;
     build_polygon_table(polygon_table, total);
-    vector<point *> concaveList;
+    vector<vector<Diagonal> > diagonalList;
     for (size_t i = 0; i < polygon_table.size(); i++)
     {
-        find_concave(concaveList, polygon_table[i]);
-        find_diagonal(concaveList);
+        find_diagonal(diagonalList, polygon_table[i]);
     }
 }
 
@@ -173,8 +174,12 @@ void SplitMgr::find_concave(vector<point *>& concaveList, vector<point *>& polyg
     }
 }
 
-void SplitMgr::find_diagonal(vector<point *>& concaveList)
+void SplitMgr::find_diagonal(vector<vector<Diagonal> >& diagonalList, vector<point *>& polygon)
 {
+    vector<point *> concaveList;
+    find_concave(concaveList, polygon);
+    
+
     
 }
 
