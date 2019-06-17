@@ -269,7 +269,12 @@ void Interval_Mgr::move_rectangle(vector<Rectangle*>& totalList )
     }
 }
 
-bool compare_Interval (Interval* a, Interval* b) { return a->get_position()<b->get_position(); }
+bool compare_Interval (Interval* a, Interval* b) 
+{ 
+    if (a->get_position() != b->get_position()) return a->get_position()<b->get_position();
+    if (a->is_reverse() && !b->is_reverse()) return true;
+    return false;
+}
 
 ostream& operator << (ostream& os, const Rectangle& rect)
 {
