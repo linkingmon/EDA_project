@@ -24,7 +24,7 @@ int main()
     // for (unsigned int number = 'a'; number < 'a' + 25; ++number)
     // {
     //     string filename = string("special/case") + char(number) + string(".txt");
-    string filename = string("OpenCase_2.txt");
+    string filename = string("OpenCase_1.txt");
     fstream fin(filename.c_str(), fstream::in);
     if (!fin)
     {
@@ -67,9 +67,14 @@ int main()
         if (operations[i][0] == 'S')
         {
             SplitMgr *SM = new SplitMgr();
-            LM->output("split/total4_SH.out");
-            SM->splitH(LM->get_list());
-            SM->output_rect("split/split4_SH.out");
+            LM->output("split/total4_S.out");
+            if (operations[i][1] == 'H')
+                SM->splitH(LM->get_list());
+            else if (operations[i][1] == 'V')
+                SM->splitH(LM->get_list());
+            else
+                SM->splitO(LM->get_list());
+            SM->output_rect("split/split4_S.out");
             delete SM;
         }
         else
@@ -79,15 +84,37 @@ int main()
             //     continue;
             for (unsigned int j = 0; j < oper.root_list.size(); ++j)
             {
-                cerr << operations[i] << ' ' << i << ' ' << j << endl;
+                cout << operations[i] << ' ' << i << ' ' << j << endl;
                 // LM->output(string("ALL") + char(j + 65) + ".txt", oper.root_list[j]);
-                // if (j == 14)
+
+                // if (j % 1000 == 0)
                 // {
+                //     cerr << operations[i] << ' ' << i << ' ' << j << endl;
+                // LM->start_print();
+                // }
+                // char buffer[3];
+                // if (i == 2 && j == 85)
+                // LM->output("AllA.txt", oper.root_list[j]);
+                // if (i == 2 && j == 86)
+                // {
+                //     LM->output("AllB.txt", oper.root_list[j]);
                 //     LM->start_print();
                 // }
-                // assert(j != 15);
+                // assert(i != 3);
+                // if (i == 3)
+                // {
+                //     itoa(j, buffer, 10);
+                //     LM->output(string("BUG/All") + buffer + ".txt", oper.root_list[j]);
+                // }
+                // if (i == 3 && j == 13)
+                // {
+                //     //     assert(j != 46);
+                //     // if (j == 45)
+                //     LM->start_print();
+                // }
                 LM->insert(oper.root_list[j], operations[i][0] == 'M');
             }
+            cerr << "total points: " << point_cnt << " & total intersects: " << intersect_cnt << endl;
             LM->print();
             // LM->output(string("result/Merge") + char(i + 49) + ".txt");
             // LM->output(string("result/Merge") + char(i + 49) + ".txt");

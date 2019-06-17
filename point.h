@@ -21,10 +21,10 @@ public:
     double area(point *&p) { return x / DIV * (p->y) / DIV - y / DIV * (p->x) / DIV; }
     // virtual void print() { cout << x << " " << y << endl; }
     void swap_dir() { swap(next, prev); };
-    void connect();
-    void sort_intersection();
-    void sort_asc();
-    void sort_dsc();
+    void connect(bool ismerge);
+    void sort_intersection(bool ismerge);
+    void sort_asc(bool ismerge);
+    void sort_dsc(bool ismerge);
     void print_poly()
     {
         point *p = this;
@@ -52,6 +52,7 @@ public:
     bool operator==(point q) { return x == q.x && y == q.y; };
     vector<point *> intersection;
     long long x, y;
+    double areas;
     point *next;                      // 後一個點
     point *prev;                      // 前一個點
     point *s_next;                    // 筆直走 走得最遠的點
@@ -62,9 +63,9 @@ public:
     short angle; //角度
     bool verti;  //垂直
     bool dir;    //往正的地方走(上、右)
-    bool mark;   // 標示有沒有走過(merge)
+    // bool mark;   // 標示有沒有走過(merge)
     bool counterclockwise;
-    double areas;
+    bool isclip;
     // point &bool operator<(point &b);
 };
 
@@ -110,7 +111,7 @@ point::point(long long xt, long long yt) : x(xt), y(yt)
     point_cnt += 1;
     verti = false;
     dir = false;
-    mark = false;
+    // mark = false;
 }
 // 複製新的多邊形
 point::point(const point &p2)
@@ -140,13 +141,13 @@ point::~point()
 }
 // bool operator < (point* a,point* b)
 
-void point::connect()
+void point::connect(bool ismerge)
 {
     point *n = next;
     point *temp = this;
     if (intersection.size() == 0)
         return;
-    sort_intersection();
+    sort_intersection(ismerge);
     int i;
     for (i = 0; i < intersection.size(); ++i)
     {
@@ -158,75 +159,148 @@ void point::connect()
     intersection[i]->next = n;
 }
 
-void point::sort_asc()
+void point::sort_asc(bool ismerge)
 {
-    if (verti)
+    if (ismerge)
     {
-        for (int i = 1; i < intersection.size(); ++i)
+        if (verti)
         {
-            point *key = intersection[i];
-            int j = i - 1;
-            while (j >= 0 && (key->y < intersection[j]->y || (key->y == intersection[j]->y && static_cast<intersect_point *>(intersection[j])->in)))
-            // while (j >= 0 && key->y < intersection[j]->y)
+            for (int i = 1; i < intersection.size(); ++i)
             {
-                intersection[j + 1] = intersection[j];
-                --j;
+                point *key = intersection[i];
+                int j = i - 1;
+                while (j >= 0 && (key->y < intersection[j]->y || (key->y == intersection[j]->y && static_cast<intersect_point *>(intersection[j])->in)))
+                // while (j >= 0 && key->y < intersection[j]->y)
+                {
+                    intersection[j + 1] = intersection[j];
+                    --j;
+                }
+                intersection[j + 1] = key;
             }
-            intersection[j + 1] = key;
+        }
+        else
+        {
+            for (int i = 1; i < intersection.size(); ++i)
+            {
+                point *key = intersection[i];
+                int j = i - 1;
+                while (j >= 0 && (key->x < intersection[j]->x || (key->x == intersection[j]->x && static_cast<intersect_point *>(intersection[j])->in)))
+                // while (j >= 0 && key->x < intersection[j]->x)
+                {
+                    intersection[j + 1] = intersection[j];
+                    --j;
+                }
+                intersection[j + 1] = key;
+            }
         }
     }
     else
     {
-        for (int i = 1; i < intersection.size(); ++i)
+
+        if (verti)
         {
-            point *key = intersection[i];
-            int j = i - 1;
-            while (j >= 0 && (key->x < intersection[j]->x || (key->x == intersection[j]->x && static_cast<intersect_point *>(intersection[j])->in)))
-            // while (j >= 0 && key->x < intersection[j]->x)
+            for (int i = 1; i < intersection.size(); ++i)
             {
-                intersection[j + 1] = intersection[j];
-                --j;
+                point *key = intersection[i];
+                int j = i - 1;
+                while (j >= 0 && (key->y < intersection[j]->y || (key->y == intersection[j]->y && !static_cast<intersect_point *>(intersection[j])->in)))
+                // while (j >= 0 && key->y < intersection[j]->y)
+                {
+                    intersection[j + 1] = intersection[j];
+                    --j;
+                }
+                intersection[j + 1] = key;
             }
-            intersection[j + 1] = key;
+        }
+        else
+        {
+            for (int i = 1; i < intersection.size(); ++i)
+            {
+                point *key = intersection[i];
+                int j = i - 1;
+                while (j >= 0 && (key->x < intersection[j]->x || (key->x == intersection[j]->x && !static_cast<intersect_point *>(intersection[j])->in)))
+                // while (j >= 0 && key->x < intersection[j]->x)
+                {
+                    intersection[j + 1] = intersection[j];
+                    --j;
+                }
+                intersection[j + 1] = key;
+            }
         }
     }
 }
 
-void point::sort_dsc()
+void point::sort_dsc(bool ismerge)
 {
-    if (verti)
+    if (ismerge)
     {
-        for (int i = 1; i < intersection.size(); ++i)
+        if (verti)
         {
-            point *key = intersection[i];
-            int j = i - 1;
-            while (j >= 0 && (key->y > intersection[j]->y || (key->y == intersection[j]->y && static_cast<intersect_point *>(intersection[j])->in)))
-            // while (j >= 0 && key->y > intersection[j]->y)
+            for (int i = 1; i < intersection.size(); ++i)
             {
-                intersection[j + 1] = intersection[j];
-                --j;
+                point *key = intersection[i];
+                int j = i - 1;
+                while (j >= 0 && (key->y > intersection[j]->y || (key->y == intersection[j]->y && static_cast<intersect_point *>(intersection[j])->in)))
+                // while (j >= 0 && key->y > intersection[j]->y)
+                {
+                    intersection[j + 1] = intersection[j];
+                    --j;
+                }
+                intersection[j + 1] = key;
             }
-            intersection[j + 1] = key;
+        }
+        else
+        {
+            for (int i = 1; i < intersection.size(); ++i)
+            {
+                point *key = intersection[i];
+                int j = i - 1;
+                while (j >= 0 && (key->x > intersection[j]->x || (key->x == intersection[j]->x && static_cast<intersect_point *>(intersection[j])->in)))
+                // while (j >= 0 && key->x > intersection[j]->x)
+                {
+                    intersection[j + 1] = intersection[j];
+                    --j;
+                }
+                intersection[j + 1] = key;
+            }
         }
     }
     else
     {
-        for (int i = 1; i < intersection.size(); ++i)
+        if (verti)
         {
-            point *key = intersection[i];
-            int j = i - 1;
-            while (j >= 0 && (key->x > intersection[j]->x || (key->x == intersection[j]->x && static_cast<intersect_point *>(intersection[j])->in)))
-            // while (j >= 0 && key->x > intersection[j]->x)
+            for (int i = 1; i < intersection.size(); ++i)
             {
-                intersection[j + 1] = intersection[j];
-                --j;
+                point *key = intersection[i];
+                int j = i - 1;
+                while (j >= 0 && (key->y > intersection[j]->y || (key->y == intersection[j]->y && !static_cast<intersect_point *>(intersection[j])->in)))
+                // while (j >= 0 && key->y > intersection[j]->y)
+                {
+                    intersection[j + 1] = intersection[j];
+                    --j;
+                }
+                intersection[j + 1] = key;
             }
-            intersection[j + 1] = key;
+        }
+        else
+        {
+            for (int i = 1; i < intersection.size(); ++i)
+            {
+                point *key = intersection[i];
+                int j = i - 1;
+                while (j >= 0 && (key->x > intersection[j]->x || (key->x == intersection[j]->x && !static_cast<intersect_point *>(intersection[j])->in)))
+                // while (j >= 0 && key->x > intersection[j]->x)
+                {
+                    intersection[j + 1] = intersection[j];
+                    --j;
+                }
+                intersection[j + 1] = key;
+            }
         }
     }
 }
 
-void point::sort_intersection()
+void point::sort_intersection(bool ismerge)
 {
     bool reverse = false;
     if (verti)
@@ -238,11 +312,11 @@ void point::sort_intersection()
         reverse = true;
     if (reverse)
     {
-        sort_dsc();
+        sort_dsc(ismerge);
     }
     else
     {
-        sort_asc();
+        sort_asc(ismerge);
     }
 
     // cout << "***************************************" << endl;
