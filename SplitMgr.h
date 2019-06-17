@@ -119,17 +119,21 @@ void SplitMgr::build_polygon_table(vector<vector<point *> > &polygon_table, vect
                 new_poly = 0;
                 break;
             }
-            else if (!outside_poly(polygon_table[j][0], p))
-            {
-                polygon_table[j].insert(polygon_table[j].begin(), p);
-                new_poly = 0;
-                break;
-            }
         }
+        
         if (new_poly)
         {
             vector<point *> poly;
             poly.push_back(p);
+            for (size_t j = 0; j < polygon_table.size(); j++)
+            {
+                if (!outside_poly(polygon_table[j][0], p))
+                {
+                    poly.insert(poly.end(), polygon_table[j].begin(), polygon_table[j].end());
+                    polygon_table.erase(polygon_table.begin()+j);
+                    j--;
+                }
+            }
             polygon_table.push_back(poly);
         }
     }
