@@ -11,7 +11,7 @@ public:
     void splitO(vector<point *> &total){};
     void output_rect(string outPath);
     bool outside_poly(point *root, point *cross);
-    void build_polygon_table(vector<vector<point *> > &, vector<point *> &);
+    void build_polygon_table(vector<vector<point *>> &, vector<point *> &);
     void clear();
 
 private:
@@ -21,7 +21,7 @@ private:
 
 void SplitMgr::splitV(vector<point *> &total)
 {
-    vector<vector<point *> > polygon_table;
+    vector<vector<point *>> polygon_table;
     build_polygon_table(polygon_table, total);
     for (size_t i = 0; i < polygon_table.size(); i++)
     {
@@ -34,7 +34,7 @@ void SplitMgr::splitV(vector<point *> &total)
 
 void SplitMgr::splitH(vector<point *> &total)
 {
-    vector<vector<point *> > polygon_table;
+    vector<vector<point *>> polygon_table;
     build_polygon_table(polygon_table, total);
     for (size_t i = 0; i < polygon_table.size(); i++)
     {
@@ -105,7 +105,7 @@ bool SplitMgr::outside_poly(point *root, point *cross)
         return true;
 }
 
-void SplitMgr::build_polygon_table(vector<vector<point *> > &polygon_table, vector<point *> &total)
+void SplitMgr::build_polygon_table(vector<vector<point *>> &polygon_table, vector<point *> &total)
 {
     for (size_t i = 0; i < total.size(); i++)
     {
