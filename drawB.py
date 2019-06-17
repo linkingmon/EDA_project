@@ -3,7 +3,7 @@ import numpy as np
 
 cnt = 1
 # filename = 'sample_in.txt'
-for char in range(92, 1664):
+for char in range(18, 20):
     filename = 'BUG/ALL{}.txt'.format(char)
     with open(filename, 'r') as f:
         L = f.read().splitlines()[2:]
