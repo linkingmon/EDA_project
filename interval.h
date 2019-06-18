@@ -17,6 +17,8 @@ class Interval_Mgr;
 class Rectangle;
 class Diagonal;
 bool compare_Interval (Interval* a, Interval* b);
+bool compare_x(point* a, point* b);
+bool compare_y(point* a, point* b);
 
 
 class Interval
@@ -52,7 +54,7 @@ public:
     void add_interval(Interval* &p);
     void add_rectangle(Interval* &p);
     void move_rectangle(vector<Rectangle*>& totalList );
-    void find_diagonal(vector<vector<Diagonal> >& diagonalList, vector<point *> concaveList, vector<point *>& polygon);
+    void find_diagonal(vector<vector<Diagonal> >& diagonalList, vector<point *>& concaveList, vector<point *>& polygon);
     void clear();
 private:
     vector<Interval*> _intervalList;
@@ -79,6 +81,8 @@ class Diagonal
 {
 public:
     Diagonal(point* p1, point* p2, bool vertical): _p1(p1), _p2(p2), _vertical(vertical) {}
+    friend ostream& operator << (ostream&, const Diagonal&);
+    
     point* _p1;
     point* _p2;
     bool _vertical;
@@ -116,7 +120,7 @@ void Interval_Mgr::build_interval( vector<point*> &rootList, bool direction)
         if (_direction==0){ //horizontal
             if (p->verti){
                 for (size_t i=0; i<n_vertex; i+=2){
-                    cout << *p->prev << " " << *p << endl;
+                    // cout << *p->prev << " " << *p << endl;
                     if (p->prev->x < p->x){
                         _intervalList.push_back(new Interval(p->prev->x, p->x, p->y, 0));
                     } else {
@@ -126,7 +130,7 @@ void Interval_Mgr::build_interval( vector<point*> &rootList, bool direction)
                 }
             } else {
                 for (size_t i=0; i<n_vertex; i+=2){
-                    cout << *p << " " << *p->next << endl;
+                    // cout << *p << " " << *p->next << endl;
                     if (p->x < p->next->x){
                         _intervalList.push_back(new Interval(p->x, p->next->x, p->y, 0));
                     } else {
@@ -138,7 +142,7 @@ void Interval_Mgr::build_interval( vector<point*> &rootList, bool direction)
         } else { // vertical
             if (p->verti){
                 for (size_t i=0; i<n_vertex; i+=2){
-                    cout << *p << " " << *p->next << endl;
+                    // cout << *p << " " << *p->next << endl;
                     if (p->y > p->next->y){
                         _intervalList.push_back(new Interval(p->next->y, p->y, p->x, 0));
                     } else {
@@ -148,7 +152,7 @@ void Interval_Mgr::build_interval( vector<point*> &rootList, bool direction)
                 }
             } else {
                 for (size_t i=0; i<n_vertex; i+=2){
-                    cout << *p->prev << " " << *p << endl;
+                    // cout << *p->prev << " " << *p << endl;
                     if (p->prev->y > p->y){
                         _intervalList.push_back(new Interval(p->y, p->prev->y, p->x, 0));
                     } else {
@@ -161,9 +165,9 @@ void Interval_Mgr::build_interval( vector<point*> &rootList, bool direction)
     }
     
     sort(_intervalList.begin(), _intervalList.end(), ::compare_Interval);
-    for (size_t i=0; i<_intervalList.size(); i++){
-        cout << *_intervalList[i] << endl;
-    }
+    // for (size_t i=0; i<_intervalList.size(); i++){
+    //     cout << *_intervalList[i] << endl;
+    // }
 
 }
 
@@ -193,11 +197,11 @@ bool Interval_Mgr::find_intersections(Interval* &p)
             _intersections.push_back(i);
         }
     }
-    cout << "Intersections: ";
-    for (size_t i=0; i<_intersections.size(); i++){
-        cout << _intersections[i] << " ";
-    }
-    cout << endl;
+    // cout << "Intersections: ";
+    // for (size_t i=0; i<_intersections.size(); i++){
+    //     cout << _intersections[i] << " ";
+    // }
+    // cout << endl;
     if (_intersections.empty()) return 0;
     return 1;
 
@@ -281,12 +285,107 @@ void Interval_Mgr::move_rectangle(vector<Rectangle*>& totalList )
     }
 }
 
-void find_diagonal(vector<vector<Diagonal> >& diagonalList, vector<point *> concaveList, vector<point *>& polygon)
+void Interval_Mgr::find_diagonal(vector<vector<Diagonal> >& diagonalList, vector<point *>& concaveList, vector<point *>& polygon)
 {
-    for (size_t i=0; i<concaveList.size(); i++)
+    build_interval(polygon, 1);
+    sort(concaveList.begin(), concaveList.end(), ::compare_x);
+    size_t k=0;
+    Interval* I=_intervalList[k];
+    vector<Diagonal> d;
+    for (size_t i=0; i<concaveList.size()-1; i++)
     {
-        
+        for (size_t j=i+1; j<concaveList.size(); j++)
+        {
+            if (concaveList[i]->x != concaveList[j]->x) break;
+            // cout << *concaveList[i] << *concaveList[j] << endl;
+            while (I->get_position()<concaveList[i]->x || (I->get_position()==concaveList[i]->x && I->is_reverse()) )
+            {
+                if(find_intersections(I)){
+                    combine_interval(I);
+                } else {
+                    add_interval(I);
+                }
+                // for (size_t idx=0; idx<_currentList.size(); idx++){
+                //     cout << *_currentList[idx] << endl;
+                // }
+                I = _intervalList[++k];
+            }
+            for(size_t idx=0; idx<_currentList.size(); idx++)
+            {
+                if(_currentList[idx]->get_left()==concaveList[i]->y && _currentList[idx]->get_right()==concaveList[j]->y){
+                    d.push_back(Diagonal(concaveList[i], concaveList[j], 1));
+                    cout << d.back() << endl; 
+                    break;
+                }
+            }
+        }
     }
+    while (k<_intervalList.size())
+    {
+        I = _intervalList[k];
+        if(find_intersections(I)){
+            combine_interval(I);
+        } else {
+            add_interval(I);
+        }
+        ++k;
+        // for (size_t idx=0; idx<_currentList.size(); idx++){
+        //     cout << *_currentList[idx] << endl;
+        // }
+    }
+    diagonalList.push_back(d);
+    d.clear();
+    clear();
+
+    build_interval(polygon, 0);
+    sort(concaveList.begin(), concaveList.end(), ::compare_y);
+    k=0;
+    I=_intervalList[k];
+    for (size_t i=0; i<concaveList.size()-1; i++)
+    {
+        for (size_t j=i+1; j<concaveList.size(); j++)
+        {
+            if (concaveList[i]->y != concaveList[j]->y) break;
+            // cout << *concaveList[i] << *concaveList[j] << endl;
+            while (I->get_position()<concaveList[i]->y || (I->get_position()==concaveList[i]->y && I->is_reverse()) )
+            {
+                if(find_intersections(I)){
+                    combine_interval(I);
+                } else {
+                    add_interval(I);
+                }
+                // for (size_t idx=0; idx<_currentList.size(); idx++){
+                //     cout << *_currentList[idx] << endl;
+                // }
+                I = _intervalList[++k];
+            }
+            for(size_t idx=0; idx<_currentList.size(); idx++)
+            {
+                if(_currentList[idx]->get_left()==concaveList[i]->x && _currentList[idx]->get_right()==concaveList[j]->x){
+                    d.push_back(Diagonal(concaveList[i], concaveList[j], 0));
+                    cout << d.back() << endl; 
+                    break;
+                }
+            }
+        }
+    }
+    while (k<_intervalList.size())
+    {
+        I = _intervalList[k];
+        if(find_intersections(I)){
+            combine_interval(I);
+        } else {
+            add_interval(I);
+        }
+        ++k;
+        // for (size_t idx=0; idx<_currentList.size(); idx++){
+        //     cout << *_currentList[idx] << endl;
+        // }
+    }
+    diagonalList.push_back(d);
+    d.clear();
+    clear();
+    
 }
 
 bool compare_Interval (Interval* a, Interval* b) 
@@ -296,9 +395,26 @@ bool compare_Interval (Interval* a, Interval* b)
     return false;
 }
 
+bool compare_x(point* a, point* b)
+{
+    if (a->x != b->x) return a->x < b->x;
+    return a->y < b->y;
+}
+
+bool compare_y(point* a, point* b)
+{
+    if (a->y != b->y) return a->y < b->y;
+    return a->x < b->x;
+}
 ostream& operator << (ostream& os, const Rectangle& rect)
 {
     os << "RECT " << rect._LLX << " " << rect._LLY << " " << rect._URX << " " << rect._URY << " ;" ;
 }
+
+ostream& operator << (ostream& os, const Diagonal& diag)
+{
+    os  << "Diagonal " << *diag._p1 << " " << *diag._p2;
+}
+
 
 #endif
