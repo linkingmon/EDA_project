@@ -16,6 +16,7 @@ public:
     void build_polygon_table(vector<vector<point *> > &, vector<point *> &);
     void find_concave(vector<point *>& concaveList, vector<point *>& polygon);
     void find_diagonal(vector<vector<Diagonal> >& diagonalList, vector<point *>& polygon);
+    void find_cross(vector<vector<Diagonal> >&diagonalList, vector<vector<bool> > adj_matrix);
     void clear();
 
 private:
@@ -53,10 +54,12 @@ void SplitMgr::splitO(vector<point *> &total)
 {
     vector<vector<point *> > polygon_table;
     build_polygon_table(polygon_table, total);
-    vector<vector<Diagonal> > diagonalList;
     for (size_t i = 0; i < polygon_table.size(); i++)
     {
+        vector<vector<Diagonal > > diagonalList;
         find_diagonal(diagonalList, polygon_table[i]);
+        vector<vector<bool> > adj_matrix;
+        find_cross(diagonalList, adj_matrix);
     }
 }
 
@@ -168,19 +171,45 @@ void SplitMgr::find_concave(vector<point *>& concaveList, vector<point *>& polyg
             p = p->next;
         }
     }
-    cout << "Concave vertices: ";
-    for (size_t i=0; i<concaveList.size(); i++){
-        cout << *concaveList[i] << endl;
-    }
+    // cout << "Concave vertices: ";
+    // for (size_t i=0; i<concaveList.size(); i++){
+    //     cout << *concaveList[i] << endl;
+    // }
 }
 
 void SplitMgr::find_diagonal(vector<vector<Diagonal> >& diagonalList, vector<point *>& polygon)
 {
     vector<point *> concaveList;
     find_concave(concaveList, polygon);
-    
+    _IM.find_diagonal(diagonalList, concaveList, polygon);
+}
 
-    
+void SplitMgr::find_cross(vector<vector<Diagonal> >&diagonalList, vector<vector<bool> > adj_matrix)
+{
+    vector<bool> neighbor;
+    for (size_t i=0; i<diagonalList[0].size(); i++)
+    {
+        Diagonal d1 = diagonalList[0][i];
+        for (size_t j=0; j<diagonalList[1].size(); j++)
+        {
+            Diagonal d2 = diagonalList[1][j];
+            
+            if (d1._p1->x >= d2._p1->x && d2._p2->x >= d1._p1->x  && d2._p1->y >= d1._p1->y && d1._p2->y >= d2._p1->y)
+            neighbor.push_back(1);
+            else neighbor.push_back(0);
+        }
+        adj_matrix.push_back(neighbor);
+        neighbor.clear();
+    }
+    // for (size_t i=0; i<diagonalList[0].size(); i++)
+    // {
+    //     for (size_t j=0; j<diagonalList[1].size(); j++)
+    //     {
+    //         if (adj_matrix[i][j]){
+    //             cout << "Cross " << diagonalList[0][i] << diagonalList[1][j] << endl;
+    //         }
+    //     }
+    // }
 }
 
 
