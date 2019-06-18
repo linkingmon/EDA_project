@@ -490,6 +490,14 @@ int littlemerge::find_intersect(point *a, point *b)
             if (min_hole_area > -a->areas)
                 min_hole_area = -a->areas;
         }
+        if (printon)
+        {
+            cerr << a->len << endl;
+            cerr << *a << endl;
+            cerr << a->counterclockwise << endl;
+            cerr << "Poly is inside of something" << endl;
+            cerr << ((min_poly_area > min_hole_area) ? "POLY" : "HOLE") << endl;
+        }
         out_list_buf.clear();
     }
     point *p;
@@ -904,17 +912,38 @@ void littlemerge::check_list(vector<point *> &new_list, point *&root)
     }
     if (isout)
     {
+        if (printon)
+            cerr << "ISOUT" << endl;
         if (min_hole_area != DBL_MAX || min_poly_area != DBL_MAX)
         {
+            if (printon)
+                cerr << "Is inside something" << endl;
             if (ismerge)
             {
                 if (min_poly_area < min_hole_area)
                 {
                     root->delete_poly();
                     delete root;
+                    if (printon)
+                        cerr << "DELETE" << endl;
                 }
                 else
-                    new_list.push_back(root);
+                {
+                    if (printon)
+                        cerr << "Is inside hole" << endl;
+                    root->setcounterclockwise();
+                    if (root->areas == min_hole_area)
+                    {
+                        if (printon)
+                            cerr << "AREA same delete" << endl;
+                        root->delete_poly();
+                        delete root;
+                    }
+                    else
+                        new_list.push_back(root);
+                    if (printon)
+                        cerr << "Inside hole" << endl;
+                }
             }
             else
             {
@@ -930,7 +959,16 @@ void littlemerge::check_list(vector<point *> &new_list, point *&root)
                     delete root;
                 }
                 else
-                    new_list.push_back(root);
+                {
+                    root->setcounterclockwise();
+                    if (-root->areas == min_poly_area)
+                    {
+                        root->delete_poly();
+                        delete root;
+                    }
+                    else
+                        new_list.push_back(root);
+                }
             }
         }
         else

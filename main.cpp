@@ -24,7 +24,7 @@ int main()
     // for (unsigned int number = 'a'; number < 'a' + 25; ++number)
     // {
     //     string filename = string("special/case") + char(number) + string(".txt");
-    string filename = string("OpenCase_1.txt");
+    string filename = string("OpenCase_2.txt");
     fstream fin(filename.c_str(), fstream::in);
     if (!fin)
     {
@@ -71,7 +71,7 @@ int main()
             if (operations[i][1] == 'H')
                 SM->splitH(LM->get_list());
             else if (operations[i][1] == 'V')
-                SM->splitH(LM->get_list());
+                SM->splitV(LM->get_list());
             else
                 SM->splitO(LM->get_list());
             SM->output_rect("split/split4_S.out");
@@ -82,27 +82,28 @@ int main()
             operation &oper = mapping[operations[i]];
             // if (i > 2)
             //     continue;
+            // if (i != 0)
+            //     continue;
             for (unsigned int j = 0; j < oper.root_list.size(); ++j)
             {
-                cout << operations[i] << ' ' << i << ' ' << j << endl;
                 // LM->output(string("ALL") + char(j + 65) + ".txt", oper.root_list[j]);
 
-                // if (j % 1000 == 0)
+                if (j % 1000 == 0)
+                {
+                    cerr << operations[i] << ' ' << i << ' ' << j << endl;
+                }
+                char buffer[3];
+                // if (j == 3317 || j == 3318)
                 // {
-                //     cerr << operations[i] << ' ' << i << ' ' << j << endl;
-                // LM->start_print();
-                // }
-                // char buffer[3];
-                // if (i == 2 && j == 85)
-                // LM->output("AllA.txt", oper.root_list[j]);
-                // if (i == 2 && j == 86)
-                // {
-                //     LM->output("AllB.txt", oper.root_list[j]);
                 //     LM->start_print();
+                //     itoa(j, buffer, 10);
+                //     LM->output(string("BUG/All") + buffer + ".txt", oper.root_list[j]);
                 // }
-                // assert(i != 3);
-                // if (i == 2 || i == 3)
-                //     continue;
+                // if (j == 10000)
+                //     break;
+                // assert(j != 3318);
+                // if (j == 3318)
+                // break;
                 // if (i == 3)
                 // {
                 //     // assert(j != 20);
@@ -111,12 +112,13 @@ int main()
                 //     if (j == 18)
                 //         LM->start_print();
                 // }
+                // if(j == 10000){
+                //     itoa(j, buffer, 10);
+                // LM->output(string("BUG/All") + buffer + ".txt", oper.root_list[j]);
+                //     break;
+                // }
                 LM->insert(oper.root_list[j], operations[i][0] == 'M');
             }
-            cerr << "total points: " << point_cnt << " & total intersects: " << intersect_cnt << endl;
-            LM->print();
-            // LM->output(string("result/Merge") + char(i + 49) + ".txt");
-            // LM->output(string("result/Merge") + char(i + 49) + ".txt");
         }
     }
     LM->memory_check();
