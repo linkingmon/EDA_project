@@ -106,6 +106,7 @@ void list_construct(point *&root)
     }
     root->iscolored = false;
     root->has_intersect = false;
+    root->setcounterclockwise();
 }
 
 // 需要初始化更種參數：包刮：x, y next, prev, s_next, len, angle, verti, dir

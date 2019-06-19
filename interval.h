@@ -54,7 +54,7 @@ public:
     void add_interval(Interval *&p);
     void add_rectangle(Interval *&p);
     void move_rectangle(vector<Rectangle *> &totalList);
-    void find_diagonal(vector<vector<Diagonal> > &diagonalList, vector<point *> &concaveList, vector<point *> &polygon);
+    void find_diagonal(vector<vector<Diagonal>> &diagonalList, vector<point *> &concaveList, vector<point *> &polygon);
     void clear();
 
 private:
@@ -343,7 +343,7 @@ void Interval_Mgr::move_rectangle(vector<Rectangle *> &totalList)
     }
 }
 
-void Interval_Mgr::find_diagonal(vector<vector<Diagonal> > &diagonalList, vector<point *> &concaveList, vector<point *> &polygon)
+void Interval_Mgr::find_diagonal(vector<vector<Diagonal>> &diagonalList, vector<point *> &concaveList, vector<point *> &polygon)
 {
     build_interval(polygon, 1);
     sort(concaveList.begin(), concaveList.end(), ::compare_x);

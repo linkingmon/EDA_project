@@ -192,7 +192,6 @@ void littlemerge::merge(point *&root)
         root_list.push_back(root);
         return;
     }
-    have_cross = false;
     min_hole_area = DBL_MAX;
     min_poly_area = DBL_MAX;
     Time->tic();
@@ -276,7 +275,6 @@ void littlemerge::clip(point *&root)
         delete root;
         return;
     }
-    have_cross = false;
     min_hole_area = DBL_MAX;
     min_poly_area = DBL_MAX;
     find_intersect(root);
@@ -440,6 +438,7 @@ bool littlemerge::find_intersect(point *a, point *b)
     ++glob_color;
     cross_cnt2 = 0;
     intersect_list.clear();
+    have_cross = false;
     for (int k = 0; k < a->len; k++)
     {
         for (int l = 0; l < b->len; l++)
@@ -453,6 +452,8 @@ bool littlemerge::find_intersect(point *a, point *b)
     bool has_out;
     // a包在b裡面，a刪掉
     has_out = in_out_cross(a, b);
+    if (printon)
+        cerr << "HAS OUT is " << has_out << endl;
     if (!has_out && !have_cross)
     {
         return_type = true;
@@ -462,26 +463,33 @@ bool littlemerge::find_intersect(point *a, point *b)
     has_out = in_out_cross(b, a);
     if (!has_out && !have_cross && (cross_cnt2 == 0))
     {
-        a->setcounterclockwise();
-        if (a->counterclockwise)
+        if (return_type == true)
         {
-            if (min_poly_area > a->areas)
-                min_poly_area = a->areas;
+            min_hole_area = min_poly_area = DBL_MIN;
         }
         else
         {
-            if (min_hole_area > -a->areas)
-                min_hole_area = -a->areas;
+            a->setcounterclockwise();
+            if (a->counterclockwise)
+            {
+                if (min_poly_area > a->areas)
+                    min_poly_area = a->areas;
+            }
+            else
+            {
+                if (min_hole_area > -a->areas)
+                    min_hole_area = -a->areas;
+            }
+            if (printon)
+            {
+                cerr << a->len << endl;
+                cerr << *a << endl;
+                cerr << a->counterclockwise << endl;
+                cerr << "Poly is inside of something" << endl;
+                cerr << ((min_poly_area > min_hole_area) ? "POLY" : "HOLE") << endl;
+            }
+            out_list_buf.clear();
         }
-        if (printon)
-        {
-            cerr << a->len << endl;
-            cerr << *a << endl;
-            cerr << a->counterclockwise << endl;
-            cerr << "Poly is inside of something" << endl;
-            cerr << ((min_poly_area > min_hole_area) ? "POLY" : "HOLE") << endl;
-        }
-        out_list_buf.clear();
     }
     point *p;
     intersect_point *p_t;
@@ -519,28 +527,6 @@ bool littlemerge::in_out_cross(point *root, point *cross)
         if (outside)
         {
             has_out = true;
-            // if (p->prev->intersection.size() > 0)
-            // {
-            //     p->prev->sort_intersection();
-            //     if (printon)
-            //     {
-            //         // cout << "XXXXXXXXXXXX" << endl;
-            //         // cout << *(p->prev) << " " << *p << endl;
-            //         for (unsigned int kk = 0; kk < p->prev->intersection.size(); ++kk)
-            //             p->prev->intersection[kk]->print();
-            //         // cout << "XXXXXXXXXXXX" << endl;
-            //     }
-            //     for (int j = p->prev->intersection.size() - 1; j >= 0; --j)
-            //     {
-            //         intersect_point *p_t = static_cast<intersect_point *>(p->prev->intersection[j]);
-            //         if (p_t->color == glob_color)
-            //         {
-            //             p_t->in = false;
-            //             out_list_buf.push_back(p_t);
-            //             break;
-            //         }
-            //     }
-            // }
         }
         p = p->next;
     }
@@ -768,40 +754,36 @@ void littlemerge::check_list(vector<point *> &new_list, point *&root)
         {
             if (ismerge)
             {
-                if (min_poly_area < min_hole_area)
+                if (min_hole_area == DBL_MIN)
+                {
+                    root->delete_poly();
+                    delete root;
+                }
+                else if (min_poly_area < min_hole_area)
                 {
                     root->delete_poly();
                     delete root;
                 }
                 else
                 {
-                    root->setcounterclockwise();
-                    if (root->areas == min_hole_area)
-                    {
-                        root->delete_poly();
-                        delete root;
-                    }
-                    else
-                        new_list.push_back(root);
+                    new_list.push_back(root);
                 }
             }
             else
             {
-                if (min_poly_area > min_hole_area)
+                if (min_poly_area == DBL_MIN)
+                {
+                    root->delete_poly();
+                    delete root;
+                }
+                else if (min_poly_area > min_hole_area)
                 {
                     root->delete_poly();
                     delete root;
                 }
                 else
                 {
-                    root->setcounterclockwise();
-                    if (-root->areas == min_poly_area)
-                    {
-                        root->delete_poly();
-                        delete root;
-                    }
-                    else
-                        new_list.push_back(root);
+                    new_list.push_back(root);
                 }
             }
         }
@@ -919,29 +901,14 @@ bool littlemerge::check_point(point *&a, point *&b, long long int &x, long long 
     }
     if (ismerge)
     {
-        if (!a_is_in != b_is_in)
-        {
-            // cerr << "Egde of " << *a << *b << " has state " << state_a << ' ' << state_b << endl;
-            // cerr << *a << *(a->next) << endl;
-            // cerr << *b << *(b->next) << endl;
-            // cerr << a_is_in << ' ' << b_is_in << endl;
-        }
-        // if (a_is_in && b_is_in)
-        // cerr << "Exist two in" << endl;
-        // if (!a_is_in && !b_is_in)
-        // cerr << "Exist two out" << endl;
         // assert(a_is_in != 1 || b_is_in != 1);
-        // assert(a_is_in != 0 || b_is_in != 0);
-    }
-    else
-    { // 00X 01V 10 11V
-        // assert(a_is_in != 1 || b_is_in != 1);
-        // assert(a_is_in != 0 || b_is_in != 0);
-    }
-    if (ismerge)
-    {
-        if (!a_is_in != b_is_in)
+        if (a_is_in == 0 && b_is_in == 0)
             return false;
+        else if (a_is_in == 1 && b_is_in == 1)
+        {
+            cerr << "There are two in. " << endl;
+            b_is_in = 0;
+        }
     }
     else
     {

@@ -20,7 +20,7 @@ public:
     void output();
 
 private:
-    map<string, vector<clock_t> > times;
+    map<string, vector<clock_t>> times;
     clock_t t;
 };
 void TimeMgr::tic()
@@ -34,7 +34,7 @@ void TimeMgr::toc(string s)
 void TimeMgr::print()
 {
     cout << "============================================" << endl;
-    for (map<string, vector<clock_t> >::iterator iter = times.begin(); iter != times.end(); ++iter)
+    for (map<string, vector<clock_t>>::iterator iter = times.begin(); iter != times.end(); ++iter)
     {
         clock_t sum = 0;
         for (unsigned int i = 0; i < iter->second.size(); ++i)
@@ -46,12 +46,14 @@ void TimeMgr::print()
 void TimeMgr::output()
 {
     fstream timefout("time.csv", fstream::out);
-    for (map<string, vector<clock_t> >::iterator iter = times.begin(); iter != times.end(); ++iter){
+    for (map<string, vector<clock_t>>::iterator iter = times.begin(); iter != times.end(); ++iter)
+    {
         timefout << iter->first << ", ";
-        for(unsigned int j = 0 ; j < iter->second.size() ; ++j){
-             timefout << iter->second[j] << " ,";
+        for (unsigned int j = 0; j < iter->second.size(); ++j)
+        {
+            timefout << iter->second[j] << " ,";
         }
-         timefout << endl;
+        timefout << endl;
     }
 }
 #endif
