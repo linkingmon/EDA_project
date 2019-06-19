@@ -80,12 +80,14 @@ private:
 class Diagonal
 {
 public:
-    Diagonal(point* p1, point* p2, bool vertical): _p1(p1), _p2(p2), _vertical(vertical) {}
+    Diagonal(point* p1, point* p2, bool vertical): _p1(p1), _p2(p2), _vertical(vertical), _is_matched(false), _in_min_cover(false) {}
     friend ostream& operator << (ostream&, const Diagonal&);
     
     point* _p1;
     point* _p2;
     bool _vertical;
+    bool _is_matched;
+    bool _in_min_cover;
 
 };
 
@@ -231,6 +233,8 @@ void Interval_Mgr::combine_interval(Interval* &p)
                 _currentList.push_back(new Interval(I->get_left(), p->get_right(), p->get_position(), 0));
             } else {
                 cerr << "The two intervals can not combine." << endl;
+                cerr << I << endl;
+                cerr << p << endl;
             }
             delete I;
         } else if (_intersections.size()==2){

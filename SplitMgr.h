@@ -1,8 +1,8 @@
 #ifndef SPLITMGR_H
 #define SPLITMGR_H
 #include "interval.h"
-
-
+#include "HopcroftKarft.h"
+#include "glob_func.h"
 
 class SplitMgr
 {
@@ -16,7 +16,10 @@ public:
     void build_polygon_table(vector<vector<point *> > &, vector<point *> &);
     void find_concave(vector<point *>& concaveList, vector<point *>& polygon);
     void find_diagonal(vector<vector<Diagonal> >& diagonalList, vector<point *>& polygon);
-    void find_cross(vector<vector<Diagonal> >&diagonalList, vector<vector<bool> > adj_matrix);
+    void find_cross(vector<vector<Diagonal> >&diagonalList, vector<vector<int> >& adj_matrix);
+    void find_max_matching(vector<vector<int> >& adj_matrix);
+    void find_min_cover(vector<vector<Diagonal> >&diagonalList, vector<vector<int> >& adj_matrix);
+    void split_poly(vector<point *>& polygon, vector<vector<Diagonal> >&diagonalList);
     void clear();
 
 private:
@@ -58,8 +61,12 @@ void SplitMgr::splitO(vector<point *> &total)
     {
         vector<vector<Diagonal > > diagonalList;
         find_diagonal(diagonalList, polygon_table[i]);
-        vector<vector<bool> > adj_matrix;
+        vector<vector<int> > adj_matrix;
         find_cross(diagonalList, adj_matrix);
+        find_max_matching(adj_matrix);
+        find_min_cover(diagonalList, adj_matrix);
+        split_poly(polygon_table[i], diagonalList);
+
     }
 }
 
@@ -99,7 +106,7 @@ bool SplitMgr::outside_poly(point *root, point *cross)
             }
             else if (root->x == p->x)
                 if ((root->y >= p->y) && (root->y <= p->s_next->y) || (root->y <= p->y) && (root->y >= p->s_next->y))
-                    return false;
+                    return true;
         }
         else
         {
@@ -113,7 +120,7 @@ bool SplitMgr::outside_poly(point *root, point *cross)
             }
             else if (root->y == p->y)
                 if ((root->x >= p->x) && (root->x <= p->s_next->x) || (root->x <= p->x) && (root->x >= p->s_next->x))
-                    return false;
+                    return true;
         }
         p = p->next;
     }
@@ -159,13 +166,16 @@ void SplitMgr::build_polygon_table(vector<vector<point *> > &polygon_table, vect
 
 void SplitMgr::find_concave(vector<point *>& concaveList, vector<point *>& polygon)
 {
+    glob_color = -1;
     concaveList.clear();
     for (size_t i=0; i<polygon.size(); i++)
     {
+        ++glob_color;
         point* p = polygon[i];
         size_t n_vertex = p->len;
         for (size_t j=0; j<n_vertex; j++)
         {
+            p->pcolor = glob_color;
             if (p->verti && (p->dir!=p->prev->dir)) concaveList.push_back(p);
             if (!p->verti && (p->dir==p->prev->dir)) concaveList.push_back(p);
             p = p->next;
@@ -184,9 +194,9 @@ void SplitMgr::find_diagonal(vector<vector<Diagonal> >& diagonalList, vector<poi
     _IM.find_diagonal(diagonalList, concaveList, polygon);
 }
 
-void SplitMgr::find_cross(vector<vector<Diagonal> >&diagonalList, vector<vector<bool> > adj_matrix)
+void SplitMgr::find_cross(vector<vector<Diagonal> >&diagonalList, vector<vector<int> >& adj_matrix)
 {
-    vector<bool> neighbor;
+    vector<int> neighbor;
     for (size_t i=0; i<diagonalList[0].size(); i++)
     {
         Diagonal d1 = diagonalList[0][i];
@@ -212,5 +222,146 @@ void SplitMgr::find_cross(vector<vector<Diagonal> >&diagonalList, vector<vector<
     // }
 }
 
+void SplitMgr::find_max_matching(vector<vector<int> >& adj_matrix)
+{
+    size_t m=adj_matrix.size(), n=adj_matrix[0].size();
+    BipGraph g(m,n);
+    for (size_t i=0; i<m; i++)
+    {
+        for (size_t j=0; j<n; j++)
+        {
+            if (adj_matrix[i][j]!=0)
+                g.addEdge(i+1, j+1);
+        }
+    }
+    g.hopcroftKarp();
+    g.get_matching(adj_matrix);
+    // for (size_t i=0; i<m; i++)
+    // {
+    //     for (size_t j=0; j<n; j++)
+    //     {
+    //         if (adj_matrix[i][j]==1)
+    //             cout << "Unmatched edge " << i+1 << ", " << j+1 << endl;
+    //         if(adj_matrix[i][j]==2)
+    //             cout << "Matched edge " << i+1 << ", " << j+1 << endl;                
+    //     }
+    // }
+
+}
+
+void SplitMgr::find_min_cover(vector<vector<Diagonal> >&diagonalList, vector<vector<int> >& adj_matrix)
+{
+    int m = diagonalList[0].size();
+    int n = diagonalList[1].size();
+    int num_vertex = m+n;
+
+    // building adjacency list
+    vector< list<int> > AdjList;
+    AdjList.resize(num_vertex);
+    for (int i=0; i<m; i++)
+    {
+        for (int j=0; j<n; j++)
+        {
+            if (adj_matrix[i][j]==0) 
+                continue;
+            else if(adj_matrix[i][j]==1)
+                AdjList[i].push_back(m+j);
+            else 
+            {
+                AdjList[m+j].push_back(i);
+                diagonalList[0][i]._is_matched = true;
+                diagonalList[1][j]._is_matched = true;
+            }               
+        }
+    }
+
+    // BFS
+    // Mark all the vertices as not visited
+    bool *visited = new bool[num_vertex];
+    for (int i=0; i<num_vertex; i++)
+        visited[i] = false;
+
+    list<int> queue;
+    for (int i=0; i<m; i++){
+        if (!diagonalList[0][i]._is_matched){
+            visited[i] = true;
+            queue.push_back(i);
+        }
+    }
+    list<int>::iterator itr;
+
+    while (!queue.empty())
+    {
+        int s = queue.front();
+        queue.pop_front();
+
+        for (itr = AdjList[s].begin(); itr != AdjList[s].end(); ++itr) 
+        { 
+            if (!visited[*itr]) 
+            { 
+                visited[*itr] = true; 
+                queue.push_back(*itr); 
+            } 
+        } 
+    }  
+
+    // Max matching to minimun vertex cover
+    for (int i=0; i<m; i++){
+        if (!visited[i])
+            diagonalList[0][i]._in_min_cover = true;
+    }
+    for (int i=m; i<num_vertex; i++){
+        if (visited[i])
+            diagonalList[1][i-m]._in_min_cover = true;
+    }
+
+
+    // cout << "Visited";
+    // for (int i=0; i<num_vertex; i++){
+    //     if (visited[i]) 
+    //         cout << " " << i+1;
+    // }
+    // cout << endl;
+
+    // cout << "Minimun vertex cover";
+    // for (int i=0; i<m; i++){
+    //     if (diagonalList[0][i]._in_min_cover)
+    //         cout << " " << i+1;
+    // }
+    // for (int i=0; i<n; i++){
+    //     if (diagonalList[1][i]._in_min_cover)
+    //         cout << " " << m+i+1;
+    // }
+    // cout << endl;
+    
+    // for (size_t i=0; i<AdjList.size(); i++)
+    // {
+    //     cout << i+1 << "'s neighbors: ";
+    //     for (itr=AdjList[i].begin(); itr!=AdjList[i].end(); itr++)
+    //     cout << *itr+1 << " ";
+    //     cout << endl;
+    // }
+    delete[] visited;
+}
+
+void SplitMgr::split_poly(vector<point *>& polygon, vector<vector<Diagonal> >&diagonalList)
+{
+    for (int i=0; i<diagonalList[0].size(); i++)
+    {
+        Diagonal & d=diagonalList[0][i];
+        if(!d._in_min_cover)
+        {
+            cout << d << endl;
+        }
+    }
+    for (int i=0; i<diagonalList[1].size(); i++)
+    {
+        Diagonal & d=diagonalList[1][i];
+        if(!d._in_min_cover)
+        {
+            cout << d << endl;
+        }
+    }
+}
 
 #endif
