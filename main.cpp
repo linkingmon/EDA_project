@@ -24,7 +24,7 @@ int main()
     // for (unsigned int number = 'a'; number < 'a' + 25; ++number)
     // {
     //     string filename = string("special/case") + char(number) + string(".txt");
-    string filename = string("OpenCase_2.txt");
+    string filename = string("OpenCase_1.txt");
     fstream fin(filename.c_str(), fstream::in);
     if (!fin)
     {
@@ -66,6 +66,7 @@ int main()
     {
         if (operations[i][0] == 'S')
         {
+            Time->tic();
             SplitMgr *SM = new SplitMgr();
             LM->output("split/total4_S.out");
             if (operations[i][1] == 'H')
@@ -76,6 +77,7 @@ int main()
                 SM->splitO(LM->get_list());
             SM->output_rect("split/split4_S.out");
             delete SM;
+            Time->toc("Split");
         }
         else
         {
@@ -93,34 +95,31 @@ int main()
                     cerr << operations[i] << ' ' << i << ' ' << j << endl;
                 }
                 char buffer[3];
-                // if (j == 3317 || j == 3318)
+                // assert(j != 3318);
+                // if (j == 5000)
+                //     break;
+                // if (j == 18)
                 // {
-                //     LM->start_print();
                 //     itoa(j, buffer, 10);
                 //     LM->output(string("BUG/All") + buffer + ".txt", oper.root_list[j]);
+                //     LM->start_print();
                 // }
                 // if (j == 10000)
                 //     break;
-                // assert(j != 3318);
-                // if (j == 3318)
-                // break;
                 // if (i == 3)
                 // {
                 //     // assert(j != 20);
                 //     itoa(j, buffer, 10);
                 //     LM->output(string("BUG/All") + buffer + ".txt", oper.root_list[j]);
                 //     if (j == 18)
-                //         LM->start_print();
-                // }
-                // if(j == 10000){
-                //     itoa(j, buffer, 10);
-                // LM->output(string("BUG/All") + buffer + ".txt", oper.root_list[j]);
-                //     break;
+                // LM->start_print();
                 // }
                 LM->insert(oper.root_list[j], operations[i][0] == 'M');
             }
         }
     }
+    Time->print();
+    Time->output();
     LM->memory_check();
     // LM->print();
     // LM->output(string("special_res/res") + char(number) + string(".txt"));
