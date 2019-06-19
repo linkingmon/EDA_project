@@ -2,6 +2,8 @@
 ## 說明
 1. 跑 drawS.py 可看到最後結果
 ## 進度
+- (6/19) 修改check list
+- (6/19) 修改insert intersect
 - (6/19) 自己和自己merge還沒寫到。
 - (6/19) 修正bug，merge多邊形如果再洞裡面且面積相同，要把洞刪掉。(clip相反)
 - (6/18) karp algorithm完成。

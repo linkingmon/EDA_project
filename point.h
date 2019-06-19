@@ -139,17 +139,7 @@ point::~point()
 {
     // cout << "destruct vertex" << *this << endl;
     point_cnt -= 1;
-    // 宥璁沒有把他從 intesection 清掉
-    // 所以不用清了
-
-    // cout << "delete vertex" << *this << endl;
-    // for (unsigned int j = intersection.size() - 1; j >= 0; --j)
-    // {
-    //     delete intersection[j];
-    // }
-    // intersection.clear();
 }
-// bool operator < (point* a,point* b)
 
 void point::connect(bool ismerge)
 {

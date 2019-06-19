@@ -16,11 +16,11 @@ public:
     void insert(point *&, bool);
     void merge(point *&);
     void clip(point *&);
-    bool find_intersect(point *&);
-    int find_intersect(point *, point *);
+    void find_intersect(point *&);
+    bool find_intersect(point *, point *);
     bool outside_poly(point *, point *);
     void find_cross(point *, point *);
-    void insert_intersect(point *&);
+    void insert_intersect();
     void add_intersect(point *a, point *b);
     bool inside_edge(long long x1, long long x2, long long y);
     bool inside_edgenhead(long long x1, long long x2, long long y);
@@ -56,6 +56,7 @@ private:
     vector<point *> root_list;
     set<point *> out_list;
     vector<point *> out_list_buf;
+    vector<point *> intersect_point_list;
     vector<point *> intersect_list;
     int cross_cnt2;
     bool printon;
@@ -191,27 +192,16 @@ void littlemerge::merge(point *&root)
         root_list.push_back(root);
         return;
     }
-    if (printon)
-    {
-        cout << "**********************************" << endl;
-        cerr << "Root list size: " << root_list.size() << endl;
-        for (unsigned int i = 0; i < root_list.size(); ++i)
-            root_list[i]->print_poly();
-        root->print_poly();
-        cout << "**********************************" << endl;
-    }
     have_cross = false;
     min_hole_area = DBL_MAX;
     min_poly_area = DBL_MAX;
     Time->tic();
-    bool del = find_intersect(root);
+    find_intersect(root);
     Time->toc("Find intersect");
     if (printon)
         print_outlist();
-    if (!del)
-        return;
     Time->tic();
-    insert_intersect(root);
+    insert_intersect();
     Time->toc("Insert intersect");
     if (printon)
     {
@@ -286,20 +276,14 @@ void littlemerge::clip(point *&root)
         delete root;
         return;
     }
-    // return;
-    // 不知道哪裡有bug，再list construct一次
-    // for (unsigned int i = 0; i < root_list.size(); ++i)
-    //     list_construct(root_list[i]);
     have_cross = false;
     min_hole_area = DBL_MAX;
     min_poly_area = DBL_MAX;
-    bool del = find_intersect(root);
+    find_intersect(root);
     // printon = true;
     if (printon)
         print_outlist();
-    if (!del)
-        return;
-    insert_intersect(root);
+    insert_intersect();
     vector<point *> new_list;
     ++glob_color;
     while (out_list.size() > 0)
@@ -413,13 +397,13 @@ void littlemerge::clip(point *&root)
             {
                 if (head_cnt == poly.size() - 1)
                     continue;
-                cout << poly.size() << endl;
-                cout << "P " << p << endl;
-                cout << "CUT " << head_cnt << endl;
+                // cout << poly.size() << endl;
+                // cout << "P " << p << endl;
+                // cout << "CUT " << head_cnt << endl;
                 poly.erase(poly.begin(), poly.begin() + head_cnt);
-                cout << poly.size() << endl;
-                for (unsigned t = 0; t < poly.size(); ++t)
-                    cout << (poly[t]) << endl;
+                // cout << poly.size() << endl;
+                // for (unsigned t = 0; t < poly.size(); ++t)
+                //     cout << (poly[t]) << endl;
             }
         }
         assert(poly[0] == poly[poly.size() - 1]);
@@ -433,32 +417,20 @@ void littlemerge::clip(point *&root)
     root_list = new_list;
 }
 
-bool littlemerge::find_intersect(point *&root)
+void littlemerge::find_intersect(point *&root)
 {
     for (int i = 0; i < root_list.size(); ++i)
     {
-        int state = find_intersect(root_list[i], root);
-        switch (state)
+        if (find_intersect(root_list[i], root))
         {
-        case 1:
             root_list[i] = root_list[root_list.size() - 1];
             root_list.pop_back();
             --i;
-            continue;
-            break;
-        case 2:
-            continue;
-            // return false;
-            break;
-        default:
-            continue;
-            break;
         }
     }
-    return true;
 }
 
-int littlemerge::find_intersect(point *a, point *b)
+bool littlemerge::find_intersect(point *a, point *b)
 {
     out_list_buf.clear();
     if (b->minx > a->maxx || b->miny > a->maxy || b->maxx < a->minx || b->maxy < a->miny)
@@ -477,13 +449,13 @@ int littlemerge::find_intersect(point *a, point *b)
         }
         p_k = p_k->next;
     }
-    int return_num = 0;
+    bool return_type = false;
     bool has_out;
     // a包在b裡面，a刪掉
     has_out = in_out_cross(a, b);
     if (!has_out && !have_cross)
     {
-        return_num += 1;
+        return_type = true;
         out_list_buf.clear();
     }
     // b包在a裡面，存最小b面積
@@ -513,24 +485,22 @@ int littlemerge::find_intersect(point *a, point *b)
     }
     point *p;
     intersect_point *p_t;
-    // cout << "Return num " << return_num << endl;
-    switch (return_num)
+    if (return_type)
     {
-    case 1:               // 如果b是洞那一樣
+        // 如果b是洞那一樣
         a->delete_poly(); // 要把對面的tran清掉 // 還有要把out的點從out_list移除
         delete a;
         for (unsigned int i = 0; i < intersect_list.size(); ++i)
             intersect_list[i]->intersection.pop_back();
-        return 1;
-        break;
-    default:
+    }
+    else
+    {
         for (unsigned int kk = 0; kk < out_list_buf.size(); ++kk)
         {
             out_list.insert(out_list_buf[kk]);
         }
-        return 0;
-        break;
     }
+    return return_type;
 }
 
 // cross 來 merge root
@@ -715,11 +685,13 @@ void littlemerge::new_intersect(point *a, point *b, long long x, long long y, bo
     intersect_point *insert_a = new intersect_point(x, y, glob_color, a_is_in);
     insert_a->root = a->root;
     a->root->has_intersect = true;
-    // if (a_is_in != ismerge)
-    //     out_list_buf.push_back(insert_a);
+    intersect_point_list.push_back(a);
+
     intersect_point *insert_b = new intersect_point(x, y, glob_color, b_is_in);
     insert_b->root = b->root;
     b->root->has_intersect = true;
+    intersect_point_list.push_back(b);
+
     if (!ismerge)
     {
         insert_a->isclip = false;
@@ -738,116 +710,83 @@ void littlemerge::new_intersect(point *a, point *b, long long x, long long y, bo
     two_way_intersect(insert_a, insert_b);
     // cout << out_list_buf.size() << endl;
 }
-void littlemerge::insert_intersect(point *&root)
+void littlemerge::insert_intersect()
 {
-    for (unsigned int i = 0; i < root_list.size(); ++i)
+    for (unsigned int i = 0; i < intersect_point_list.size(); ++i)
     {
-        point *a = root_list[i];
-        int len = 0;
-        for (unsigned int j = 0; j < root_list[i]->len; ++j)
-        {
-            point *temp = a->next;
-            a->connect(ismerge);
-            len += a->intersection.size();
-            a->intersection.clear();
-            a = temp;
-        }
-        root_list[i]->len += len;
-    }
-    point *a = root;
-    int len = 0;
-    for (unsigned int j = 0; j < root->len; ++j)
-    {
-        point *temp = a->next;
+        point *&a = intersect_point_list[i];
         a->connect(ismerge);
-        len += a->intersection.size();
+        int len = a->intersection.size();
         a->intersection.clear();
-        a = temp;
+        a->root->len += len;
     }
-    a->len += len;
+    intersect_point_list.clear();
 }
 void littlemerge::check_list(vector<point *> &new_list, point *&root)
-{ // 判斷有些多邊形跟其他是分開的，根本不用何在一起，要直接加進去；感覺有點慢?
+{ // 判斷有些多邊形跟其他是分開的，根本不用何在一起，要直接加進去；感覺有點慢? 已更改(6/19)
     for (unsigned int k = 0; k < root_list.size(); ++k)
     {
-        point *p = root_list[k];
-        bool isout = !root_list[k]->iscolored;
-        bool has_new_point = root_list[k]->has_intersect;
-        int cut_len = 0;
-        if (isout && has_new_point)
-        {
-            for (unsigned int z = 0; z < root_list[k]->len; ++z)
-            {
-                point *p_next = p->next;
-                if (!p->ispoint())
-                {
-                    cut_len += 1;
-                    p->prev->next = p->next;
-                    p->next->prev = p->prev;
-                    delete p;
-                }
-                p = p_next;
-            }
-            root_list[k]->has_intersect = false;
-        }
-        root_list[k]->len -= cut_len;
-        if (isout)
-        {
-            if (has_new_point)
-                list_construct(root_list[k]);
-            new_list.push_back(root_list[k]);
-        }
-        else
+        if (root_list[k]->iscolored)
         {
             root_list[k]->delete_poly();
             delete root_list[k];
         }
+        else
+        {
+            if (root_list[k]->has_intersect)
+            {
+                int cut_len = 0;
+                point *p = root_list[k];
+                for (unsigned int z = 0; z < root_list[k]->len; ++z)
+                {
+                    point *p_next = p->next;
+                    if (!p->ispoint())
+                    {
+                        cut_len += 1;
+                        p->prev->next = p->next;
+                        p->next->prev = p->prev;
+                        delete p;
+                    }
+                    p = p_next;
+                }
+                root_list[k]->has_intersect = false;
+                root_list[k]->len -= cut_len;
+                list_construct(root_list[k]);
+            }
+            else
+                new_list.push_back(root_list[k]);
+        }
     }
-    point *p = root;
-    bool isout = !root->iscolored;
-    if (isout)
+    if (root->iscolored)
     {
-        if (printon)
-            cerr << "ISOUT" << endl;
+        root->delete_poly();
+        delete root;
+    }
+    else
+    {
         if (min_hole_area != DBL_MAX || min_poly_area != DBL_MAX)
         {
-            if (printon)
-                cerr << "Is inside something" << endl;
             if (ismerge)
             {
                 if (min_poly_area < min_hole_area)
                 {
                     root->delete_poly();
                     delete root;
-                    if (printon)
-                        cerr << "DELETE" << endl;
                 }
                 else
                 {
-                    if (printon)
-                        cerr << "Is inside hole" << endl;
                     root->setcounterclockwise();
                     if (root->areas == min_hole_area)
                     {
-                        if (printon)
-                            cerr << "AREA same delete" << endl;
                         root->delete_poly();
                         delete root;
                     }
                     else
                         new_list.push_back(root);
-                    if (printon)
-                        cerr << "Inside hole" << endl;
                 }
             }
             else
             {
-                if (printon)
-                {
-                    cout << "HOLE exists" << (min_hole_area != DBL_MAX) << '\n';
-                    cout << "POLY exists" << (min_poly_area != DBL_MAX) << '\n';
-                    cout << "AREA HOLE is smaller " << (min_hole_area < min_poly_area) << endl;
-                }
                 if (min_poly_area > min_hole_area)
                 {
                     root->delete_poly();
@@ -876,11 +815,6 @@ void littlemerge::check_list(vector<point *> &new_list, point *&root)
                 delete root;
             }
         }
-    }
-    else
-    {
-        root->delete_poly();
-        delete root;
     }
 }
 // 傳入：a和b為頭的邊和交點的x、y座標

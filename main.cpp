@@ -24,7 +24,7 @@ int main()
     // for (unsigned int number = 'a'; number < 'a' + 25; ++number)
     // {
     //     string filename = string("special/case") + char(number) + string(".txt");
-    string filename = string("OpenCase_1.txt");
+    string filename = string("OpenCase_2.txt");
     fstream fin(filename.c_str(), fstream::in);
     if (!fin)
     {
@@ -84,8 +84,8 @@ int main()
             operation &oper = mapping[operations[i]];
             // if (i > 2)
             //     continue;
-            // if (i != 0)
-            //     continue;
+            if (i != 0)
+                continue;
             for (unsigned int j = 0; j < oper.root_list.size(); ++j)
             {
                 // LM->output(string("ALL") + char(j + 65) + ".txt", oper.root_list[j]);
@@ -96,8 +96,8 @@ int main()
                 }
                 char buffer[3];
                 // assert(j != 3318);
-                // if (j == 5000)
-                //     break;
+                if (j == 10000)
+                    break;
                 // if (j == 18)
                 // {
                 //     itoa(j, buffer, 10);
@@ -119,7 +119,6 @@ int main()
         }
     }
     Time->print();
-    Time->output();
     LM->memory_check();
     // LM->print();
     // LM->output(string("special_res/res") + char(number) + string(".txt"));
