@@ -59,7 +59,7 @@ public:
     void add_interval(Interval *&p);
     void add_rectangle(Interval *&p);
     void move_rectangle(vector<Rectangle *> &totalList);
-    void find_diagonal(vector<vector<Diagonal>> &diagonalList, vector<point *> &concaveList, vector<point *> &polygon);
+    bool find_diagonal(vector<vector<Diagonal>> &diagonalList, vector<point *> &concaveList, vector<point *> &polygon);
     void clear();
 
 private:
@@ -188,9 +188,9 @@ void Interval_Mgr::build_interval(vector<point *> &rootList, bool direction)
     }
 
     sort(_intervalList.begin(), _intervalList.end(), ::compare_Interval);
-    for (size_t i=0; i<_intervalList.size(); i++){
-        cout << *_intervalList[i] << endl;
-    }
+    // for (size_t i=0; i<_intervalList.size(); i++){
+    //     cout << *_intervalList[i] << endl;
+    // }
 
 }
 
@@ -199,6 +199,8 @@ void Interval_Mgr::split_polygon()
     for (size_t i = 0; i < _intervalList.size(); i++)
     {
         Interval *I = _intervalList[i];
+        cout << "=========================" << endl;
+        cout << *I << endl;
         if (find_intersections(I))
         {
             add_rectangle(I);
@@ -210,7 +212,7 @@ void Interval_Mgr::split_polygon()
         }
         for (size_t i = 0; i < _currentList.size(); i++)
         {
-            // cout << *_currentList[i] << endl;
+            cout << *_currentList[i] << endl;
         }
     }
 }
@@ -230,21 +232,21 @@ bool Interval_Mgr::find_intersections(Interval *&p)
     } else {
         for (size_t i=0; i<_currentList.size(); i++)
         {
-            if (p->get_left() == _currentList[i]->get_right() && _currentList[i]->get_right_pos() == p->get_position())
+            if (p->get_left() == _currentList[i]->get_right() && _currentList[i]->get_right_pos() <= p->get_position())
             {
                 _intersections.push_back(i);
-            } else if (p->get_right() == _currentList[i]->get_left() && _currentList[i]->get_left_pos() == p->get_position()){
+            } else if (p->get_right() == _currentList[i]->get_left() && _currentList[i]->get_left_pos() <= p->get_position()){
                 _intersections.push_back(i);
             }
         }
     }
     
     
-    // cout << "Intersections: ";
-    // for (size_t i=0; i<_intersections.size(); i++){
-    //     cout << _intersections[i] << " ";
-    // }
-    // cout << endl;
+    cout << "Intersections: ";
+    for (size_t i=0; i<_intersections.size(); i++){
+        cout << _intersections[i] << " ";
+    }
+    cout << endl;
     if (_intersections.empty())
         return 0;
     return 1;
@@ -309,7 +311,7 @@ void Interval_Mgr::add_rectangle(Interval *&p)
             if (p->get_position() > I->get_position())
             {
                 _rectList.push_back(new Rectangle(I->get_left(), I->get_position(), I->get_right(), p->get_position()));
-                // cout << *_rectList.back() << endl;
+                cout << *_rectList.back() << endl;
             }
         }
     }
@@ -321,7 +323,7 @@ void Interval_Mgr::add_rectangle(Interval *&p)
             if (p->get_position() > I->get_position())
             {
                 _rectList.push_back(new Rectangle(I->get_position(), I->get_left(), p->get_position(), I->get_right()));
-                // cout << *_rectList.back() << endl;
+                cout << *_rectList.back() << endl;
             }
         }
     }
@@ -336,14 +338,16 @@ void Interval_Mgr::move_rectangle(vector<Rectangle *> &totalList)
     }
 }
 
-void Interval_Mgr::find_diagonal(vector<vector<Diagonal>> &diagonalList, vector<point *> &concaveList, vector<point *> &polygon)
+bool Interval_Mgr::find_diagonal(vector<vector<Diagonal>> &diagonalList, vector<point *> &concaveList, vector<point *> &polygon)
 {
+    bool vertical_diagonal;
+    bool horizontal_diagonal;
     build_interval(polygon, 1);
     sort(concaveList.begin(), concaveList.end(), ::compare_x);
     size_t k = 0;
     Interval *I = _intervalList[k];
     vector<Diagonal> d;
-    for (size_t i = 0; i < concaveList.size() - 1; i++)
+    for (size_t i = 0; i+1< concaveList.size() ; i++)
     {
         for (size_t j = i + 1; j < concaveList.size(); j++)
         {
@@ -360,9 +364,9 @@ void Interval_Mgr::find_diagonal(vector<vector<Diagonal>> &diagonalList, vector<
                 {
                     add_interval(I);
                 }
-                // for (size_t idx=0; idx<_currentList.size(); idx++){
-                //     cout << *_currentList[idx] << endl;
-                // }
+                for (size_t idx=0; idx<_currentList.size(); idx++){
+                    cout << *_currentList[idx] << endl;
+                }
                 I = _intervalList[++k];
             }
             for (size_t idx = 0; idx < _currentList.size(); idx++)
@@ -370,6 +374,7 @@ void Interval_Mgr::find_diagonal(vector<vector<Diagonal>> &diagonalList, vector<
                 if (_currentList[idx]->get_left() == concaveList[i]->y && _currentList[idx]->get_right() == concaveList[j]->y)
                 {
                     d.push_back(Diagonal(concaveList[i], concaveList[j], 1));
+                    vertical_diagonal = true;
                     // cout << d.back() << endl;
                     break;
                 }
@@ -400,7 +405,7 @@ void Interval_Mgr::find_diagonal(vector<vector<Diagonal>> &diagonalList, vector<
     sort(concaveList.begin(), concaveList.end(), ::compare_y);
     k = 0;
     I = _intervalList[k];
-    for (size_t i = 0; i < concaveList.size() - 1; i++)
+    for (size_t i = 0; i+1 < concaveList.size(); i++)
     {
         for (size_t j = i + 1; j < concaveList.size(); j++)
         {
@@ -427,7 +432,8 @@ void Interval_Mgr::find_diagonal(vector<vector<Diagonal>> &diagonalList, vector<
                 if (_currentList[idx]->get_left() == concaveList[i]->x && _currentList[idx]->get_right() == concaveList[j]->x)
                 {
                     d.push_back(Diagonal(concaveList[i], concaveList[j], 0));
-                    cout << d.back() << endl;
+                    horizontal_diagonal = true;
+                    // cout << d.back() << endl;
                     break;
                 }
             }
@@ -452,6 +458,7 @@ void Interval_Mgr::find_diagonal(vector<vector<Diagonal>> &diagonalList, vector<
     diagonalList.push_back(d);
     d.clear();
     clear();
+    return horizontal_diagonal || vertical_diagonal;
 }
 
 bool compare_Interval(Interval *a, Interval *b)

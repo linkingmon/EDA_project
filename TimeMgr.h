@@ -39,7 +39,7 @@ void TimeMgr::print()
         clock_t sum = 0;
         for (unsigned int i = 0; i < iter->second.size(); ++i)
             sum += iter->second[i];
-        cout << setw(16) << left << iter->first << " consumes " << setw(8) << right << sum << " miniseconds." << endl;
+        cout << setw(16) << left << iter->first << " consumes " << setw(8) << right << double(sum)/CLOCKS_PER_SEC << " seconds." << endl;
     }
     cout << "============================================" << endl;
 }
