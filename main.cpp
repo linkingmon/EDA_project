@@ -66,6 +66,8 @@ int main()
     {
         if (operations[i][0] == 'S')
         {
+            cerr << "Split start" << endl;
+            Time->tic();
             SplitMgr *SM = new SplitMgr();
             LM->output("split/total4_S.out");
             if (operations[i][1] == 'H')
@@ -76,51 +78,35 @@ int main()
                 SM->splitO(LM->get_list());
             SM->output_rect("split/split4_S.out");
             delete SM;
+            Time->toc("Split");
         }
         else
         {
             operation &oper = mapping[operations[i]];
             // if (i > 2)
             //     continue;
-            // if (i != 0)
-            //     continue;
+            char buffer[3];
             for (unsigned int j = 0; j < oper.root_list.size(); ++j)
             {
-                // LM->output(string("ALL") + char(j + 65) + ".txt", oper.root_list[j]);
-
-                if (j % 1000 == 0)
-                {
-                    cerr << operations[i] << ' ' << i << ' ' << j << endl;
-                }
-                char buffer[3];
-                // if (j == 3317 || j == 3318)
+                // if (i == 0)
                 // {
-                //     LM->start_print();
-                //     itoa(j, buffer, 10);
-                //     LM->output(string("BUG/All") + buffer + ".txt", oper.root_list[j]);
-                // }
-                // if (j == 10000)
-                //     break;
-                // assert(j != 3318);
-                // if (j == 3318)
-                // break;
-                // if (i == 3)
-                // {
-                //     // assert(j != 20);
-                //     itoa(j, buffer, 10);
-                //     LM->output(string("BUG/All") + buffer + ".txt", oper.root_list[j]);
-                //     if (j == 18)
+                //     // LM->start_print();
+                //     if (j >= 4066)
+                //     {
                 //         LM->start_print();
+                //         itoa(j, buffer, 10);
+                //         LM->output(string("BUG/All") + buffer + ".txt", oper.root_list[j]);
+                //     }
+                //     assert(j != 4067);
                 // }
-                // if(j == 10000){
-                //     itoa(j, buffer, 10);
-                // LM->output(string("BUG/All") + buffer + ".txt", oper.root_list[j]);
-                //     break;
-                // }
+                if (j % 1000 == 0)
+                    cerr << operations[i] << ' ' << i << ' ' << j << endl;
                 LM->insert(oper.root_list[j], operations[i][0] == 'M');
             }
+            // LM->output(string("BUG/All") + buffer + ".txt", oper.root_list[i]);
         }
     }
+    Time->print();
     LM->memory_check();
     // LM->print();
     // LM->output(string("special_res/res") + char(number) + string(".txt"));

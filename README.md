@@ -2,7 +2,13 @@
 ## 說明
 1. 跑 drawS.py 可看到最後結果
 ## 進度
-- (6/19) 自己和自己merge還沒寫到。
+- (6/20) 應該要開 root class。[16]
+- (6/20) 新增 TimeMgr class可用來計算時間。
+- (6/20) 就算是座標一樣，面積算起來也可能部一樣...，換方法，用outside poly，當兩個互相包含的時候就把min_hole_area和min_poly_area設為DBL_MIN。[15] ~~[15]~~
+- (6/20) 修改bug，兩個in的情況(對被merge的人來說in一定會判斷正確，因為放進來的是多邊形，但是merge人的可能在判斷走到邊上的in/out時把洞誤判成多邊形)[14] ~~[14]~~
+- (6/19) (加速)修改check list，在point class加入新的變數iscolored，只要其中有交點被塗到，就直接到該多邊形的root把iscolored改為true，這樣在check的時候只要看root的iscolored就好，不需要搜尋整個多邊形。
+- (6/19) (加速)修改insert intersect，直接在littlemerge裡面存有插入焦點的線段的頭，直接對頭進行insert就好。
+- (6/19) 自己和自己merge還沒寫到。[5]
 - (6/19) 修正bug，merge多邊形如果再洞裡面且面積相同，要把洞刪掉。(clip相反)
 - (6/18) karp algorithm完成。
 - (6/18) OpenCase_2記憶體不夠(沒有memory leak)，bad_alloc

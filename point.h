@@ -44,7 +44,7 @@ public:
     {
         string ang = "\\/X";
         // cout << *this << " DIR" << (this->verti ? '|' : '-') << " Angle" << ang[this->angle] << " Snext" << *(this->s_next) << endl;
-        cout << *this << this->intersection.size() << ' ' << this << endl;
+        cout << *this << this->intersection.size() << ' ' << this << " is poly with root " << *(this->root) << ' ' << this->root << endl;
     };
     virtual bool ispoint() { return true; };
     void setcounterclockwise();
@@ -53,20 +53,30 @@ public:
     vector<point *> intersection;
     long long x, y;
     double areas;
-    point *next;                      // 後一個點
-    point *prev;                      // 前一個點
-    point *s_next;                    // 筆直走 走得最遠的點
-    int len;                          // ROOT 專用
-    long long minx, miny, maxx, maxy; //多邊形的邊界
-    int pcolor;                       // merge時 做DFS用的
-    // point* straright_next;
+    point *next;   // 後一個點
+    point *prev;   // 前一個點
+    point *s_next; // 筆直走 走得最遠的點
+    point *root;
+    int pcolor;
     short angle; //角度
     bool verti;  //垂直
     bool dir;    //往正的地方走(上、右)
-    // bool mark;   // 標示有沒有走過(merge)
     bool counterclockwise;
     bool isclip;
-    // point &bool operator<(point &b);
+    long long minx, miny, maxx, maxy; //多邊形的邊界
+    int len;                          // ROOT 專用
+    bool iscolored;
+    bool has_intersect;
+};
+
+class root_point : public point
+{
+private:
+public:
+    // long long minx, miny, maxx, maxy; //多邊形的邊界
+    // int len;                          // ROOT 專用
+    // bool iscolored;
+    // bool has_intersect;
 };
 
 class intersect_point : public point
@@ -129,17 +139,7 @@ point::~point()
 {
     // cout << "destruct vertex" << *this << endl;
     point_cnt -= 1;
-    // 宥璁沒有把他從 intesection 清掉
-    // 所以不用清了
-
-    // cout << "delete vertex" << *this << endl;
-    // for (unsigned int j = intersection.size() - 1; j >= 0; --j)
-    // {
-    //     delete intersection[j];
-    // }
-    // intersection.clear();
 }
-// bool operator < (point* a,point* b)
 
 void point::connect(bool ismerge)
 {

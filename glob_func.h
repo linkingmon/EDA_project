@@ -98,6 +98,15 @@ void list_construct(point *&root)
         root->maxx = maxx;
         root->maxy = maxy;
     }
+    point *p = root;
+    for (unsigned int i = 0; i < root->len; ++i)
+    {
+        p->root = root;
+        p = p->next;
+    }
+    root->iscolored = false;
+    root->has_intersect = false;
+    root->setcounterclockwise();
 }
 
 // 需要初始化更種參數：包刮：x, y next, prev, s_next, len, angle, verti, dir
