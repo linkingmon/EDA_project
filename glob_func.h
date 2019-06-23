@@ -169,9 +169,12 @@ point *construct_new_poly(vector<point *> &point_stream)
     p_prev->next = root;
     root->prev = p_prev;
     root->len = point_stream_simple.size();
+    // cerr << "SIZE" << point_stream_simple.size() << endl;
     // 壓縮一下直接走到s_next
     // cout << "LLLLLLLLLLLLLLLLLLLLListLLLLLLLLLLLLLL" << endl;
     // root->print_poly();
+    if (point_stream_simple.size() < 4)
+        return nullptr;
     list_construct(root);
     // root->print_poly();
     return root;
