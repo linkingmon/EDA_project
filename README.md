@@ -1,6 +1,7 @@
 # EDA_project
 ## 說明
 1. 跑 drawS.py 可看到最後結果
+2. 結果：https://drive.google.com/open?id=1g9JQW9y77nshBMttWFLC6zNCcNCl-lFM
 ## 進度
 - (6/20) 應該要開 root class。[16]
 - (6/20) 新增 TimeMgr class可用來計算時間。
