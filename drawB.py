@@ -3,8 +3,8 @@ import numpy as np
 
 cnt = 1
 # filename = 'sample_in.txt'
-for char in range(4065, 10000):
-    filename = 'BUG/ALL{}.txt'.format(char)
+for char in range(230348, 10000000, 20):
+    filename = 'BUG1/ALL{}.txt'.format(char)
     with open(filename, 'r') as f:
         L = f.read().splitlines()[2:]
         plt.figure()

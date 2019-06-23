@@ -21,10 +21,8 @@ int main()
     ios_base::sync_with_stdio(0);
     cin.tie(0);
     int number_id = 0;
-    // for (unsigned int number = 'a'; number < 'a' + 25; ++number)
-    // {
-    //     string filename = string("special/case") + char(number) + string(".txt");
-    string filename = string("OpenCase_2.txt");
+    Time->tic();
+    string filename = string("OpenCase_1.txt");
     fstream fin(filename.c_str(), fstream::in);
     if (!fin)
     {
@@ -60,8 +58,9 @@ int main()
         while (read_operation(fin, root, isclip))
             oper.root_list.push_back(root);
     }
-
+    Time->toc("Read file");
     littlemerge *LM = new littlemerge();
+    // LM->preread("All230348.txt");
     for (unsigned int i = 0; i < operations.size(); ++i)
     {
         if (operations[i][0] == 'S')
@@ -83,35 +82,29 @@ int main()
         else
         {
             operation &oper = mapping[operations[i]];
-            // if (i > 2)
-            //     continue;
             char buffer[3];
             for (unsigned int j = 0; j < oper.root_list.size(); ++j)
             {
-                // if (i == 0)
+                // cerr << operations[i] << ' ' << i << ' ' << j << endl;
+                // if (i == 1)
                 // {
-                //     // LM->start_print();
-                //     if (j >= 4066)
+                //     cerr << operations[i] << ' ' << i << ' ' << j << endl;
+                //     LM->start_print();
+                //     if (j % 1000 == 0)
                 //     {
-                //         LM->start_print();
                 //         itoa(j, buffer, 10);
+                //         cerr << "TEST" << endl;
                 //         LM->output(string("BUG/All") + buffer + ".txt", oper.root_list[j]);
+                //         cerr << "TEST" << endl;
                 //     }
-                //     assert(j != 4067);
                 // }
-                if (j % 1000 == 0)
-                    cerr << operations[i] << ' ' << i << ' ' << j << endl;
                 LM->insert(oper.root_list[j], operations[i][0] == 'M');
             }
-            // LM->output(string("BUG/All") + buffer + ".txt", oper.root_list[i]);
         }
     }
     Time->print();
     LM->memory_check();
-    // LM->print();
-    // LM->output(string("special_res/res") + char(number) + string(".txt"));
     delete LM;
-    // }
 }
 
 inline bool read_operation(fstream &fin, point *&root, bool isclip)
