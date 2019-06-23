@@ -22,6 +22,7 @@ public:
     // virtual void print() { cout << x << " " << y << endl; }
     void swap_dir() { swap(next, prev); };
     void connect(bool ismerge);
+    point* connect_2(bool ismerge);
     void sort_intersection(bool ismerge);
     void sort_asc(bool ismerge);
     void sort_dsc(bool ismerge);
@@ -67,6 +68,7 @@ public:
     int len;                          // ROOT 專用
     bool iscolored;
     bool has_intersect;
+    bool end; // 簡化walk步驟
 };
 
 class root_point : public point
@@ -91,6 +93,7 @@ public:
     int color; // 標示交點屬於哪個多邊形
     bool in;   // 標示進入對面的多邊形否
     bool tran; // 可以轉到對面的交點上
+    point *next_p;//下一個交點
 };
 
 void point::setcounterclockwise()
@@ -157,6 +160,30 @@ void point::connect(bool ismerge)
     }
     n->prev = intersection[--i];
     intersection[i]->next = n;
+}
+
+point* point::connect_2(bool ismerge)
+{
+    point *n = next;
+    point *temp = this;
+    if (intersection.size() == 0)
+        return NULL;
+    sort_intersection(ismerge);
+    int i;
+    temp = intersection[0];
+    temp->prev = this;
+    next = temp;
+    
+    for (i = 0; i < intersection.size()-1; ++i)
+    {
+        static_cast < intersect_point *>(temp)->next_p = intersection[i + 1];
+        temp->next = intersection[i + 1];
+        temp = intersection[i + 1];
+        temp->prev = intersection[i];
+    }
+    n->prev = intersection[i];
+    intersection[i]->next = n;
+    return intersection[i];
 }
 
 void point::sort_asc(bool ismerge)

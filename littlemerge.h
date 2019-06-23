@@ -15,12 +15,14 @@ public:
     ~littlemerge();
     void insert(point *&, bool);
     void merge(point *&);
+    void merge2(point *&);
     void clip(point *&);
     void find_intersect(point *&);
     bool find_intersect(point *, point *);
     bool outside_poly(point *, point *);
     void find_cross(point *, point *);
     void insert_intersect();
+    void insert_intersect_2(point *&);
     void add_intersect(point *a, point *b);
     bool inside_edge(long long x1, long long x2, long long y);
     bool inside_edgenhead(long long x1, long long x2, long long y);
@@ -811,6 +813,62 @@ void littlemerge::insert_intersect()
     }
     intersect_point_list.clear();
 }
+void littlemerge::insert_intersect_2(point*& self_root ){
+    
+    point *last_point; //last_point 是一條邊上最後的交點 ，start_point 是一個多邊形的第一個交點
+    point *start_point;
+    for (unsigned int i = 0; i < intersect_point_list.size(); ++i)
+    {
+        point *&a = intersect_point_list[i];
+        point *check_root = self_root;
+        
+        if( a->root == self_root ){
+            continue;
+        }
+        else if(a->root != check_root){
+            check_root = a->root;
+            a->connect_2(ismerge);
+            start_point = a->intersection.front();
+            last_point = a->intersection.back();
+        }
+        else {
+            a->connect_2(ismerge);
+            static_cast < intersect_point *> (last_point)->next_p = a->intersection.front();
+            last_point = a->intersection.back();
+            static_cast < intersect_point *> (last_point)->next_p = start_point;
+        }
+        int len = a->intersection.size();
+        a->intersection.clear();
+        a->root->len += len;
+    }
+
+    point *temp = self_root;
+    bool isfirst = true;
+    for (unsigned i = 0; i < self_root->len; ++i){
+        t_next = temp->next;
+        if(!temp->intersection.empty()){
+            temp->connect_2(ismerge);
+            if(isfirst){
+                start_point = temp->intersection.front();
+                last_point = temp->intersection.back();
+                isfirst = false;
+            }
+            else{
+                static_cast<intersect_point *>(last_point)->next_p = temp->intersection.front();
+                last_point = a->intersection.back();
+                static_cast<intersect_point *>(last_point)->next_p = start_point;
+            }
+        int len = temp->intersection.size();
+        temp->intersection.clear();
+        temp->root->len += len;
+        
+        }
+        temp = t_next;
+    }
+    intersect_point_list.clear();
+    
+}
+
 void littlemerge::check_list(vector<point *> &new_list, point *&root)
 { // 判斷有些多邊形跟其他是分開的，根本不用何在一起，要直接加進去；感覺有點慢? 已更改(6/19)
     for (unsigned int k = 0; k < root_list.size(); ++k)
@@ -1020,8 +1078,7 @@ bool littlemerge::check_point(point *&a, point *&b, long long int &x, long long 
     }
     return true;
 }
-short littlemerge::cal_state(point *&a, long long int &x,
-                             long long int &y)
+short littlemerge::cal_state(point *&a, long long int &x,long long int &y)
 { // 交點一定在a上面，RETURN三種狀況：1：交點在A尾；2：交點在A中間；3：交點在A頭
     if (a->verti)
     {
@@ -1371,3 +1428,85 @@ bool littlemerge::check_tail2mid(point *&a, point *&b)
     return true;
 }
 #endif
+
+void littlemerge::merge2(point *&root)
+{
+    if (root_list.size() == 0)
+    {
+        root_list.push_back(root);
+        return;
+    }
+    min_hole_area = DBL_MAX;
+    min_poly_area = DBL_MAX;
+    Time->tic();
+    find_intersect(root);
+    Time->toc("Find intersect");
+    if (printon)
+        print_outlist();
+    Time->tic();
+    insert_intersect_2(root);
+    Time->toc("Insert intersect");
+    if (printon)
+    {
+        cerr << "POLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLY" << endl;
+        root->print_poly();
+        cerr << "POLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLY" << endl;
+    }
+    vector<point *> new_list;
+    ++glob_color;
+    Time->tic();
+    while (out_list.size() > 0)
+    {
+        vector<point *> poly;
+        point *new_poly;
+        set<point *>::iterator iter;
+        iter = out_list.begin();
+        new_poly = *iter;
+        point *p = static_cast<intersect_point *>(*iter)->next_p;
+        out_list.erase(*iter);
+        if (printon)
+            cout << "WALK " << *new_poly << endl;
+        new_poly->pcolor = glob_color;
+        new_poly->root->iscolored = true;
+        poly.push_back(new_poly);
+        while (p != new_poly)
+        {
+            if (printon)
+                cout << "WALK " << *p << endl;
+            p->pcolor = glob_color;
+            p->root->iscolored = true;
+            poly.push_back(p);
+            if (!p->ispoint())
+            {
+                intersect_point *p_cross = static_cast<intersect_point *>(p)->cross_point;
+                if (!static_cast<intersect_point *>(p)->in)
+                    out_list.erase(p);
+                if (!p_cross->in)
+                {
+                    p = p_cross;
+                    if (printon)
+                        cout << "cross " << *p << ' ' << p << endl;
+                    p->pcolor = glob_color;
+                    p->root->iscolored = true;
+                    poly.push_back(p);
+                    if (p == new_poly)
+                        break;
+                    out_list.erase(p);
+                }
+                // else
+                //     p_cross->pcolor = glob_color;
+            }
+            p = static_cast<intersect_point *>(p)->next_p;
+        }
+        // 用新走出的形狀做出多邊形
+        // 需要初始化更種參數：包刮：x, y next, prev, s_next, len, angle, verti, dir
+        new_list.push_back(construct_new_poly(poly));
+    }
+    Time->toc("Walk");
+    Time->tic();
+    check_list(new_list, root);
+    Time->toc("Check list");
+    for (unsigned int i = 0; i < new_list.size(); ++i)
+        new_list[i]->setcounterclockwise();
+    root_list = new_list;
+}
