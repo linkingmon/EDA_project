@@ -33,6 +33,8 @@ public:
     void memory_check();
     void output(string);
     void output(string, point *root);
+    void preread(string s);
+    bool readline(string filename, point *&root);
     void print();
     void print_outlist();
     void print_outbuf();
@@ -73,6 +75,52 @@ void littlemerge::clear()
 {
     out_list.clear();
     out_list_buf.clear();
+}
+void littlemerge::preread(string s)
+{
+    point *root;
+    while (readline(s, root))
+    {
+        list_construct(root);
+        root_list.push_back(root);
+    }
+}
+bool littlemerge::readline(string filename, point *&root)
+{
+    // read points and construct polygon
+    static fstream preread(filename.c_str(), fstream::in);
+    string s, s2;
+
+    // read dummy POLYGON
+    preread >> s;
+    if (s == "END" && preread >> s)
+        return false;
+
+    // read first 2 dummy int
+    // 第一個座標在最後有可能不會給，要先存起來
+    preread >> s >> s2;
+    long long first_x = (long long)(atoi(s.c_str()));
+    long long first_y = (long long)(atoi(s2.c_str()));
+
+    // read root
+    preread >> s >> s2;
+    point *p;
+    point *prev = new point((long long)(atoi(s.c_str())), (long long)(atoi(s2.c_str())));
+    root = prev;
+    int cnt = 1;
+
+    while (preread >> s && s != ";" && preread >> s2)
+    {
+        p = new point((long long)(atoi(s.c_str())), (long long)(atoi(s2.c_str())));
+        p->prev = prev;
+        prev->next = p;
+        prev = p;
+        ++cnt;
+    }
+    p->next = root;
+    root->prev = p;
+    root->len = cnt;
+    return true;
 }
 void littlemerge::output(string filename)
 {
@@ -213,6 +261,7 @@ void littlemerge::merge(point *&root)
     Time->tic();
     while (out_list.size() > 0)
     {
+        bool cycle = false;
         vector<point *> poly;
         point *new_poly;
         set<point *>::iterator iter;
@@ -225,10 +274,21 @@ void littlemerge::merge(point *&root)
         new_poly->pcolor = glob_color;
         new_poly->root->iscolored = true;
         poly.push_back(new_poly);
-        while (p != new_poly)
+        while (true)
         {
+            if (p == new_poly)
+            {
+                poly.push_back(p);
+                break;
+            }
             if (printon)
                 cout << "WALK " << *p << endl;
+            if (p->pcolor == glob_color)
+            {
+                cycle = true;
+                poly.push_back(p);
+                break;
+            }
             p->pcolor = glob_color;
             p->root->iscolored = true;
             poly.push_back(p);
@@ -242,11 +302,20 @@ void littlemerge::merge(point *&root)
                     p = p_cross;
                     if (printon)
                         cout << "cross " << *p << ' ' << p << endl;
+                    if (p == new_poly)
+                    {
+                        poly.push_back(p);
+                        break;
+                    }
+                    if (p->pcolor == glob_color)
+                    {
+                        cycle = true;
+                        poly.push_back(p);
+                        break;
+                    }
                     p->pcolor = glob_color;
                     p->root->iscolored = true;
                     poly.push_back(p);
-                    if (p == new_poly)
-                        break;
                     out_list.erase(p);
                 }
                 // else
@@ -254,9 +323,41 @@ void littlemerge::merge(point *&root)
             }
             p = p->next;
         }
+        if (printon)
+        {
+            cerr << "One poly done" << endl;
+        }
+        if (cycle == true)
+        {
+            int head_cnt = 0;
+            while (poly[head_cnt] != p)
+                ++head_cnt;
+            if (head_cnt != 0)
+            {
+                if (head_cnt == poly.size() - 1)
+                    continue;
+                poly.erase(poly.begin(), poly.begin() + head_cnt);
+            }
+        }
+        if (printon)
+        {
+            cerr << "CYCLE: " << cycle << endl;
+            cerr << poly.size() << endl;
+        }
+        assert(poly[0] == poly[poly.size() - 1]);
         // 用新走出的形狀做出多邊形
         // 需要初始化更種參數：包刮：x, y next, prev, s_next, len, angle, verti, dir
-        new_list.push_back(construct_new_poly(poly));
+        if (printon)
+            cerr << "HHH" << endl;
+        point *return_pointer = construct_new_poly(poly);
+        if (return_pointer != nullptr)
+            new_list.push_back(return_pointer);
+        else
+        {
+            cerr << "NULL poly" << endl;
+        }
+        if (printon)
+            cerr << "HHH" << endl;
     }
     Time->toc("Walk");
     Time->tic();
@@ -407,7 +508,9 @@ void littlemerge::clip(point *&root)
         assert(poly[0] == poly[poly.size() - 1]);
         // 用新走出的形狀做出多邊形
         // 需要初始化更種參數：包刮：x, y next, prev, s_next, len, angle, verti, dir
-        new_list.push_back(construct_new_poly(poly));
+        point *return_pointer = construct_new_poly(poly);
+        if (return_pointer != nullptr)
+            new_list.push_back(return_pointer);
     }
     check_list(new_list, root);
     for (unsigned int i = 0; i < new_list.size(); ++i)
