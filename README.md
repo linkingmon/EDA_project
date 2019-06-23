@@ -3,6 +3,9 @@
 1. 跑 drawS.py 可看到最後結果
 2. 結果：https://drive.google.com/open?id=1g9JQW9y77nshBMttWFLC6zNCcNCl-lFM
 ## 進度
+- (6/23) 完成 OpenCase_1 和 OpenCase_2 並且都通過官方 Checker
+- (6/23) 修正如果有很扁的多邊形(面積0，就是往右再往左)，直接刪掉
+- (6/22) Merge和Clip都要在Walk完後把非cycle的部分去掉。
 - (6/20) 應該要開 root class。[16]
 - (6/20) 新增 TimeMgr class可用來計算時間。
 - (6/20) 就算是座標一樣，面積算起來也可能部一樣...，換方法，用outside poly，當兩個互相包含的時候就把min_hole_area和min_poly_area設為DBL_MIN。[15] ~~[15]~~
@@ -12,7 +15,7 @@
 - (6/19) 自己和自己merge還沒寫到。[5]
 - (6/19) 修正bug，merge多邊形如果再洞裡面且面積相同，要把洞刪掉。(clip相反)
 - (6/18) karp algorithm完成。
-- (6/18) OpenCase_2記憶體不夠(沒有memory leak)，bad_alloc
+- (6/18) OpenCase_2 bad_alloc
 - (6/18) OpenCase_1全部完成，總共449塊矩形。 ~~[13]~~ ~~[11]~~
 - (6/17) OpenCase_1.txt中的C2還有部分bug，洞沒有何在一起。
 - (6/17) 修改走過的部分不要走(clip會有很多這種情況)，如果是繞一圈就咖掉，如果還沒繞一圈就走到走過的就不要算(還有bug[13])
