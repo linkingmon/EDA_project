@@ -516,11 +516,13 @@ bool compare_y(point *a, point *b)
 ostream &operator<<(ostream &os, const Rectangle &rect)
 {
     os << "RECT " << rect._LLX << " " << rect._LLY << " " << rect._URX << " " << rect._URY << " ;";
+    return os;
 }
 
 ostream &operator<<(ostream &os, const Diagonal &diag)
 {
     os << "Diagonal " << *diag._p1 << " " << *diag._p2;
+    return os;
 }
 
 #endif
