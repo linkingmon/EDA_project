@@ -22,7 +22,7 @@ int main()
     cin.tie(0);
     int number_id = 0;
     Time->tic();
-    string filename = string("OpenCase_1.txt");
+    string filename = string("OpenCase_2.txt");
     fstream fin(filename.c_str(), fstream::in);
     if (!fin)
     {
@@ -59,8 +59,8 @@ int main()
             oper.root_list.push_back(root);
     }
     Time->toc("Read file");
+    cerr << "start operation" << endl;
     littlemerge *LM = new littlemerge();
-    // LM->preread("All230348.txt");
     for (unsigned int i = 0; i < operations.size(); ++i)
     {
         if (operations[i][0] == 'S')
@@ -85,7 +85,11 @@ int main()
             char buffer[3];
             for (unsigned int j = 0; j < oper.root_list.size(); ++j)
             {
-                // cerr << operations[i] << ' ' << i << ' ' << j << endl;
+                if (j % 1000 == 0)
+                    cerr << operations[i] << ' ' << i << ' ' << j << endl;
+                if (j == 400000)
+                    break;
+                // assert(i == 0);
                 // if (i == 1)
                 // {
                 //     cerr << operations[i] << ' ' << i << ' ' << j << endl;
@@ -177,6 +181,6 @@ inline bool read_operation(fstream &fin, point *&root, bool isclip)
             p = p->prev;
         }
     }
-    // root->print_poly();
+    list_construct(root);
     return true;
 }

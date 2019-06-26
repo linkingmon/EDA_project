@@ -1,71 +1,39 @@
 #ifndef GLOB_FUNC_H
 #define GLOB_FUNC_H
 #include "point.h"
-// #define DEBUG
+#include <climits>
+#include "TimeMgr.h"
+
 static int glob_color = 0;
-void list_construct(point *&);
+static TimeMgr *Time = new TimeMgr();
+void list_construct(point *&root);
+// void list_construct(point *&root, int for_new_poly);
 point *construct_new_poly(vector<point *> &);
 
-// to construct a link
 // 增加 point 的特殊性質
 void list_construct(point *&root)
 {
-    static fstream lfout("list_construct.txt", fstream::out);
     point *temp = root;
     long long minx, miny, maxx, maxy;
-    minx = miny = 9223372036854775807;
-    maxx = maxy = -9223372036854775808;
+    minx = miny = LLONG_MAX;
+    maxx = maxy = LLONG_MIN;
     for (int i = 0; i < root->len; ++i)
     {
-        lfout << "OLD" << *(temp) << *(temp->next) << temp->verti << ' ' << temp->dir << endl;
+        // 判斷是否是垂直線
         if (temp->next->x == temp->x)
-        { // 判斷是否是垂直線
+        {
             temp->verti = true;
+            temp->dir = (temp->next->y > temp->y);
         }
         else
         {
             temp->verti = false;
+            temp->dir = (temp->next->x > temp->x);
         }
-        lfout << "NEW" << *(temp) << *(temp->next) << temp->verti << ' ' << temp->dir << endl;
-        if (temp->prev->x != temp->next->x && temp->prev->y != temp->next->y) // 判斷是哪種角
-        {                                                                     //是角
-            if ((temp->prev->x - temp->next->x < 0) != (temp->prev->y - temp->next->y < 0))
-            { //一正一負 負斜率 左上右下角
-                temp->angle = 1;
-            }
-            else
-            {
-                temp->angle = 0;
-            }
-        }
-        else
-        {
-            temp->angle = 2;
-        }
-        point *s_next = temp->next;
-        if (temp->verti) // 找 straight next
-        {
-            while (s_next->next->x == temp->x)
-                s_next = s_next->next;
-            if (s_next->y > temp->y)
-            {
-                temp->dir = true;
-            }
-            else
-                temp->dir = false;
-        }
-        else
-        {
-            while (s_next->next->y == temp->y)
-                s_next = s_next->next;
-            if (s_next->x > temp->x)
-            {
-                temp->dir = true;
-            }
-            else
-                temp->dir = false;
-        }
-        temp->s_next = s_next;
+        // 判斷是哪種角
+        if (temp->prev->x != temp->next->x && temp->prev->y != temp->next->y)
+            temp->angle = ((temp->prev->x - temp->next->x < 0) != (temp->prev->y - temp->next->y < 0));
+        // 設定dir
         if (temp->x < minx)
             minx = temp->x;
         if (temp->y < miny)
@@ -74,15 +42,14 @@ void list_construct(point *&root)
             maxx = temp->x;
         if (temp->y > maxy)
             maxy = temp->y;
-        lfout << "END" << *(temp) << *(temp->next) << temp->verti << ' ' << temp->dir << endl;
         temp = temp->next;
     }
+    // 如果root在邊的中間，把root移動到下一個並delete掉原root(前後接好)
     if (root->verti == root->prev->verti)
     {
         point *p = root->next;
         root->prev->next = root->next;
         root->next->prev = root->prev;
-        root->prev->s_next = root->next;
         root->next->minx = minx;
         root->next->miny = miny;
         root->next->maxx = maxx;
@@ -98,6 +65,7 @@ void list_construct(point *&root)
         root->maxx = maxx;
         root->maxy = maxy;
     }
+    // 設定 root
     point *p = root;
     for (unsigned int i = 0; i < root->len; ++i)
     {
@@ -128,6 +96,7 @@ point *construct_new_poly(vector<point *> &point_stream)
         else
             vec.push_back(0);
     }
+
     vector<point *> point_stream_simple;
     int cnt = 0;
     while (vec[cnt] == 2)
@@ -141,7 +110,6 @@ point *construct_new_poly(vector<point *> &point_stream)
         if (vec[i] != dir)
         {
             point_stream_simple.push_back(point_stream[i]);
-            assert(vec[i] != 2);
             dir = vec[i];
         }
     }
@@ -154,9 +122,18 @@ point *construct_new_poly(vector<point *> &point_stream)
             --i;
         }
     }
+    // 不是多邊形直接跳出
+    if (point_stream_simple.size() < 4)
+        return nullptr;
+    if ((point_stream_simple[0]->x == point_stream_simple[1]->x) == (point_stream_simple[point_stream_simple.size() - 1]->x == point_stream_simple[0]->x))
+    {
+        point_stream_simple[0] = point_stream_simple[point_stream_simple.size() - 1];
+        point_stream_simple.pop_back();
+    }
     // Assert 沒有相同點出現
     for (unsigned int i = 0; i < point_stream_simple.size() - 1; ++i)
         assert(point_stream_simple[i]->x != point_stream_simple[i + 1]->x || point_stream_simple[i]->y != point_stream_simple[i + 1]->y);
+    // 串起link list
     point *root = new point(*(point_stream_simple[0]));
     point *p_prev = root;
     for (unsigned int i = 1; i < point_stream_simple.size(); ++i)
@@ -169,14 +146,7 @@ point *construct_new_poly(vector<point *> &point_stream)
     p_prev->next = root;
     root->prev = p_prev;
     root->len = point_stream_simple.size();
-    // cerr << "SIZE" << point_stream_simple.size() << endl;
-    // 壓縮一下直接走到s_next
-    // cout << "LLLLLLLLLLLLLLLLLLLLListLLLLLLLLLLLLLL" << endl;
-    // root->print_poly();
-    if (point_stream_simple.size() < 4)
-        return nullptr;
     list_construct(root);
-    // root->print_poly();
     return root;
 }
 #endif

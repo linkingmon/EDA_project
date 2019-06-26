@@ -1,5 +1,5 @@
 #ifndef TIMEMGR_H
-#define TIMEMGR_N
+#define TIMEMGR_H
 #include <iostream>
 #include <time.h>
 #include <string>
@@ -33,15 +33,20 @@ void TimeMgr::toc(string s)
 }
 void TimeMgr::print()
 {
-    cout << "============================================" << endl;
+    cout << "===========================================================" << endl;
+    clock_t total_sum = 0;
     for (map<string, vector<clock_t>>::iterator iter = times.begin(); iter != times.end(); ++iter)
     {
         clock_t sum = 0;
         for (unsigned int i = 0; i < iter->second.size(); ++i)
             sum += iter->second[i];
-        cout << setw(16) << left << iter->first << " consumes " << setw(8) << right << double(sum)/CLOCKS_PER_SEC << " seconds." << endl;
+        total_sum += sum;
+        cout << setw(25) << left << iter->first << " consumes " << setw(8) << right << double(sum) / CLOCKS_PER_SEC << " seconds." << endl;
     }
-    cout << "============================================" << endl;
+    cout << "-----------------------------------------------------------" << endl;
+    cout << setw(25) << left << "All"
+         << " consumes " << setw(8) << right << double(total_sum) / CLOCKS_PER_SEC << " seconds." << endl;
+    cout << "===========================================================" << endl;
 }
 void TimeMgr::output()
 {

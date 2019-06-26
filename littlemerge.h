@@ -6,8 +6,6 @@
 #include "point.h"
 #include "TimeMgr.h"
 
-static TimeMgr *Time = new TimeMgr();
-
 class littlemerge
 {
 public:
@@ -245,20 +243,11 @@ void littlemerge::merge(point *&root)
     Time->tic();
     find_intersect(root);
     Time->toc("Find intersect");
-    if (printon)
-        print_outlist();
     Time->tic();
     insert_intersect();
     Time->toc("Insert intersect");
-    if (printon)
-    {
-        cerr << "POLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLY" << endl;
-        root->print_poly();
-        cerr << "POLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLYPOLY" << endl;
-    }
     vector<point *> new_list;
     ++glob_color;
-    Time->tic();
     while (out_list.size() > 0)
     {
         bool cycle = false;
@@ -269,11 +258,12 @@ void littlemerge::merge(point *&root)
         new_poly = *iter;
         point *p = (*iter)->next;
         out_list.erase(*iter);
-        if (printon)
-            cout << "WALK " << *new_poly << endl;
+        // if (printon)
+        //     cout << "WALK " << *new_poly << endl;
         new_poly->pcolor = glob_color;
         new_poly->root->iscolored = true;
         poly.push_back(new_poly);
+        Time->tic();
         while (true)
         {
             if (p == new_poly)
@@ -281,8 +271,8 @@ void littlemerge::merge(point *&root)
                 poly.push_back(p);
                 break;
             }
-            if (printon)
-                cout << "WALK " << *p << endl;
+            // if (printon)
+            //     cout << "WALK " << *p << endl;
             if (p->pcolor == glob_color)
             {
                 cycle = true;
@@ -300,8 +290,8 @@ void littlemerge::merge(point *&root)
                 if (!p_cross->in)
                 {
                     p = p_cross;
-                    if (printon)
-                        cout << "cross " << *p << ' ' << p << endl;
+                    // if (printon)
+                    //     cout << "cross " << *p << ' ' << p << endl;
                     if (p == new_poly)
                     {
                         poly.push_back(p);
@@ -318,14 +308,8 @@ void littlemerge::merge(point *&root)
                     poly.push_back(p);
                     out_list.erase(p);
                 }
-                // else
-                //     p_cross->pcolor = glob_color;
             }
             p = p->next;
-        }
-        if (printon)
-        {
-            cerr << "One poly done" << endl;
         }
         if (cycle == true)
         {
@@ -339,33 +323,24 @@ void littlemerge::merge(point *&root)
                 poly.erase(poly.begin(), poly.begin() + head_cnt);
             }
         }
-        if (printon)
-        {
-            cerr << "CYCLE: " << cycle << endl;
-            cerr << poly.size() << endl;
-        }
         assert(poly[0] == poly[poly.size() - 1]);
         // 用新走出的形狀做出多邊形
-        // 需要初始化更種參數：包刮：x, y next, prev, s_next, len, angle, verti, dir
-        if (printon)
-            cerr << "HHH" << endl;
+        Time->toc("Walks");
+        Time->tic();
         point *return_pointer = construct_new_poly(poly);
-        if (return_pointer != nullptr)
-            new_list.push_back(return_pointer);
-        else
+        Time->toc("Construct new");
+        if (return_pointer == nullptr)
         {
-            cerr << "NULL poly" << endl;
+            continue;
         }
-        if (printon)
-            cerr << "HHH" << endl;
+        new_list.push_back(return_pointer);
     }
-    Time->toc("Walk");
     Time->tic();
     check_list(new_list, root);
     Time->toc("Check list");
-    for (unsigned int i = 0; i < new_list.size(); ++i)
-        new_list[i]->setcounterclockwise();
+    Time->tic();
     root_list = new_list;
+    Time->toc("Copy list");
 }
 
 void littlemerge::clip(point *&root)
@@ -378,11 +353,12 @@ void littlemerge::clip(point *&root)
     }
     min_hole_area = DBL_MAX;
     min_poly_area = DBL_MAX;
+    Time->tic();
     find_intersect(root);
-    // printon = true;
-    if (printon)
-        print_outlist();
+    Time->toc("Find intersect");
+    Time->tic();
     insert_intersect();
+    Time->toc("Insert intersect");
     vector<point *> new_list;
     ++glob_color;
     while (out_list.size() > 0)
@@ -395,11 +371,12 @@ void littlemerge::clip(point *&root)
         new_poly = *iter;
         point *p = (*iter)->next;
         out_list.erase(*iter);
-        if (printon)
-            cout << "WALK " << *new_poly << endl;
+        // if (printon)
+        //     cout << "WALK " << *new_poly << endl;
         new_poly->pcolor = glob_color;
         new_poly->root->iscolored = true;
         poly.push_back(new_poly);
+        Time->tic();
         while (true)
         {
             if (p == new_poly)
@@ -413,11 +390,8 @@ void littlemerge::clip(point *&root)
                 poly.push_back(p);
                 break;
             }
-            if (printon)
-            {
-                cout << "WALK " << *p << endl;
-                cout << "IT is point/intersect " << p->ispoint() << endl;
-            }
+            // if (printon)
+            //     cout << "WALK " << *p << endl;
             p->pcolor = glob_color;
             p->root->iscolored = true;
             poly.push_back(p);
@@ -432,8 +406,8 @@ void littlemerge::clip(point *&root)
                     else
                     {
                         p = p_cross;
-                        if (printon)
-                            cout << "cross " << *p << ' ' << p << endl;
+                        // if (printon)
+                        //     cout << "cross " << *p << ' ' << p << endl;
                         if (p == new_poly)
                         {
                             poly.push_back(p);
@@ -462,8 +436,8 @@ void littlemerge::clip(point *&root)
                     if (p_cross->in)
                     {
                         p = p_cross;
-                        if (printon)
-                            cout << "cross " << *p << ' ' << p << endl;
+                        // if (printon)
+                        //     cout << "cross " << *p << ' ' << p << endl;
                         if (p == new_poly)
                         {
                             poly.push_back(p);
@@ -487,6 +461,7 @@ void littlemerge::clip(point *&root)
             }
             p = p->next;
         }
+        Time->toc("Walk");
         if (cycle == true)
         {
             int head_cnt = 0;
@@ -496,26 +471,23 @@ void littlemerge::clip(point *&root)
             {
                 if (head_cnt == poly.size() - 1)
                     continue;
-                // cout << poly.size() << endl;
-                // cout << "P " << p << endl;
-                // cout << "CUT " << head_cnt << endl;
                 poly.erase(poly.begin(), poly.begin() + head_cnt);
-                // cout << poly.size() << endl;
-                // for (unsigned t = 0; t < poly.size(); ++t)
-                //     cout << (poly[t]) << endl;
             }
         }
         assert(poly[0] == poly[poly.size() - 1]);
         // 用新走出的形狀做出多邊形
-        // 需要初始化更種參數：包刮：x, y next, prev, s_next, len, angle, verti, dir
+        Time->tic();
         point *return_pointer = construct_new_poly(poly);
+        Time->toc("Construct new");
         if (return_pointer != nullptr)
             new_list.push_back(return_pointer);
     }
+    Time->tic();
     check_list(new_list, root);
-    for (unsigned int i = 0; i < new_list.size(); ++i)
-        new_list[i]->setcounterclockwise();
+    Time->toc("Check list");
+    Time->tic();
     root_list = new_list;
+    Time->toc("Copy list");
 }
 
 void littlemerge::find_intersect(point *&root)
@@ -555,8 +527,6 @@ bool littlemerge::find_intersect(point *a, point *b)
     bool has_out;
     // a包在b裡面，a刪掉
     has_out = in_out_cross(a, b);
-    if (printon)
-        cerr << "HAS OUT is " << has_out << endl;
     if (!has_out && !have_cross)
     {
         return_type = true;
@@ -582,14 +552,6 @@ bool littlemerge::find_intersect(point *a, point *b)
             {
                 if (min_hole_area > -a->areas)
                     min_hole_area = -a->areas;
-            }
-            if (printon)
-            {
-                cerr << a->len << endl;
-                cerr << *a << endl;
-                cerr << a->counterclockwise << endl;
-                cerr << "Poly is inside of something" << endl;
-                cerr << ((min_poly_area > min_hole_area) ? "POLY" : "HOLE") << endl;
             }
             out_list_buf.clear();
         }
@@ -653,7 +615,7 @@ bool littlemerge::outside_poly(point *root, point *cross)
                     cross_cnt += 1;
             }
             else if (root->x == p->x)
-                if ((root->y >= p->y) && (root->y <= p->s_next->y) || (root->y <= p->y) && (root->y >= p->s_next->y))
+                if ((root->y >= p->y) && (root->y <= p->next->y) || (root->y <= p->y) && (root->y >= p->next->y))
                     return false;
         }
         else
@@ -667,7 +629,7 @@ bool littlemerge::outside_poly(point *root, point *cross)
                     cross_cnt += 1;
             }
             else if (root->y == p->y)
-                if ((root->x >= p->x) && (root->x <= p->s_next->x) || (root->x <= p->x) && (root->x >= p->s_next->x))
+                if ((root->x >= p->x) && (root->x <= p->next->x) || (root->x <= p->x) && (root->x >= p->next->x))
                     return false;
         }
         p = p->next;
@@ -685,11 +647,6 @@ void littlemerge::find_cross(point *a, point *b)
     bool verti_b = b->verti;
     point *a_next = a->next;
     point *b_next = b->next;
-    if (printon)
-    {
-        static fstream myfout("intersect.txt", fstream::out);
-        myfout << *(a) << *(a->next) << a->verti << a->dir << *b << *(b->next) << b->verti << b->dir << endl;
-    }
     if (verti_a != verti_b)
     {
         x = verti_a ? a->x : b->x;
@@ -699,8 +656,8 @@ void littlemerge::find_cross(point *a, point *b)
             bool a_is_in, b_is_in;
             if (check_point(a, b, x, y, a_is_in, b_is_in))
             {
-                if (printon)
-                    cout << *a << *b << x << ' ' << y << ' ' << a_is_in << ' ' << b_is_in << endl;
+                // if (printon)
+                //     cout << *a << *b << x << ' ' << y << ' ' << a_is_in << ' ' << b_is_in << endl;
                 new_intersect(a, b, x, y, a_is_in, b_is_in);
             }
         }
@@ -713,7 +670,6 @@ void littlemerge::add_intersect(point *a, point *b) { a->intersection.push_back(
 // check whether x is inside x1 and x2 or not
 bool littlemerge::inside_edge(long long x1, long long x2, long long x)
 {
-    // cout << "LLL" << x1 << ' ' << x2 << ' ' << x << endl;
     if (x >= x1 && x <= x2)
         return true;
     else if (x <= x1 && x >= x2)
@@ -723,7 +679,6 @@ bool littlemerge::inside_edge(long long x1, long long x2, long long x)
 }
 bool littlemerge::inside_edgenhead(long long x1, long long x2, long long x)
 {
-    // cout << "LLL" << x1 << ' ' << x2 << ' ' << x << endl;
     if (x > x1 && x < x2)
         return true;
     else if (x < x1 && x > x2)
@@ -735,20 +690,12 @@ bool littlemerge::inside_region(point *a, point *b, long long x, long long y)
 {
     if (a->verti)
     {
-        // if (y == a->next->y && x == b->next->x)
-        //     return false;
-        // if (y == a->next->y && x == b->x)
-        //     return false;
         bool b_b = inside_edge(b->x, b->next->x, x);
         bool b_c = inside_edge(a->y, a->next->y, y);
         return (b_b && b_c);
     }
     else
     {
-        // if (x == a->next->x && y == b->next->y)
-        //     return false;
-        // if (x == a->next->x && y == b->y)
-        //     return false;
         bool b_a = inside_edge(a->x, a->next->x, x);
         bool b_d = inside_edge(b->y, b->next->y, y);
         return (b_a && b_d);
@@ -766,19 +713,19 @@ void littlemerge::two_way_intersect(intersect_point *a, intersect_point *b)
 // the new intersect (x,y) is right after point a and point b
 void littlemerge::new_intersect(point *a, point *b, long long x, long long y, bool &a_is_in, bool &b_is_in)
 {
-    if (printon)
-    {
-        cout << "NEW intersect" << *a << *b << x << ' ' << y << ' ' << a_is_in << b_is_in << ismerge << endl;
-    }
+    // if (printon)
+    //     cout << "NEW intersect" << *a << *b << x << ' ' << y << ' ' << a_is_in << b_is_in << ismerge << endl;
     cross_cnt2 += 2;
     intersect_point *insert_a = new intersect_point(x, y, glob_color, a_is_in);
     insert_a->root = a->root;
     a->root->has_intersect = true;
+    a->root->all_intersection.push_back(insert_a);
     intersect_point_list.push_back(a);
 
     intersect_point *insert_b = new intersect_point(x, y, glob_color, b_is_in);
     insert_b->root = b->root;
     b->root->has_intersect = true;
+    b->root->all_intersection.push_back(insert_b);
     intersect_point_list.push_back(b);
 
     if (!ismerge)
@@ -790,10 +737,6 @@ void littlemerge::new_intersect(point *a, point *b, long long x, long long y, bo
     // cout << out_list_buf.size() << endl;
     if (b_is_in != ismerge)
         out_list_buf.push_back(insert_b);
-    if (printon)
-    {
-        cout << insert_a << ' ' << insert_b << endl;
-    }
     add_intersect(a, insert_a);
     add_intersect(b, insert_b);
     two_way_intersect(insert_a, insert_b);
@@ -824,23 +767,17 @@ void littlemerge::check_list(vector<point *> &new_list, point *&root)
         {
             if (root_list[k]->has_intersect)
             {
-                int cut_len = 0;
-                point *p = root_list[k];
-                for (unsigned int z = 0; z < root_list[k]->len; ++z)
+                int cut_len = root_list[k]->all_intersection.size();
+                for (unsigned int z = 0; z < cut_len; ++z)
                 {
-                    point *p_next = p->next;
-                    if (!p->ispoint())
-                    {
-                        cut_len += 1;
-                        p->prev->next = p->next;
-                        p->next->prev = p->prev;
-                        delete p;
-                    }
-                    p = p_next;
+                    point *p = root_list[k]->all_intersection[z];
+                    p->prev->next = p->next;
+                    p->next->prev = p->prev;
+                    delete p;
                 }
+                root_list[k]->all_intersection.clear();
                 root_list[k]->has_intersect = false;
                 root_list[k]->len -= cut_len;
-                list_construct(root_list[k]);
             }
             else
                 new_list.push_back(root_list[k]);
@@ -913,12 +850,12 @@ bool littlemerge::check_point(point *&a, point *&b, long long int &x, long long 
     // (3)b頭：對a來說：b在左邊就是in，在右邊要看b是不是從右邊來
     int state_a = cal_state(a, x, y);
     int state_b = cal_state(b, x, y);
-    if (printon)
-    {
-        cout << "Egde of " << *a << *b << " has state " << state_a << ' ' << state_b << endl;
-        cout << *a << *(a->next) << endl;
-        cout << *b << *(b->next) << endl;
-    }
+    // if (printon)
+    // {
+    //     cout << "Egde of " << *a << *b << " has state " << state_a << ' ' << state_b << endl;
+    //     cout << *a << *(a->next) << endl;
+    //     cout << *b << *(b->next) << endl;
+    // }
     if (state_a == 1)
     {
         if (state_b == 2)
@@ -981,42 +918,26 @@ bool littlemerge::check_point(point *&a, point *&b, long long int &x, long long 
         }
         else if (state_b == 3)
         {
-            // if ((!a->counterclockwise || !b->counterclockwise) && check_head2head(a, b))
-            // {
             if (!(b->prev->dir == a->dir) != (b->dir == a->prev->dir))
                 return false;
             a_is_in = head2head(a, b);
             b_is_in = head2head(b, a);
-            // }
-            // else
-            //     return false;
         }
         else
         {
-            // if (check_mid2head(b, a))
-            // {
             a_is_in = isleft(a->next, b);
             b_is_in = mid2head(b, a);
-            // }
-            // else
-            //     return false;
         }
     }
     if (ismerge)
     {
-        // assert(a_is_in != 1 || b_is_in != 1);
         if (a_is_in == 0 && b_is_in == 0)
             return false;
         else if (a_is_in == 1 && b_is_in == 1)
         {
-            cerr << "There are two in. " << endl;
+            // cerr << "There are two in. " << endl;
             b_is_in = 0;
         }
-    }
-    else
-    {
-        // if (a_is_in == 0 && b_is_in == 0)
-        // return false;
     }
     return true;
 }

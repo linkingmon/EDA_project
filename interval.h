@@ -23,14 +23,13 @@ bool compare_y(point *a, point *b);
 class Interval
 {
 public:
-    Interval(long long left, long long right, long long position, long long left_pos, long long right_pos, bool reverse): 
-            _left(left), _right(right), _position(position), _left_pos(left_pos), _right_pos(right_pos), _reverse(reverse) {}
+    Interval(long long left, long long right, long long position, long long left_pos, long long right_pos, bool reverse) : _left(left), _right(right), _position(position), _left_pos(left_pos), _right_pos(right_pos), _reverse(reverse) {}
     ~Interval() {}
-    long long get_left() const { return _left;}
-    long long get_right() const { return _right;}
-    long long get_left_pos() const { return _left_pos;}
-    long long get_right_pos() const { return _right_pos;}
-    long long get_position() const { return _position;}
+    long long get_left() const { return _left; }
+    long long get_right() const { return _right; }
+    long long get_left_pos() const { return _left_pos; }
+    long long get_right_pos() const { return _right_pos; }
+    long long get_position() const { return _position; }
     bool is_reverse() const { return _reverse; }
 
 private:
@@ -134,9 +133,12 @@ void Interval_Mgr::build_interval(vector<point *> &rootList, bool direction)
                 for (size_t i = 0; i < n_vertex; i += 2)
                 {
                     // cout << *p->prev << " " << *p << endl;
-                    if (p->prev->x < p->x){
+                    if (p->prev->x < p->x)
+                    {
                         _intervalList.push_back(new Interval(p->prev->x, p->x, p->y, p->prev->prev->y, p->next->y, 0));
-                    } else {
+                    }
+                    else
+                    {
                         _intervalList.push_back(new Interval(p->x, p->prev->x, p->y, p->next->y, p->prev->prev->y, 1));
                     }
                     p = p->next->next;
@@ -147,9 +149,12 @@ void Interval_Mgr::build_interval(vector<point *> &rootList, bool direction)
                 for (size_t i = 0; i < n_vertex; i += 2)
                 {
                     // cout << *p << " " << *p->next << endl;
-                    if (p->x < p->next->x){
+                    if (p->x < p->next->x)
+                    {
                         _intervalList.push_back(new Interval(p->x, p->next->x, p->y, p->prev->y, p->next->next->y, 0));
-                    } else {
+                    }
+                    else
+                    {
                         _intervalList.push_back(new Interval(p->next->x, p->x, p->y, p->next->next->y, p->prev->y, 1));
                     }
                     p = p->next->next;
@@ -163,9 +168,12 @@ void Interval_Mgr::build_interval(vector<point *> &rootList, bool direction)
                 for (size_t i = 0; i < n_vertex; i += 2)
                 {
                     // cout << *p << " " << *p->next << endl;
-                    if (p->y > p->next->y){
+                    if (p->y > p->next->y)
+                    {
                         _intervalList.push_back(new Interval(p->next->y, p->y, p->x, p->next->next->x, p->prev->x, 0));
-                    } else {
+                    }
+                    else
+                    {
                         _intervalList.push_back(new Interval(p->y, p->next->y, p->x, p->prev->x, p->next->next->x, 1));
                     }
                     p = p->next->next;
@@ -176,9 +184,12 @@ void Interval_Mgr::build_interval(vector<point *> &rootList, bool direction)
                 for (size_t i = 0; i < n_vertex; i += 2)
                 {
                     // cout << *p->prev << " " << *p << endl;
-                    if (p->prev->y > p->y){
+                    if (p->prev->y > p->y)
+                    {
                         _intervalList.push_back(new Interval(p->y, p->prev->y, p->x, p->next->x, p->prev->prev->x, 0));
-                    } else {
+                    }
+                    else
+                    {
                         _intervalList.push_back(new Interval(p->prev->y, p->y, p->x, p->prev->prev->x, p->next->x, 1));
                     }
                     p = p->next->next;
@@ -191,7 +202,6 @@ void Interval_Mgr::build_interval(vector<point *> &rootList, bool direction)
     // for (size_t i=0; i<_intervalList.size(); i++){
     //     cout << *_intervalList[i] << endl;
     // }
-
 }
 
 void Interval_Mgr::split_polygon()
@@ -199,8 +209,8 @@ void Interval_Mgr::split_polygon()
     for (size_t i = 0; i < _intervalList.size(); i++)
     {
         Interval *I = _intervalList[i];
-        cout << "=========================" << endl;
-        cout << *I << endl;
+        // cout << "=========================" << endl;
+        // cout << *I << endl;
         if (find_intersections(I))
         {
             add_rectangle(I);
@@ -210,10 +220,10 @@ void Interval_Mgr::split_polygon()
         {
             add_interval(I);
         }
-        for (size_t i = 0; i < _currentList.size(); i++)
-        {
-            cout << *_currentList[i] << endl;
-        }
+        // for (size_t i = 0; i < _currentList.size(); i++)
+        // {
+        //     cout << *_currentList[i] << endl;
+        // }
     }
 }
 
@@ -222,31 +232,34 @@ bool Interval_Mgr::find_intersections(Interval *&p)
     _intersections.clear();
     if (p->is_reverse())
     {
-        for (size_t i=0; i<_currentList.size(); i++)
+        for (size_t i = 0; i < _currentList.size(); i++)
         {
-            if (p->get_right()<=_currentList[i]->get_right() && p->get_left()>=_currentList[i]->get_left())
+            if (p->get_right() <= _currentList[i]->get_right() && p->get_left() >= _currentList[i]->get_left())
             {
                 _intersections.push_back(i);
             }
         }
-    } else {
-        for (size_t i=0; i<_currentList.size(); i++)
+    }
+    else
+    {
+        for (size_t i = 0; i < _currentList.size(); i++)
         {
             if (p->get_left() == _currentList[i]->get_right() && _currentList[i]->get_right_pos() <= p->get_position())
             {
                 _intersections.push_back(i);
-            } else if (p->get_right() == _currentList[i]->get_left() && _currentList[i]->get_left_pos() <= p->get_position()){
+            }
+            else if (p->get_right() == _currentList[i]->get_left() && _currentList[i]->get_left_pos() <= p->get_position())
+            {
                 _intersections.push_back(i);
             }
         }
     }
-    
-    
-    cout << "Intersections: ";
-    for (size_t i=0; i<_intersections.size(); i++){
-        cout << _intersections[i] << " ";
-    }
-    cout << endl;
+
+    // cout << "Intersections: ";
+    // for (size_t i=0; i<_intersections.size(); i++){
+    //     cout << _intersections[i] << " ";
+    // }
+    // cout << endl;
     if (_intersections.empty())
         return 0;
     return 1;
@@ -254,40 +267,56 @@ bool Interval_Mgr::find_intersections(Interval *&p)
 
 void Interval_Mgr::combine_interval(Interval *&p)
 {
-    if (p->is_reverse()){
-        assert(_intersections.size()==1);
-        Interval* I=_currentList[_intersections[0]];
-        _currentList.erase(_currentList.begin()+_intersections[0]);
-        if (I->get_left()!=p->get_left()){
+    if (p->is_reverse())
+    {
+        assert(_intersections.size() == 1);
+        Interval *I = _currentList[_intersections[0]];
+        _currentList.erase(_currentList.begin() + _intersections[0]);
+        if (I->get_left() != p->get_left())
+        {
             _currentList.push_back(new Interval(I->get_left(), p->get_left(), p->get_position(), I->get_left_pos(), p->get_left_pos(), 0));
         }
-        if (I->get_right()!=p->get_right()){
+        if (I->get_right() != p->get_right())
+        {
             _currentList.push_back(new Interval(p->get_right(), I->get_right(), p->get_position(), p->get_right_pos(), I->get_right_pos(), 0));
         }
         delete I;
-    } else {
-        assert(_intersections.size()<=2);
-        if (_intersections.size()==1){
-            Interval* I=_currentList[_intersections[0]];
-            _currentList.erase(_currentList.begin()+_intersections[0]);
-            if (I->get_left()==p->get_right()){
+    }
+    else
+    {
+        assert(_intersections.size() <= 2);
+        if (_intersections.size() == 1)
+        {
+            Interval *I = _currentList[_intersections[0]];
+            _currentList.erase(_currentList.begin() + _intersections[0]);
+            if (I->get_left() == p->get_right())
+            {
                 _currentList.push_back(new Interval(p->get_left(), I->get_right(), p->get_position(), p->get_left_pos(), I->get_right_pos(), 0));
-            } else if (p->get_left()==I->get_right()){
+            }
+            else if (p->get_left() == I->get_right())
+            {
                 _currentList.push_back(new Interval(I->get_left(), p->get_right(), p->get_position(), I->get_left_pos(), p->get_right_pos(), 0));
-            } else {
+            }
+            else
+            {
                 cerr << "The two intervals can not combine." << endl;
                 cerr << *I << endl;
                 cerr << *p << endl;
             }
             delete I;
-        } else if (_intersections.size()==2){
-            Interval* I1=_currentList[_intersections[0]];
-            Interval* I2=_currentList[_intersections[1]];
-            _currentList.erase(_currentList.begin()+_intersections[1]);
-            _currentList.erase(_currentList.begin()+_intersections[0]);
-            if(I1->get_left()<I2->get_left()){
+        }
+        else if (_intersections.size() == 2)
+        {
+            Interval *I1 = _currentList[_intersections[0]];
+            Interval *I2 = _currentList[_intersections[1]];
+            _currentList.erase(_currentList.begin() + _intersections[1]);
+            _currentList.erase(_currentList.begin() + _intersections[0]);
+            if (I1->get_left() < I2->get_left())
+            {
                 _currentList.push_back(new Interval(I1->get_left(), I2->get_right(), p->get_position(), I1->get_left_pos(), I2->get_right_pos(), 0));
-            } else {
+            }
+            else
+            {
                 _currentList.push_back(new Interval(I2->get_left(), I1->get_right(), p->get_position(), I2->get_left_pos(), I1->get_right_pos(), 0));
             }
             delete I1;
@@ -311,7 +340,7 @@ void Interval_Mgr::add_rectangle(Interval *&p)
             if (p->get_position() > I->get_position())
             {
                 _rectList.push_back(new Rectangle(I->get_left(), I->get_position(), I->get_right(), p->get_position()));
-                cout << *_rectList.back() << endl;
+                // cout << *_rectList.back() << endl;
             }
         }
     }
@@ -323,7 +352,7 @@ void Interval_Mgr::add_rectangle(Interval *&p)
             if (p->get_position() > I->get_position())
             {
                 _rectList.push_back(new Rectangle(I->get_position(), I->get_left(), p->get_position(), I->get_right()));
-                cout << *_rectList.back() << endl;
+                // cout << *_rectList.back() << endl;
             }
         }
     }
@@ -347,7 +376,7 @@ bool Interval_Mgr::find_diagonal(vector<vector<Diagonal>> &diagonalList, vector<
     size_t k = 0;
     Interval *I = _intervalList[k];
     vector<Diagonal> d;
-    for (size_t i = 0; i+1< concaveList.size() ; i++)
+    for (size_t i = 0; i + 1 < concaveList.size(); i++)
     {
         for (size_t j = i + 1; j < concaveList.size(); j++)
         {
@@ -364,9 +393,10 @@ bool Interval_Mgr::find_diagonal(vector<vector<Diagonal>> &diagonalList, vector<
                 {
                     add_interval(I);
                 }
-                for (size_t idx=0; idx<_currentList.size(); idx++){
-                    cout << *_currentList[idx] << endl;
-                }
+                // for (size_t idx = 0; idx < _currentList.size(); idx++)
+                // {
+                //     cout << *_currentList[idx] << endl;
+                // }
                 I = _intervalList[++k];
             }
             for (size_t idx = 0; idx < _currentList.size(); idx++)
@@ -405,7 +435,7 @@ bool Interval_Mgr::find_diagonal(vector<vector<Diagonal>> &diagonalList, vector<
     sort(concaveList.begin(), concaveList.end(), ::compare_y);
     k = 0;
     I = _intervalList[k];
-    for (size_t i = 0; i+1 < concaveList.size(); i++)
+    for (size_t i = 0; i + 1 < concaveList.size(); i++)
     {
         for (size_t j = i + 1; j < concaveList.size(); j++)
         {
