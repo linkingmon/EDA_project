@@ -13,7 +13,7 @@
 #define DEBUG
 using namespace std;
 
-inline bool read_operation(fstream &fin, point *&root, bool isclip);
+inline bool read_operation(istream &fin, point *&root, bool isclip);
 void find_intersect(operation, operation);
 
 int main()
@@ -22,11 +22,9 @@ int main()
     cin.tie(0);
     int number_id = 0;
     Time->tic();
-    string filename = string("OpenCase_2.txt");
-    fstream fin(filename.c_str(), fstream::in);
+    istream &fin = cin;
     if (!fin)
     {
-        cerr << filename << endl;
         cerr << "Error reading file" << endl;
         return 0;
     }
@@ -68,14 +66,13 @@ int main()
             cerr << "Split start" << endl;
             Time->tic();
             SplitMgr *SM = new SplitMgr();
-            LM->output("split/total4_S.out");
             if (operations[i][1] == 'H')
                 SM->splitH(LM->get_list());
             else if (operations[i][1] == 'V')
                 SM->splitV(LM->get_list());
             else
                 SM->splitO(LM->get_list());
-            SM->output_rect("split/split4_S.out");
+            SM->output_rect();
             delete SM;
             Time->toc("Split");
         }
@@ -87,21 +84,6 @@ int main()
             {
                 if (j % 1000 == 0)
                     cerr << operations[i] << ' ' << i << ' ' << j << endl;
-                if (j == 400000)
-                    break;
-                // assert(i == 0);
-                // if (i == 1)
-                // {
-                //     cerr << operations[i] << ' ' << i << ' ' << j << endl;
-                //     LM->start_print();
-                //     if (j % 1000 == 0)
-                //     {
-                //         itoa(j, buffer, 10);
-                //         cerr << "TEST" << endl;
-                //         LM->output(string("BUG/All") + buffer + ".txt", oper.root_list[j]);
-                //         cerr << "TEST" << endl;
-                //     }
-                // }
                 LM->insert(oper.root_list[j], operations[i][0] == 'M');
             }
         }
@@ -111,7 +93,7 @@ int main()
     delete LM;
 }
 
-inline bool read_operation(fstream &fin, point *&root, bool isclip)
+inline bool read_operation(istream &fin, point *&root, bool isclip)
 {
     // read points and construct polygon
     string s, s2;

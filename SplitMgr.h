@@ -11,7 +11,7 @@ public:
     void splitV(vector<point *> &total);
     void splitH(vector<point *> &total);
     void splitO(vector<point *> &total);
-    void output_rect(string outPath);
+    void output_rect();
     bool outside_poly(point *root, point *cross);
     void build_polygon_table(vector<vector<point *>> &, vector<point *> &);
     void find_concave(vector<point *> &concaveList, vector<point *> &polygon);
@@ -38,7 +38,7 @@ void SplitMgr::splitV(vector<point *> &total)
         _IM.move_rectangle(_rectList);
         _IM.clear();
     }
-    cout << "Total number of rectangles: " << _rectList.size() << endl;
+    cerr << "Total number of rectangles: " << _rectList.size() << endl;
 }
 
 void SplitMgr::splitH(vector<point *> &total)
@@ -52,7 +52,7 @@ void SplitMgr::splitH(vector<point *> &total)
         _IM.move_rectangle(_rectList);
         _IM.clear();
     }
-    cout << "Total number of rectangles: " << _rectList.size() << endl;
+    cerr << "Total number of rectangles: " << _rectList.size() << endl;
 }
 
 void SplitMgr::splitO(vector<point *> &total)
@@ -67,7 +67,7 @@ void SplitMgr::splitO(vector<point *> &total)
             vector<vector<int>> adj_matrix;
             if (find_cross(diagonalList, adj_matrix))
             {
-                cout << "Finding max matching" << endl;
+                cerr << "Finding max matching" << endl;
                 find_max_matching(adj_matrix);
                 find_min_cover(diagonalList, adj_matrix);
             }
@@ -93,37 +93,37 @@ void SplitMgr::splitO(vector<point *> &total)
 
         // for (int j=0; j<polygon_table[i].size(); j++)
         // {
-        //     cout << "Polygon " << j+1 << ":";
+        //     cerr << "Polygon " << j+1 << ":";
         //     point* p = polygon_table[i][j];
         //     for(int k=0; k<polygon_table[i][j]->len; k++)
         //     {
-        //         cout << *p;
+        //         cerr << *p;
         //         p = p->next;
         //     }
-        //     cout << endl;
+        //     cerr << endl;
         // }
 
         // for ( int j=0; j<new_polygon_table.size(); j++)
         // {
-        //     cout << "Polygon " << ":";
+        //     cerr << "Polygon " << ":";
         //     for (int k=0; k<new_polygon_table[j].size(); k++)
         //     {
         //         point* p = new_polygon_table[j][k];
         //         for(int l=0; l<new_polygon_table[j][k]->len; l++)
         //         {
-        //             cout << *p;
+        //             cerr << *p;
         //             p = p->next;
         //         }
-        //         cout << endl;
+        //         cerr << endl;
         //     }
         // }
     }
-    cout << "Total number of rectangles: " << _rectList.size() << endl;
+    cerr << "Total number of rectangles: " << _rectList.size() << endl;
 }
 
-void SplitMgr::output_rect(string outPath)
+void SplitMgr::output_rect()
 {
-    ofstream outfile(outPath.c_str());
+    ostream &outfile = cout;
     for (size_t i = 0; i < _rectList.size(); i++)
     {
         outfile << *_rectList[i] << endl;
@@ -234,9 +234,9 @@ void SplitMgr::find_concave(vector<point *> &concaveList, vector<point *> &polyg
             p = p->next;
         }
     }
-    // cout << "Concave vertices: ";
+    // cerr << "Concave vertices: ";
     // for (size_t i=0; i<concaveList.size(); i++){
-    //     cout << *concaveList[i] << endl;
+    //     cerr << *concaveList[i] << endl;
     // }
 }
 
@@ -278,7 +278,7 @@ bool SplitMgr::find_cross(vector<vector<Diagonal>> &diagonalList, vector<vector<
     //     for (size_t j=0; j<diagonalList[1].size(); j++)
     //     {
     //         if (adj_matrix[i][j]){
-    //             cout << "Cross " << diagonalList[0][i] << diagonalList[1][j] << endl;
+    //             cerr << "Cross " << diagonalList[0][i] << diagonalList[1][j] << endl;
     //         }
     //     }
     // }
@@ -304,9 +304,9 @@ void SplitMgr::find_max_matching(vector<vector<int>> &adj_matrix)
     //     for (size_t j=0; j<n; j++)
     //     {
     //         if (adj_matrix[i][j]==1)
-    //             cout << "Unmatched edge " << i+1 << ", " << j+1 << endl;
+    //             cerr << "Unmatched edge " << i+1 << ", " << j+1 << endl;
     //         if(adj_matrix[i][j]==2)
-    //             cout << "Matched edge " << i+1 << ", " << j+1 << endl;
+    //             cerr << "Matched edge " << i+1 << ", " << j+1 << endl;
     //     }
     // }
 }
@@ -381,30 +381,30 @@ void SplitMgr::find_min_cover(vector<vector<Diagonal>> &diagonalList, vector<vec
             diagonalList[1][i - m]._in_min_cover = true;
     }
 
-    // cout << "Visited";
+    // cerr << "Visited";
     // for (int i=0; i<num_vertex; i++){
     //     if (visited[i])
-    //         cout << " " << i+1;
+    //         cerr << " " << i+1;
     // }
-    // cout << endl;
+    // cerr << endl;
 
-    // cout << "Minimun vertex cover";
+    // cerr << "Minimun vertex cover";
     // for (int i=0; i<m; i++){
     //     if (diagonalList[0][i]._in_min_cover)
-    //         cout << " " << i+1;
+    //         cerr << " " << i+1;
     // }
     // for (int i=0; i<n; i++){
     //     if (diagonalList[1][i]._in_min_cover)
-    //         cout << " " << m+i+1;
+    //         cerr << " " << m+i+1;
     // }
-    // cout << endl;
+    // cerr << endl;
 
     // for (size_t i=0; i<AdjList.size(); i++)
     // {
-    //     cout << i+1 << "'s neighbors: ";
+    //     cerr << i+1 << "'s neighbors: ";
     //     for (itr=AdjList[i].begin(); itr!=AdjList[i].end(); itr++)
-    //     cout << *itr+1 << " ";
-    //     cout << endl;
+    //     cerr << *itr+1 << " ";
+    //     cerr << endl;
     // }
     delete[] visited;
 }
@@ -417,8 +417,8 @@ void SplitMgr::split_poly(vector<point *> &polygon, vector<vector<Diagonal>> &di
         Diagonal &d = diagonalList[0][i];
         if (d._in_min_cover)
             continue;
-        // cout << d << endl;
-        // cout << i+1 << endl;
+        // cerr << d << endl;
+        // cerr << i+1 << endl;
         point *a1 = d._p1->verti ? d._p1 : d._p1->prev;
         point *a2 = d._p2->verti ? d._p2->next : d._p2;
         point *b1 = d._p2->verti ? d._p2 : d._p2->prev;
@@ -483,8 +483,8 @@ void SplitMgr::split_poly(vector<point *> &polygon, vector<vector<Diagonal>> &di
         Diagonal &d = diagonalList[1][i];
         if (d._in_min_cover)
             continue;
-        // cout << d << endl;
-        // cout << i+1 << endl;
+        // cerr << d << endl;
+        // cerr << i+1 << endl;
         point *a1 = d._p1->verti ? d._p1->prev : d._p1;
         point *a2 = d._p2->verti ? d._p2 : d._p2->next;
         point *b1 = d._p2->verti ? d._p2->prev : d._p2;
@@ -551,14 +551,14 @@ void SplitMgr::split_poly(vector<point *> &polygon, vector<vector<Diagonal>> &di
     }
     for (int i = 0; i < polygon.size(); i++)
     {
-        cout << "Polygon " << i + 1 << ":";
+        cerr << "Polygon " << i + 1 << ":";
         point *p = polygon[i];
         for (int j = 0; j < polygon[i]->len; j++)
         {
-            cout << *p;
+            cerr << *p;
             p = p->next;
         }
-        cout << endl;
+        cerr << endl;
     }
 }
 

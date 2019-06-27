@@ -1,10 +1,38 @@
 # EDA_project
-## 說明
-1. 跑 drawS.py 可看到最後結果
-2. 結果：https://drive.google.com/open?id=1g9JQW9y77nshBMttWFLC6zNCcNCl-lFM
+## 使用說明
+0. our program is running on ubuntu 18.04<br>
+1. run "bash setup.sh" to install the correct gcc version, unzip testcasesm unzip Checkers and compile our source code<br>
+2. run "./a.out < $input_filename > $output_filename" to generate the result. Ex. "./a.out < OpenCase_1.txt > res_1.txt" will input OpenCase_1.txt and output the result to res_1.txt<br>
+3. run "./CHECKER $input_filename $OpenCase_num" to check if the result is correct on OpenCase1 and 2. The CHECKER file is provided by ICCAD contest. Ex. "./CHECKER res_1.txt 1" will input the result and check if the answer is consistent with the correct answer of OpenCase_1.<br><br>
+## 包含檔案
+1. Readme file:<br> 
+Readme.md<br> 
+2. Final presentation powerpoint:<br> 
+Algorithm_final.ppt<br>
+3. Final report:<br>
+Rectilinear Polygon Operators for Phsical Design<br>
+4. Reference paper:<br> 
+reference/Graph-Theoretic Solutions.pdf<br> 
+         /Polygon Clipping and Filling.pdf<br> 
+5. Source code:<br> 
+main.cpp<br> 
+glob_func.h<br> 
+HopcroftKarft.h<br> 
+interval.h<br> 
+littlemerge.h<br> 
+operation.h<br> 
+point.h<br> 
+SplitMgr.h<br> 
+TimeMgr.h<br> 
+6. Shell script:
+setup.sh<br>
+7. Python file for plotting result:
+drawS.py<br><br>
+
 ## 進度
 - (6/23) 完成 OpenCase_1 和 OpenCase_2 並且都通過官方 Checker
 - (6/23) 修正如果有很扁的多邊形(面積0，就是往右再往左)，直接刪掉
+- (6/22) 完成SO，Opencase_1可以切成446塊 
 - (6/22) Merge和Clip都要在Walk完後把非cycle的部分去掉。
 - (6/20) 應該要開 root class。[16]
 - (6/20) 新增 TimeMgr class可用來計算時間。
@@ -54,3 +82,4 @@
 - (6/8) 跑Opencase1.txt發現很沒效率(交點找很久)，可以記錄(min,max)(x,y)，太遠的就不用比較 [2]
 - (6/8) 現在merge出來的多邊形可能有一個邊上有很多點，還沒優化，應該把多餘的點刪掉 [1]
 - (6/7) 單operation merge完成，可以吃test_merge.txt(可以自己改裡面的多邊形個數、形狀)再跑draw.py，就可以在result資料夾看到結果
+
