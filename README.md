@@ -3,7 +3,8 @@
 0. our program is running on ubuntu 18.04<br>
 1. run "bash setup.sh" to install the correct gcc version, unzip testcasesm unzip Checkers and compile our source code<br>
 2. run "./a.out < $input_filename > $output_filename" to generate the result. Ex. "./a.out < OpenCase_1.txt > res_1.txt" will input OpenCase_1.txt and output the result to res_1.txt<br>
-3. run "./CHECKER $input_filename $OpenCase_num" to check if the result is correct on OpenCase1 and 2. The CHECKER file is provided by ICCAD contest. Ex. "./CHECKER res_1.txt 1" will input the result and check if the answer is consistent with the correct answer of OpenCase_1.<br><br>
+3. run "./CHECKER $input_filename $OpenCase_num" to check if the result is correct on OpenCase1 and 2. The CHECKER file is provided by ICCAD contest. Ex. "./CHECKER res_1.txt 1" will input the result and check if the answer is consistent with the correct answer of OpenCase_1.<br>
+4. Note that OpenCase2_txt need to run 3.5 hours to get the result, we save the reult in the "final_result.zip" folder.<br><br>
 ## 包含檔案
 1. Readme file:<br> 
 Readme.md<br> 
