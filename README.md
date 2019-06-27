@@ -24,9 +24,9 @@ operation.h<br>
 point.h<br> 
 SplitMgr.h<br> 
 TimeMgr.h<br> 
-6. Shell script:
+6. Shell script:<br>
 setup.sh<br>
-7. Python file for plotting result:
+7. Python file for plotting result:<br>
 drawS.py<br><br>
 
 ## 進度
